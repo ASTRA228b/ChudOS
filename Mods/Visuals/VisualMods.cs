@@ -1,0 +1,59 @@
+using ChudOS.Core.Managers;
+using ChudOS.Libraries.Notifications;
+using ChudOS.Stuff;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+namespace ChudOS.Mods.Visuals;
+
+public static class VisualMods
+{
+    private static bool SavedFog, OldFog;
+    private static bool SavedAmbient;
+    private static Color OldAmbient;
+    private static AmbientMode OldAmbientMode;
+
+    [MenuButton("Hide Fog", ButtonType.Toggle, Category = "Visuals", Order = 0, runOption = RunOption.Once, Description = "Disable scene fog while enabled")]
+    public static void HideFog()
+    {
+        if (!SavedFog) { OldFog = RenderSettings.fog; SavedFog = true; }
+        RenderSettings.fog = false;
+    }
+
+    [MenuDisable("Hide Fog")]
+    public static void RestoreFog()
+    {
+        if (SavedFog) RenderSettings.fog = OldFog;
+        SavedFog = false;
+    }
+
+
+    [MenuButton("Ambient Tint", ButtonType.Option, Category = "Visuals", Order = 1, Options = new[] { "Default", "Purple", "Warm" }, Description = "Change ambient scene lighting")]
+    public static void AmbientTint()
+    {
+        int mode = ButtonManager.GetButton("Ambient Tint")!.OptionIndex;
+        if (!SavedAmbient)
+        {
+            OldAmbient = RenderSettings.ambientLight;
+            OldAmbientMode = RenderSettings.ambientMode;
+            SavedAmbient = true;
+        }
+        if (mode == 0) RestoreAmbient();
+        else
+        {
+            RenderSettings.ambientMode = AmbientMode.Flat;
+            RenderSettings.ambientLight = mode == 1 ? new Color(0.36f, 0.17f, 0.46f) : new Color(0.72f, 0.52f, 0.32f);
+        }
+    }
+
+    private static void RestoreAmbient()
+    {
+        if (!SavedAmbient) return;
+        RenderSettings.ambientMode = OldAmbientMode;
+        RenderSettings.ambientLight = OldAmbient;
+        SavedAmbient = false;
+    }
+
+    [MenuButton("Visual Info", ButtonType.Press, Category = "Visuals", Order = 2, Notify = false, Description = "Show current scene fog and ambient settings")]
+    public static void VisualInfo() => NotifyLib.MessageToast($"Fog: {(RenderSettings.fog ? "ON" : "OFF")} | Ambient: {RenderSettings.ambientMode}", 3500);
+}
