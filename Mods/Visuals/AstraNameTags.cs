@@ -1,3 +1,19 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Astra
+//
+// This file is part of ChudOS.
+// ChudOS is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 3,
+// as published by the Free Software Foundation.
+//
+// ChudOS is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with ChudOS. If not, see <https://www.gnu.org/licenses/>.
+
 // Port of Astra's NameTags V2 by Astra, revision f14a3af67a0e10424d36b7928429dd51a8721969.
 // https://github.com/ASTRA228b/Astras-NameTags-V2
 // Uses ChudOS lifecycle/buttons; fixes stale rig cleanup and caches voice lookups.
