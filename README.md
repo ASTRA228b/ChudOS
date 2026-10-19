@@ -2,7 +2,7 @@
 
 **Made by Astra**
 
-ChudOS is a customizable Gorilla Tag PCVR mod menu. Version **0.0.5** includes **143 menu buttons**, covering mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.6** has **145 total menu buttons**, including mods, settings, and actions.
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -15,7 +15,8 @@ ChudOS is a customizable Gorilla Tag PCVR mod menu. Version **0.0.5** includes *
 - Soundboard and microphone controls.
 - Custom MOTD and rules boards with settings to edit and reload text.
 - PC and VR menus, search, an active mod list, and saved menu settings.
-- Reduced idle menu work and cached active button dispatch.
+- Eight menu themes: OG, OG Blue, OG Red, Midnight, Forest, Sunset, Ice, and Text Only.
+- A text-only menu with clickable buttons and a setting to reset the theme to OG.
 
 ## Installation
 
@@ -26,18 +27,9 @@ ChudOS is a customizable Gorilla Tag PCVR mod menu. Version **0.0.5** includes *
 
 ## Controls
 
-- **PC menu:** press `H`.
-- **VR menu:** use the left controller secondary button.
+- **PC menu:** press `H` to open or close it, then click buttons with your mouse.
+- **VR menu:** press **Y on your left controller** (the left secondary button) to open or close it. Use your right-hand pointer to press menu buttons.
 - **Free camera:** `WASD` to move, `Q/E` to move down/up, and hold the right mouse button to look around.
 - **Custom boards:** use **Open Board Text** and **Reload Board Text** in Settings.
 - **Saved settings:** use **Save Menu State** in Settings.
-
-## Building
-
-Requires the .NET SDK and a local Gorilla Tag installation with BepInEx and the game assemblies referenced by the project.
-
-```powershell
-dotnet build ChudOS.csproj -c Release -p:Version=0.0.5 -p:GorillaTagDir="C:\path\to\Gorilla Tag" -p:BaseOutputPath=artifacts/ -p:OutputPath=artifacts/Release/
-```
-
-The release build completed with zero warnings and zero errors. In-game performance has not been measured for this release.
+- **Themes:** open **Settings → Menu Theme**. Use **Save Menu State** to keep your selection for next time.

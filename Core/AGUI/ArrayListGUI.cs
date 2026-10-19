@@ -47,7 +47,7 @@ public static class ArrayListGUI
     {
         if (!HasEntries || Event.current.type != EventType.Repaint) return;
         Something ??= new GUIStyle(GUI.skin.label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleRight };
-        Something.normal.textColor = new Color(0.82f, 0.64f, 1f);
+        Something.normal.textColor = ChudOS.Core.Main.PrimaryColorValue;
         GUI.Label(new Rect(Screen.width - 300, 12, 280, 25), Header, Something);
         for (int i = 0; i < Names.Length; i++) GUI.Label(new Rect(Screen.width - 300, 41 + i * 21, 280, 22), Names[i], Something);
     }

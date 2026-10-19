@@ -49,6 +49,7 @@ public sealed class Main : MonoBehaviour
     private static Color SecondaryTextColor = new Color32(142, 145, 154, 255);
     public static Color PrimaryColorValue => PrimaryColor;
     public static Color ButtonColorValue => ButtonColor;
+    public static bool TextOnlyMenu { get; private set; }
 
     private static readonly Vector3 VRMenuScale = new(0.129f, 0.221f, 0.297f);
     private static readonly Vector3 DesktopMenuScale = new(0.1f, 0.3f, 0.3825f);
@@ -71,6 +72,7 @@ public sealed class Main : MonoBehaviour
         Instance = this;
         FileManager.Initialize(this);
         ButtonManager.Initialize();
+        ChudOS.Mods.Settings.MenuThemes.Apply();
         CategoryManager.PageLimit = 3;
         CategoryManager.Initialize();
         SoundboardManager.Initialize(this);
@@ -174,6 +176,53 @@ public sealed class Main : MonoBehaviour
     private static void DestroyMaterial(Material? m) { if (m != null) Destroy(m); }
     private static void Notify(string text) => NotifyLib.SendNotificationALL(text, 3500);
     public static void RequestRefresh() { NeedsRefresh = true; }
+    public static void ApplyMenuTheme(ChudOS.Mods.Settings.MenuThemes.Theme theme)
+    {
+        Color oldSecondary = SecondaryTextColor;
+        BackgroundColor = theme.Background;
+        MenuColor = theme.Face;
+        ButtonColor = theme.Button;
+        HeaderColor = theme.Header;
+        PrimaryColor = theme.Accent;
+        BorderColor = theme.Border;
+        DividerColor = theme.Divider;
+        SearchBorderColor = theme.SearchBorder;
+        TextColor = theme.Text;
+        SecondaryTextColor = theme.SecondaryText;
+        TextOnlyMenu = theme.TextOnly;
+
+        if (BackgroundMat != null) BackgroundMat.color = BackgroundColor;
+        if (MenuMat != null) MenuMat.color = MenuColor;
+        if (ButtonMat != null) ButtonMat.color = ButtonColor;
+        if (HeaderMat != null) HeaderMat.color = HeaderColor;
+        if (BorderMat != null) BorderMat.color = BorderColor;
+        if (DividerMat != null) DividerMat.color = DividerColor;
+        if (SearchBorderMat != null) SearchBorderMat.color = SearchBorderColor;
+
+        if (MenuMain == null) return;
+        foreach (TextMesh label in MenuMain.GetComponentsInChildren<TextMesh>(true))
+            label.color = label.color == oldSecondary ? SecondaryTextColor : TextColor;
+
+        RefreshThemeObjects();
+        RequestRefresh();
+    }
+    private static void RefreshThemeObjects()
+    {
+        if (MenuMain == null) return;
+        foreach (Renderer renderer in MenuMain.GetComponentsInChildren<Renderer>(true))
+            renderer.enabled = !TextOnlyMenu || renderer.GetComponent<TextMesh>() != null;
+
+        foreach (MenuButtonCollider button in MenuMain.GetComponentsInChildren<MenuButtonCollider>(true))
+        {
+            Renderer renderer = button.GetComponent<Renderer>();
+            button.IdleColor = renderer != null && renderer.sharedMaterial == HeaderMat ? HeaderColor : ButtonColor;
+            if ((button.PreviousPage || button.NextPage) && button.Label != null)
+            {
+                Renderer labelRenderer = button.Label.GetComponent<Renderer>();
+                if (labelRenderer != null) labelRenderer.enabled = TextOnlyMenu;
+            }
+        }
+    }
     public static void OpenPC() => SwitchMenu(true);
     private static void SwitchMenu(bool desktop)
     {
@@ -293,6 +342,7 @@ public sealed class Main : MonoBehaviour
     }
     private static GameObject MakeButton(string label, float y, float z, float width, float height, ButtonManager.ButtonData? button = null, string category = "", bool home = false, bool previous = false, bool next = false, bool disconnect = false, bool search = false, string key = "", Material? material = null, List<GameObject>? track = null)
     {
+        if (previous || next) label = previous ? "<" : ">";
         GameObject obj = Cube(label.Length == 0 ? "ChudOS Button" : label, new Vector3(0.63f, y, z), new Vector3(0.06f, height, width), material ?? ButtonMat, true);
         MenuButtonCollider trigger = obj.AddComponent<MenuButtonCollider>();
         trigger.IdleColor = material == HeaderMat ? HeaderColor : ButtonColor;
@@ -359,6 +409,7 @@ public sealed class Main : MonoBehaviour
         }
         if (SearchManager.Active && SearchManager.KeyboardVisible) CreateKeyboard();
         else ClearKeyboard();
+        RefreshThemeObjects();
     }
     private static void CreateKeyboard()
     {
