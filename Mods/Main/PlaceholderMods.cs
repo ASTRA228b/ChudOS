@@ -27,7 +27,7 @@ public static class PlaceholderMods
     public static void JoinDiscord() => OpenLink("https://discord.gg/F6Et6BMQKw");
 
     [MenuButton("Menu Source", ButtonType.Press, Category = "Main", Order = 2)]
-    public static void Source() => OpenLink("http://www.google.com/404");
+    public static void Source() => OpenLink("https://github.com/ASTRA228b/ChudOS");
 
 
     private static void OpenLink(string link)
