@@ -30,7 +30,7 @@ internal static class NetworkSafety
         if (Time.unscaledTime >= nextNotice)
         {
             nextNotice = Time.unscaledTime + 3f;
-            SafetyMods.Toast("Tag tools require a private MODDED room while Modded Tag Guard is on.");
+            SafetyMods.Toast(!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null ? "Join a room before using tag tools." : "Tag tools require a private MODDED room while Modded Tag Guard is on.");
         }
         return false;
     }

@@ -140,10 +140,14 @@ public static class SafetyMods
     [MenuDisable("RPC Protection")]
     public static void DisableRPCProtection() => NetworkSafety.RPCProtection = false;
 
-    [MenuButton("Modded Tag Guard", ButtonType.Toggle, Category = "Safety", Order = 25, DefaultEnabled = true, runOption = RunOption.Once, Description = "Restrict tag tools to private rooms whose game mode contains MODDED")]
+    [MenuButton("Modded Tag Guard", ButtonType.Toggle, Category = "Settings", Order = 32, DefaultEnabled = true, runOption = RunOption.Once, Notify = false, Description = "ON: private MODDED rooms only. OFF: allow tag tools in other rooms and show a warning")]
     public static void ModdedTagGuard() => NetworkSafety.ModdedRoomGuard = true;
     [MenuDisable("Modded Tag Guard")]
-    public static void DisableModdedTagGuard() => NetworkSafety.ModdedRoomGuard = false;
+    public static void DisableModdedTagGuard()
+    {
+        NetworkSafety.ModdedRoomGuard = false;
+        NotifyLib.SendNotificationALL("WARNING: Modded Tag Guard is OFF. Tag tools can run in non-modded rooms. Using them can result in a ban.", 7000);
+    }
 
     [MenuButton("Mod Error Protection", ButtonType.Toggle, Category = "Safety", Order = 26, DefaultEnabled = true, runOption = RunOption.Once, Description = "Stop an enabled mod when an error stack identifies its button method")]
     public static void ErrorProtection() { ModSafetyMonitor.ErrorProtection = true; ModSafetyMonitor.Ensure(); }
