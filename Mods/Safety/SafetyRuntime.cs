@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 Astra
 //
 // This file is part of ChudOS.
@@ -85,55 +85,62 @@ internal static class SafetyRuntime
         OverlaySaved = false;
     }
 
+    private static readonly Dictionary<LurkerGhost, bool> Lurkers = new();
+    private static VRRig? fingerRig;
+    private static float[]? fingerPose;
+
+    public static void NoFinger()
+    {
+        VRRig rig = VRRig.LocalRig;
+        if (rig == null) return;
+        if (fingerRig != rig)
+        {
+            RestoreFingers();
+            fingerRig = rig;
+            fingerPose = new[] { rig.leftHand.calcT, rig.rightHand.calcT, rig.leftIndex.calcT, rig.leftMiddle.calcT, rig.leftThumb.calcT, rig.rightIndex.calcT, rig.rightMiddle.calcT, rig.rightThumb.calcT };
+            PortTools.Register(RestoreFingers);
+        }
+        rig.leftHand.calcT = rig.rightHand.calcT = 0f;
+        rig.leftIndex.calcT = rig.leftMiddle.calcT = rig.leftThumb.calcT = 0f;
+        rig.rightIndex.calcT = rig.rightMiddle.calcT = rig.rightThumb.calcT = 0f;
+    }
+
+    public static void RestoreFingers()
+    {
+        if (fingerRig != null && fingerPose != null)
+        {
+            fingerRig.leftHand.calcT = fingerPose[0]; fingerRig.rightHand.calcT = fingerPose[1];
+            fingerRig.leftIndex.calcT = fingerPose[2]; fingerRig.leftMiddle.calcT = fingerPose[3]; fingerRig.leftThumb.calcT = fingerPose[4];
+            fingerRig.rightIndex.calcT = fingerPose[5]; fingerRig.rightMiddle.calcT = fingerPose[6]; fingerRig.rightThumb.calcT = fingerPose[7];
+        }
+        fingerRig = null;
+        fingerPose = null;
+    }
+
     public static void AntiLurker()
     {
         if (Time.unscaledTime < NextLurkerScan) return;
-        NextLurkerScan = Time.unscaledTime + 0.5f;
-        if (NetworkSystem.Instance == null || NetworkSystem.Instance.LocalPlayer == null) return;
+        NextLurkerScan = Time.unscaledTime + 1f;
+        PortTools.Register(RestoreLurkers);
         foreach (LurkerGhost lurker in UnityEngine.Object.FindObjectsByType<LurkerGhost>(FindObjectsSortMode.None))
         {
             if (lurker == null) continue;
-
-            var ghostStateType = lurker.GetType().GetNestedType("ghostState", System.Reflection.BindingFlags.NonPublic);
-            if (ghostStateType == null) continue;
-
-            var dataField = lurker.GetType().GetField("Data", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (dataField == null) continue;
-            var data = dataField.GetValue(lurker);
-            if (data == null) continue;
-
-            var currentStateProp = data.GetType().GetProperty("CurrentState");
-            if (currentStateProp == null) continue;
-            var currentState = currentStateProp.GetValue(data);
-
-            var possessValue = System.Enum.Parse(ghostStateType, "possess");
-
-            var targetPlayerProp = data.GetType().GetProperty("TargetActor");
-            if (targetPlayerProp == null) continue;
-            var targetActor = (int)targetPlayerProp.GetValue(data);
-
-            var localPlayer = NetworkSystem.Instance.LocalPlayer;
-            if (currentState == null || !currentState.Equals(possessValue) || localPlayer == null) continue;
-
-            var localActorNumberProp = localPlayer.GetType().GetProperty("ActorNumber");
-            if (localActorNumberProp == null) continue;
-            var localActorNumber = (int)localActorNumberProp.GetValue(localPlayer);
-
-            if (targetActor != localActorNumber) continue;
-
-            var changeStateMethod = lurker.GetType().GetMethod("ChangeState", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-            if (changeStateMethod != null)
-            {
-                var patrolValue = System.Enum.Parse(ghostStateType, "patrol");
-                changeStateMethod.Invoke(lurker, new object[] { patrolValue });
-            }
+            if (!Lurkers.ContainsKey(lurker)) Lurkers.Add(lurker, lurker.gameObject.activeSelf);
+            lurker.gameObject.SetActive(false);
         }
     }
 
+    public static void RestoreLurkers()
+    {
+        foreach (var pair in Lurkers) if (pair.Key != null) pair.Key.gameObject.SetActive(pair.Value);
+        Lurkers.Clear();
+        NextLurkerScan = 0f;
+    }
     public static void ClearMyRPCs()
     {
         if (Time.unscaledTime < NextRPCFlush) { SafetyMods.Toast("RPC cleanup cooldown active."); return; }
         if (!PhotonNetwork.InRoom || PhotonNetwork.LocalPlayer == null) { SafetyMods.Toast("No room to clear RPCs from."); return; }
+        if (!NetworkSafety.TryRPC()) { SafetyMods.Toast("RPC cleanup is temporarily limited."); return; }
         NextRPCFlush = Time.unscaledTime + 5f;
         PhotonNetwork.RemoveRPCs(PhotonNetwork.LocalPlayer);
         SafetyMods.Toast("Requested cleanup of local player's buffered RPCs.");
@@ -170,6 +177,7 @@ internal static class SafetyRuntime
         string nick = PhotonNetwork.NickName ?? "";
         if (string.IsNullOrWhiteSpace(nick)) SafetyMods.Toast("Nickname is empty.");
         else if (nick.Length > 12) SafetyMods.Toast($"Nickname is {nick.Length} characters (over 12).");
+        else if (!ValidName(nick)) SafetyMods.Toast("Use only A-Z and 0-9 in your nickname. This is not a ban-list check.");
         else SafetyMods.Toast($"Nickname length OK: {nick.Length}/12. Not a ban-list validation.");
     }
 
@@ -178,6 +186,7 @@ internal static class SafetyRuntime
         if (PhotonNetwork.InRoom) { SafetyMods.Toast("Leave the room before changing nickname."); return; }
         string nickname = fromFile ? PickCustomName() : $"monke{UnityEngine.Random.Range(1000, 10000)}";
         if (string.IsNullOrWhiteSpace(nickname)) { SafetyMods.Toast("No valid custom nicknames available."); return; }
+        if (!ValidName(nickname)) { SafetyMods.Toast("Nickname must contain 1-12 letters or digits."); return; }
         PhotonNetwork.NickName = nickname;
         SafetyMods.Toast($"Nickname changed to {nickname}.");
     }
@@ -189,13 +198,15 @@ internal static class SafetyRuntime
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             if (!File.Exists(path)) File.WriteAllText(path, "monke\nbanana\nchud\n");
-            string[] names = File.ReadAllLines(path).Select(s => s.Trim()).Where(s => s.Length > 0 && s.Length <= 12 && !s.StartsWith("#")).ToArray();
+            string[] names = File.ReadAllLines(path).Select(s => s.Trim()).Where(ValidName).ToArray();
             return names.Length == 0 ? "" : names[UnityEngine.Random.Range(0, names.Length)];
         }
         catch (Exception ex) { Debug.LogWarning($"[ChudOS] Could not read identities.txt: {ex.Message}"); return ""; }
     }
 
     public static void BeginWatchRoomLeave() => WasInRoom = PhotonNetwork.InRoom;
+
+    private static bool ValidName(string name) => name.Length > 0 && name.Length <= 12 && name.All(c => c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9');
 
     public static void WatchRoomLeave()
     {
@@ -273,7 +284,9 @@ internal static class SafetyRuntime
         {
             ReportZone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ReportZone.name = "ChudOS.LocalReportZone";
-            UnityEngine.Object.Destroy(ReportZone.GetComponent<Collider>());
+            ReportZone.layer = 2;
+            Collider collider = ReportZone.GetComponent<Collider>();
+            if (collider != null) { collider.enabled = false; UnityEngine.Object.Destroy(collider); }
             Renderer render = ReportZone.GetComponent<Renderer>();
             Shader shader = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Color");
             if (shader != null)

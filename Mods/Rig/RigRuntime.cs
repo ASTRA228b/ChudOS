@@ -50,7 +50,9 @@ internal sealed class RigRuntime : MonoBehaviour
     private static readonly string[] ExternalPoses = { "Tag Gun", "Tag Self", "Tag All", "Fake Power Off", "Rewind" };
     private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun" };
 
-    internal static bool Ready => PortTools.Ready && VRRig.LocalRig != null;
+    internal static bool Ready => PortTools.Ready && VRRig.LocalRig != null &&
+        VRRig.LocalRig.head.rigTarget != null && VRRig.LocalRig.leftHand.rigTarget != null && VRRig.LocalRig.rightHand.rigTarget != null &&
+        GTPlayer.Instance.LeftHand.controllerTransform != null && GTPlayer.Instance.RightHand.controllerTransform != null;
     internal static bool InVR => XRSettings.isDeviceActive;
     internal static bool IsRigEnabled => VRRig.LocalRig != null && VRRig.LocalRig.enabled;
     internal static Vector3 RigPosition
@@ -243,7 +245,13 @@ internal sealed class RigInput
     {
         if (frame == Time.frameCount) return;
         frame = Time.frameCount;
-        if (ControllerInputPoller.instance == null) return;
+        if (ControllerInputPoller.instance == null)
+        {
+            RightPrimary.Set(false); RightSecondary.Set(false); LeftPrimary.Set(false); LeftSecondary.Set(false);
+            LeftGrip.Set(false); RightGrip.Set(false);
+            LeftJoystick.Axis = RightJoystick.Axis = Vector2.zero;
+            return;
+        }
         RightPrimary.Set(InputLib.RightControllerAButton); RightSecondary.Set(InputLib.RightControllerBButton);
         LeftPrimary.Set(InputLib.LeftControllerXButton); LeftSecondary.Set(InputLib.LeftControllerYButton);
         LeftGrip.Set(InputLib.LeftGrab); RightGrip.Set(InputLib.RightGrab);

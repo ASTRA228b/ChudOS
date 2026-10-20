@@ -33,7 +33,7 @@ public static class RecRoomRigPatch
 {
     private static void Postfix(VRRig __instance)
     {
-        if (!RecRoomRig.IsEnabled || !__instance.IsLocalRig())
+        if (!RecRoomRig.IsEnabled || !__instance.IsLocalRig() || !RigRuntime.Ready || GorillaTagger.Instance.mainCamera == null)
             return;
 
         Transform cameraTransform = GorillaTagger.Instance.mainCamera.transform;
@@ -52,6 +52,7 @@ public static class RecRoomRigPatch
             reductionFactor = 0.2f;
 
         Vector3 torsoDirection = Vector3.Lerp(headForward, handDirection, reductionFactor);
+        if (torsoDirection.sqrMagnitude < 0.0001f) return;
 
         __instance.transform.rotation = Quaternion.Euler(0f, Quaternion.LookRotation(torsoDirection, Vector3.up).eulerAngles.y, 0f);
 

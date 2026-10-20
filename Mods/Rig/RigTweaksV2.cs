@@ -66,7 +66,7 @@ public static class RigTweaksV2_LateUpdatePatch
     {
         try
         {
-            if (!RigTweaksV2.IsEnabled)
+            if (!RigTweaksV2.IsEnabled || !RigRuntime.Ready || GorillaTagger.Instance.headCollider == null)
                 return;
 
             if (!__instance.IsLocalRig())

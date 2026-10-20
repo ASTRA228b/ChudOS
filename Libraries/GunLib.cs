@@ -16,6 +16,7 @@
 
 using UnityEngine;
 using ChudOS.Stuff;
+using GorillaLocomotion;
 
 namespace ChudOS.Libraries;
 
@@ -26,15 +27,20 @@ public static class GunLib
     public static RaycastHit LastHit;
     public static bool HasHit;
     public static bool Enabled;
+    private static RaycastHit[] Hits = new RaycastHit[64];
 
     public static bool UpdateGun(Transform hand, bool active, bool select, out Vector3 point, float distance = 80f)
+        => UpdateGunInternal(hand, active, select, out point, distance, false);
+
+    private static bool UpdateGunInternal(Transform hand, bool active, bool select, out Vector3 point, float distance, bool playerTargets)
     {
         point = Vector3.zero;
-        if (!active || hand == null) { Hide(); return false; }
+        if (!active || hand == null || !Finite(hand.position) || !Finite(hand.forward) || float.IsNaN(distance) || float.IsInfinity(distance) || distance <= 0f) { Hide(); return false; }
+        distance = Mathf.Min(distance, 500f);
         if (Line == null) Create();
         Vector3 origin = hand.position;
         Vector3 direction = hand.forward;
-        HasHit = Physics.Raycast(origin, direction, out LastHit, distance, ~0, QueryTriggerInteraction.Ignore);
+        HasHit = RaycastNearest(origin, direction, distance, playerTargets, out LastHit);
         point = HasHit ? LastHit.point : origin + direction * distance;
         if (Pointer != null) { Pointer.SetActive(true); Pointer.transform.position = point; }
         if (Line != null) { Line.enabled = true; Line.SetPosition(0, origin); Line.SetPosition(1, point); }
@@ -51,14 +57,14 @@ public static class GunLib
             return false;
         }
 
-        bool selected = UpdateGun(hand, active, select, out _, distance);
-        if (!active || !select || hand == null)
+        bool selected = UpdateGunInternal(hand, active, select, out _, distance, true);
+        if (!active || !select || hand == null || !Finite(hand.position) || !Finite(hand.forward) || float.IsNaN(distance) || float.IsInfinity(distance) || distance <= 0f)
         {
             target = null;
             return false;
         }
 
-        if (!IsRemoteRig(target))
+        if (!IsRemoteRig(target) || (target!.transform.position - hand.position).sqrMagnitude > distance * distance)
         {
             target = null;
             if (selected && LastHit.collider != null)
@@ -75,8 +81,42 @@ public static class GunLib
         return true;
     }
 
-    private static bool IsRemoteRig(VRRig? rig) => rig != null && rig != VRRig.LocalRig &&
-        !rig.isLocal && !rig.isOfflineVRRig && VRRigCache.ActiveRigs != null && VRRigCache.ActiveRigs.Contains(rig);
+    private static bool IsRemoteRig(VRRig? rig) => rig != null && rig != VRRig.LocalRig && rig.gameObject.activeInHierarchy &&
+        !rig.isLocal && !rig.isOfflineVRRig && Finite(rig.transform.position) &&
+        rig.head.rigTarget != null && rig.leftHand.rigTarget != null && rig.rightHand.rigTarget != null &&
+        VRRigCache.ActiveRigs != null && VRRigCache.ActiveRigs.Contains(rig);
+
+    private static bool Finite(Vector3 value) => !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
+        !float.IsNaN(value.y) && !float.IsInfinity(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.z);
+
+    private static bool RaycastNearest(Vector3 origin, Vector3 direction, float distance, bool playerTargets, out RaycastHit hit)
+    {
+        hit = default;
+        int count;
+        while (true)
+        {
+            count = Physics.RaycastNonAlloc(origin, direction, Hits, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
+            if (count < Hits.Length) break;
+            if (Hits.Length >= 512) return false;
+            Hits = new RaycastHit[Hits.Length * 2];
+        }
+        float closest = distance;
+        bool found = false;
+        for (int i = 0; i < count; i++)
+        {
+            Collider collider = Hits[i].collider;
+            if (collider == null || collider.gameObject == Pointer) continue;
+            VRRig rig = collider.GetComponentInParent<VRRig>();
+            if (rig != null && !IsRemoteRig(rig)) continue;
+            if (GTPlayer.Instance != null && collider.transform.IsChildOf(GTPlayer.Instance.transform)) continue;
+            if (collider.isTrigger && (!playerTargets || rig == null)) continue;
+            if (Hits[i].distance > closest) continue;
+            closest = Hits[i].distance;
+            hit = Hits[i];
+            found = true;
+        }
+        return found;
+    }
 
     private static void Create()
     {
@@ -92,10 +132,12 @@ public static class GunLib
         Line.endColor = Color.white;
         Pointer = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         Pointer.name = Constantss.GUID + ".GunPointer";
+        Pointer.layer = 2;
         Pointer.transform.localScale = Vector3.one * 0.035f;
-        UnityEngine.Object.Destroy(Pointer.GetComponent<Collider>());
+        Collider collider = Pointer.GetComponent<Collider>();
+        if (collider != null) { collider.enabled = false; UnityEngine.Object.Destroy(collider); }
     }
-    public static void Hide() { Enabled = false; if (Line != null) Line.enabled = false; if (Pointer != null) Pointer.SetActive(false); }
+    public static void Hide() { Enabled = false; HasHit = false; LastHit = default; if (Line != null) Line.enabled = false; if (Pointer != null) Pointer.SetActive(false); }
     public static void Cleanup()
     {
         if (Line != null) { if (Line.material != null) UnityEngine.Object.Destroy(Line.material); UnityEngine.Object.Destroy(Line.gameObject); }

@@ -15,6 +15,7 @@
 // along with ChudOS. If not, see <https://www.gnu.org/licenses/>.
 
 using ChudOS.Libraries;
+using ChudOS.Core.Managers;
 using ChudOS.Stuff;
 using GorillaLocomotion;
 using UnityEngine;
@@ -39,6 +40,8 @@ public static class MovementMods
 
     private static float Pitch;
     private static bool Looking;
+    private static GTPlayer? freezeOwner;
+    private static bool oldFreeze;
     private static CursorLockMode PreviousLock;
     private static bool PreviousVisibility;
 
@@ -55,18 +58,21 @@ public static class MovementMods
     [MenuButton("Low Gravity", ButtonType.Toggle, Category = "Movement", Order = 1, runOption = RunOption.FixedUpdate, Description = "Reduce gravity locally")]
     public static void LowGravity()
     {
+        if (!PortTools.Ready) return;
         GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 6.66f, ForceMode.Acceleration);
     }
 
     [MenuButton("High Gravity", ButtonType.Toggle, Category = "Movement", Order = 2, runOption = RunOption.FixedUpdate, Description = "Increase gravity locally")]
     public static void HighGravity()
     {
+        if (!PortTools.Ready) return;
         GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 7.77f, ForceMode.Acceleration);
     }
 
     [MenuButton("Zero Gravity", ButtonType.Toggle, Category = "Movement", Order = 3, runOption = RunOption.FixedUpdate, Description = "Counteract default gravity")]
     public static void ZeroGravity()
     {
+        if (!PortTools.Ready) return;
         GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration);
     }
 
@@ -86,6 +92,7 @@ public static class MovementMods
     [MenuButton("Fly (X)", ButtonType.Toggle, Category = "Movement", Order = 5, runOption = RunOption.FixedUpdate, Description = "Press X to go weee.")]
     public static void Fly()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.LeftControllerXButton)
         {
             GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * Time.deltaTime * flyspeed;
@@ -96,6 +103,7 @@ public static class MovementMods
     [MenuButton("Slingshot Fly (A)", ButtonType.Toggle, Category = "Movement", Order = 6, runOption = RunOption.FixedUpdate, Description = "fly like slingshot.")]
     public static void UpdateSlingshotFly()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.RightControllerAButton && GTPlayer.Instance != null && GorillaTagger.Instance != null)
             GorillaTagger.Instance.rigidbody.linearVelocity += GTPlayer.Instance.headCollider.transform.forward * (50f * Time.fixedDeltaTime);
     }
@@ -103,6 +111,7 @@ public static class MovementMods
     [MenuButton("Up And Down", ButtonType.Toggle, Category = "Movement", Order = 7, runOption = RunOption.FixedUpdate, Description = "monke go up and down.")]
     public static void UpdateUpAndDown()
     {
+        if (!PortTools.Ready) return;
         if (GorillaTagger.Instance == null) return;
         Rigidbody rb = GorillaTagger.Instance.rigidbody;
         if (InputLib.LeftTrigger) rb.AddForce(Vector3.up * 50f, ForceMode.Acceleration);
@@ -112,6 +121,7 @@ public static class MovementMods
     [MenuButton("Iron Man", ButtonType.Toggle, Category = "Movement", Order = 8, runOption = RunOption.FixedUpdate, Description = "become IRON MAN.")]
     public static void UpdateIronMan()
     {
+        if (!PortTools.Ready) return;
         if (GorillaTagger.Instance == null) return;
         Rigidbody rb = GorillaTagger.Instance.rigidbody;
         const float speed = 37.5f;
@@ -125,6 +135,7 @@ public static class MovementMods
     [MenuButton("Trigger Fly", ButtonType.Toggle, Category = "Movement", Order = 9)]
     public static void TriggerFly()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.LeftTrigger)
         {
             GorillaTagger.Instance.rigidbody.linearVelocity = GorillaTagger.Instance.headCollider.transform.forward * flyspeed;
@@ -134,6 +145,7 @@ public static class MovementMods
     [MenuButton("Joystick Fly (LJ)", ButtonType.Toggle, Category = "Movement", Order = 10)]
     public static void JoyFly()
     {
+        if (!PortTools.Ready) return;
         Vector2 joy = InputLib.LeftJoyStickAxis;
         if (Mathf.Abs(joy.x) > 0.3 || Mathf.Abs(joy.y) > 0.3)
         {
@@ -145,6 +157,7 @@ public static class MovementMods
     [MenuButton("Zero Grav Fly (A)", ButtonType.Toggle, Category = "Movement", Order = 11)]
     public static void ZGFly()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.RightControllerAButton)
         {
             GTPlayer.Instance.transform.position += GorillaTagger.Instance.headCollider.transform.forward * Time.deltaTime * flyspeed;
@@ -156,6 +169,7 @@ public static class MovementMods
     [MenuButton("BarkFly (JR)(JL)", ButtonType.Toggle, Category = "Movement", Order = 12)]
     public static void BarkFly()
     {
+        if (!PortTools.Ready) return;
         Vector3 JoyL = InputLib.LeftJoyStickAxis;
         Vector3 JoyR = InputLib.RightJoyStickAxis;
 
@@ -171,6 +185,7 @@ public static class MovementMods
     [MenuButton("Velocity BarkFly (JR)(JL)", ButtonType.Toggle, Category = "Movement", Order = 13)]
     public static void VelBark()
     {
+        if (!PortTools.Ready) return;
         Vector3 JoyL = InputLib.LeftJoyStickAxis;
         Vector3 JoyR = InputLib.RightJoyStickAxis;
         if (Mathf.Abs(JoyL.x) > 0.3 || Mathf.Abs(JoyL.y) > 0.3 || Mathf.Abs(JoyR.x) > 0.3 || Mathf.Abs(JoyR.y) > 0.3)
@@ -180,6 +195,7 @@ public static class MovementMods
     [MenuButton("Hand Fly (B)", ButtonType.Toggle, Category = "Movement", Order = 14)]
     public static void HandFly()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.RightControllerBButton)
         {
             GorillaTagger.Instance.rigidbody.linearVelocity = GTPlayer.Instance.RightHand.controllerTransform.forward * flyspeed;
@@ -189,6 +205,7 @@ public static class MovementMods
     [MenuButton("NoGrav SlingshotFly (B)", ButtonType.Toggle, Category = "Movement", Order = 15)]
     public static void GravSling()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.RightControllerBButton)
         {
             ZeroGravity();
@@ -201,7 +218,7 @@ public static class MovementMods
     {
         Keyboard keyboard = Keyboard.current;
         Mouse mouse = Mouse.current;
-        if (keyboard == null || GTPlayer.Instance == null || GorillaTagger.Instance == null)
+        if (!Application.isFocused || keyboard == null || !PortTools.Ready || GTPlayer.Instance.headCollider == null || GTPlayer.Instance.turnParent == null)
         {
             StopLooking();
             return;
@@ -255,13 +272,13 @@ public static class MovementMods
     public static void WASDDisable()
     {
         StopLooking();
-        if (GTPlayer.Instance != null)
+        if (GTPlayer.Instance != null && GTPlayer.Instance.headCollider != null && GTPlayer.Instance.turnParent != null)
         {
             Transform head = GTPlayer.Instance.headCollider.transform;
             GTPlayer.Instance.turnParent.transform.RotateAround(head.position, head.right, -Pitch);
         }
         Pitch = 0f;
-        if (GorillaTagger.Instance != null) GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
+        if (GorillaTagger.Instance != null && GorillaTagger.Instance.rigidbody != null) GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
 
     }
 
@@ -270,6 +287,7 @@ public static class MovementMods
     [MenuButton("Forzone", ButtonType.Toggle, Category = "Movement", Order = 17, runOption = RunOption.FixedUpdate, Description = "Forzone ice idk.")]
     public static void UpdateFrozone()
     {
+        if (!PortTools.Ready) return;
         if (GTPlayer.Instance == null || Time.time - LastSpawn < 0.1f) return;
         if (!InputLib.LeftGrab && !InputLib.RightGrab) return;
         LastSpawn = Time.time;
@@ -284,6 +302,7 @@ public static class MovementMods
     [MenuButton("Platforms", ButtonType.Toggle, Category = "Movement", Order = 18, runOption = RunOption.Update, Description = "hand platfroms.")]
     public static void UpdatePlatforms()
     {
+        if (!PortTools.Ready) return;
         bool leftGrip = InputLib.LeftGrab;
         bool rightGrip = InputLib.RightGrab;
         if (leftGrip && LeftPlatform == null) LeftPlatform = CreateLeftPlatform();
@@ -338,6 +357,7 @@ public static class MovementMods
     [MenuButton("Platform Spam", ButtonType.Toggle, Category = "Movement", Order = 19)]
     public static void SpamPlatfrom()
     {
+        if (!PortTools.Ready) return;
         if (InputLib.RightGrab)
         {
             GameObject PSpam = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -352,10 +372,42 @@ public static class MovementMods
     }
 
     [MenuButton("No Tag Freeze", ButtonType.Toggle, Category = "Movement", Order = 20)]
-    public static void NTF() => GTPlayer.Instance.disableMovement = false;
+    public static void NTF() => SetFreeze(false);
+
+    [MenuEnable("No Tag Freeze")]
+    public static void StartNoTagFreeze() => ButtonManager.SetEnabled("Tag Freeze", false);
+
+    [MenuDisable("No Tag Freeze")]
+    public static void StopNoTagFreeze() => RestoreFreeze();
 
     [MenuButton("Tag Freeze", ButtonType.Toggle, Category = "Movement", Order = 21)]
-    public static void ForceTagFreeze() => GTPlayer.Instance.disableMovement = true;
+    public static void ForceTagFreeze() => SetFreeze(true);
+
+    [MenuEnable("Tag Freeze")]
+    public static void StartTagFreeze() => ButtonManager.SetEnabled("No Tag Freeze", false);
+
+    [MenuDisable("Tag Freeze")]
+    public static void StopTagFreeze() => RestoreFreeze();
+
+    private static void SetFreeze(bool value)
+    {
+        GTPlayer player = GTPlayer.Instance;
+        if (player == null) return;
+        if (freezeOwner != player)
+        {
+            RestoreFreeze();
+            freezeOwner = player;
+            oldFreeze = player.disableMovement;
+            PortTools.Register(RestoreFreeze);
+        }
+        player.disableMovement = value;
+    }
+
+    private static void RestoreFreeze()
+    {
+        if (freezeOwner != null) freezeOwner.disableMovement = oldFreeze;
+        freezeOwner = null;
+    }
 
 
     private static GameObject CreateLeftPlatform()

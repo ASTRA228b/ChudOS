@@ -58,22 +58,10 @@ public static class SafetyMods
     }
 
 
-    [MenuButton("No Finger Gestures", ButtonType.Toggle, Category = "Safety", Order = 6, runOption = RunOption.Update, Description = "Suppress local animated finger grip/trigger floats")]
-    public static void NoFinger()
-    {
-        ControllerInputPoller.instance.leftControllerGripFloat = 0f;
-        ControllerInputPoller.instance.rightControllerGripFloat = 0f;
-        ControllerInputPoller.instance.leftControllerIndexFloat = 0f;
-        ControllerInputPoller.instance.rightControllerIndexFloat = 0f;
-        ControllerInputPoller.instance.leftControllerPrimaryButton = false;
-        ControllerInputPoller.instance.leftControllerSecondaryButton = false;
-        ControllerInputPoller.instance.rightControllerPrimaryButton = false;
-        ControllerInputPoller.instance.rightControllerSecondaryButton = false;
-        ControllerInputPoller.instance.leftControllerPrimaryButtonTouch = false;
-        ControllerInputPoller.instance.leftControllerSecondaryButtonTouch = false;
-        ControllerInputPoller.instance.rightControllerPrimaryButtonTouch = false;
-        ControllerInputPoller.instance.rightControllerSecondaryButtonTouch = false;
-    }
+    [MenuButton("No Finger Gestures", ButtonType.Toggle, Category = "Safety", Order = 6, runOption = RunOption.LateUpdate, Description = "Suppress local finger animation without changing controller input")]
+    public static void NoFinger() => SafetyRuntime.NoFinger();
+    [MenuDisable("No Finger Gestures")]
+    public static void RestoreFingers() => SafetyRuntime.RestoreFingers();
 
     [MenuButton("Fake Valve Tracking", ButtonType.Toggle, Category = "Safety", Order = 7, runOption = RunOption.Update, Description = "Hold right joystick click to freeze the local rig head angle")]
     public static void FakeValveTracking() => SafetyRuntime.FakeValveTracking();
@@ -129,8 +117,10 @@ public static class SafetyMods
     [MenuDisable("Fake Report Overlay")]
     public static void DisableFakeReportOverlay() => SafetyRuntime.RestoreReportOverlay();
 
-    [MenuButton("Anti Lurker (Local)", ButtonType.Toggle, Category = "Safety", Order = 21, runOption = RunOption.Update, Description = "If a LurkerGhost possesses your local player, return it to patrol")]
+    [MenuButton("Anti Lurker (Local)", ButtonType.Toggle, Category = "Safety", Order = 21, runOption = RunOption.Update, Description = "Locally hide LurkerGhost objects and restore their original visibility on disable")]
     public static void AntiLurker() => SafetyRuntime.AntiLurker();
+    [MenuDisable("Anti Lurker (Local)")]
+    public static void RestoreLurkers() => SafetyRuntime.RestoreLurkers();
 
     [MenuButton("Clear My Buffered RPCs", ButtonType.Press, Category = "Safety", Order = 22, Notify = false, Description = "Clean this player's buffered RPCs, limited to once per 5 seconds")]
     public static void ClearRPCs() => SafetyRuntime.ClearMyRPCs();
@@ -144,6 +134,31 @@ public static class SafetyMods
 
     [MenuDisable("Anti Report Disconnect")]
     public static void DisableAntiReportDisconnect() => SafetyRuntime.ResetAntiReport();
+
+    [MenuButton("RPC Protection", ButtonType.Toggle, Category = "Safety", Order = 24, DefaultEnabled = true, runOption = RunOption.Once, Description = "Limit ChudOS tag requests and buffered RPC cleanup; does not suppress server checks")]
+    public static void RPCProtection() { NetworkSafety.RPCProtection = true; NetworkSafety.Reset(); }
+    [MenuDisable("RPC Protection")]
+    public static void DisableRPCProtection() => NetworkSafety.RPCProtection = false;
+
+    [MenuButton("Modded Tag Guard", ButtonType.Toggle, Category = "Safety", Order = 25, DefaultEnabled = true, runOption = RunOption.Once, Description = "Restrict tag tools to private rooms whose game mode contains MODDED")]
+    public static void ModdedTagGuard() => NetworkSafety.ModdedRoomGuard = true;
+    [MenuDisable("Modded Tag Guard")]
+    public static void DisableModdedTagGuard() => NetworkSafety.ModdedRoomGuard = false;
+
+    [MenuButton("Mod Error Protection", ButtonType.Toggle, Category = "Safety", Order = 26, DefaultEnabled = true, runOption = RunOption.Once, Description = "Stop an enabled mod when an error stack identifies its button method")]
+    public static void ErrorProtection() { ModSafetyMonitor.ErrorProtection = true; ModSafetyMonitor.Ensure(); }
+    [MenuDisable("Mod Error Protection")]
+    public static void DisableErrorProtection() => ModSafetyMonitor.ErrorProtection = false;
+
+    [MenuButton("Disable Mods On Leave", ButtonType.Toggle, Category = "Safety", Order = 27, DefaultEnabled = true, runOption = RunOption.Once, Description = "Disable gameplay and visual toggles when leaving or changing rooms")]
+    public static void LeaveProtection() { ModSafetyMonitor.LeaveProtection = true; ModSafetyMonitor.Ensure(); }
+    [MenuDisable("Disable Mods On Leave")]
+    public static void DisableLeaveProtection() => ModSafetyMonitor.LeaveProtection = false;
+
+    [MenuButton("Rapid Master Protection", ButtonType.Toggle, Category = "Safety", Order = 28, DefaultEnabled = true, runOption = RunOption.Once, Description = "Leave after five master changes within three seconds")]
+    public static void MasterProtection() { ModSafetyMonitor.MasterProtection = true; ModSafetyMonitor.Ensure(); }
+    [MenuDisable("Rapid Master Protection")]
+    public static void DisableMasterProtection() => ModSafetyMonitor.MasterProtection = false;
 
 
     private static int DisableCategory(string category)

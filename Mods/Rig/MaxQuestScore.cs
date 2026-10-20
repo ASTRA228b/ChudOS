@@ -15,6 +15,9 @@
 // along with ChudOS. If not, see <https://www.gnu.org/licenses/>.
 
 using ChudOS.Libraries;
+using ChudOS.Core.Managers;
+using ChudOS.Libraries.Notifications;
+using Photon.Pun;
 using ChudOS.Stuff;
 
 namespace ChudOS.Mods.Rig;
@@ -49,6 +52,12 @@ public static class MaxQuestScore
     private static void Apply()
     {
         if (!enabled || VRRig.LocalRig == null) return;
+        if (PhotonNetwork.InRoom)
+        {
+            ButtonManager.SetEnabled("Max Quest Score", false);
+            NotifyLib.MessageToast("Max Quest Score is an offline display option.", 3500);
+            return;
+        }
         if (scoreRig != VRRig.LocalRig)
         {
             RestoreScore();

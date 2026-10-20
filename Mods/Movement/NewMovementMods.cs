@@ -303,7 +303,7 @@ public static class NewMovementMods
             float grace = HoverboardFields.Grace(p), tilt = HoverboardFields.Tilt(p);
             Capture("Hoverboard", () => { if (p != null) { HoverboardFields.Max(p) = max; HoverboardFields.Multiplier(p) = multiplier; HoverboardFields.Grace(p) = grace; HoverboardFields.Tilt(p) = tilt; } });
         }
-        HoverboardFields.Max(p) = float.MaxValue;
+        HoverboardFields.Max(p) = 20f;
         HoverboardFields.Multiplier(p) = 5f;
         HoverboardFields.Grace(p) = 0f;
         HoverboardFields.Tilt(p) = 1f;

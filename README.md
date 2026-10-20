@@ -2,7 +2,7 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.6** has **145 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.7** has **150 total menu buttons**, including mods, settings, and actions.
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -17,6 +17,8 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - PC and VR menus, search, an active mod list, and saved menu settings.
 - Eight menu themes: OG, OG Blue, OG Red, Midnight, Forest, Sunset, Ice, and Text Only.
 - A text-only menu with clickable buttons and a setting to reset the theme to OG.
+- Safety options for ChudOS RPC request limits, mod errors, room changes, and rapid master changes.
+- Player-targeting guns that include player trigger hitboxes and skip your local body.
 
 ## Installation
 
@@ -33,3 +35,6 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - **Custom boards:** use **Open Board Text** and **Reload Board Text** in Settings.
 - **Saved settings:** use **Save Menu State** in Settings.
 - **Themes:** open **Settings → Menu Theme**. Use **Save Menu State** to keep your selection for next time.
+- **Tag tools:** Modded Tag Guard is on by default and restricts them to private MODDED rooms. Tag Gun, Tag All, and Tag Aura use bounded normal hand reach; they no longer teleport your rig or set unlimited reach. Tag Self requires the tag room master.
+
+Safety options reduce specific errors and limit ChudOS requests. They do not guarantee protection from bans. Head pose mods remain usable online; using mods can still lead to a ban.

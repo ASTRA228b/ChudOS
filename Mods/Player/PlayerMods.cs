@@ -29,28 +29,7 @@ namespace ChudOS.Mods.Player;
 
 public static class PlayerMods
 {
-    private const float TagTimeout = 8f;
-    private const float TargetTimeout = 3f;
-    private const float TagReportInterval = 0.2f;
-
-    private static bool RigDisabled;
-    private static bool PreviousRigState;
-    private static bool HandMoved;
-    private static Vector3 PreviousControllerHand;
-    private static Vector3 PreviousRigHand;
-
-    private static VRRig? Target;
-    private static float TagTimer;
-    private static float NextTagReport;
-    private static float SelfStartTime;
-
-    private static List<VRRig>? AllTargets;
-    private static int TargetIndex;
-    private static float TargetStartTime;
-
-    private static bool AuraModified;
-    private static float PreviousTagDistance;
-
+    private static VRRig? gunTarget;
     [MenuButton("Body Tracers", ButtonType.Toggle, Category = "Player", Order = 0, runOption = RunOption.LateUpdate, Description = "Draw local tracers from you to other players")]
     public static void BodyTracers() => PlayerESPRuntime.BodyTracers();
 
@@ -87,57 +66,14 @@ public static class PlayerMods
     [MenuDisable("Trails ESP")]
     public static void StopTrailsESP() => PlayerESPRuntime.ClearTrailsESP();
 
-    [MenuButton("Tag Gun", ButtonType.Toggle, Category = "Player", Order = 6, runOption = RunOption.Update, Description = "Aim at a player and attempt to tag them")]
+    [MenuButton("Tag Gun", ButtonType.Toggle, Category = "Player", Order = 6, Description = "Select a player within normal hand reach; does not move your rig")]
     public static void TG()
     {
-        if (!Ready() || GTPlayer.Instance == null || ControllerInputPoller.instance == null)
-        {
-            TGStopTagging();
-            GunLib.Hide();
-            return;
-        }
-        bool grip = InputLib.RightGrab;
-        bool trigger = InputLib.RightTrigger;
-        bool selected = GunLib.UpdateGun(GorillaTagger.Instance.rightHandTransform, grip, trigger, out Vector3 point);
-        if (!grip || !trigger)
-        {
-            TGStopTagging();
-            return;
-        }
-        if (Target == null && selected && GunLib.HasHit)
-        {
-            Collider collider = GunLib.LastHit.collider;
-            VRRig? rig = collider != null ? collider.GetComponentInParent<VRRig>() : null;
-            if (rig != null && !rig.isLocal && !TagManager.IsTagged(rig))
-            {
-                Target = rig;
-                TagTimer = 0f;
-                NextTagReport = 0f;
-            }
-        }
-        if (Target == null) return;
-        if (TagManager.IsTagged(Target))
-        {
-            TGStopTagging();
-            return;
-        }
-        if (PhotonNetwork.IsMasterClient)
-        {
-            TagManager.Instance.AddInfected(Target.Creator);
-            TGStopTagging();
-            return;
-        }
-        if (!CanMoveHand())
-        {
-            TGStopTagging();
-            return;
-        }
-        Vector3 targetPosition = Target.transform.position;
-        MoveRig(targetPosition + Vector3.down * 3f);
-        MoveHand(targetPosition);
-        ReportTag(Target.Creator);
-        TagTimer += Time.deltaTime;
-        if (TagTimer >= TagTimeout) TGStopTagging();
+        if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Gun")) { GunLib.Hide(); return; }
+        if (!PortTools.Ready || GorillaTagger.Instance.rightHandTransform == null) { GunLib.Hide(); return; }
+        bool grip = InputLib.RightGrab, trigger = InputLib.RightTrigger;
+        if (GunLib.UpdateRigGun(GorillaTagger.Instance.rightHandTransform, grip, trigger, ref gunTarget) && gunTarget != null)
+            ChudOS.Mods.Safety.NetworkSafety.TryTag(gunTarget);
     }
 
     [MenuEnable("Tag Gun")]
@@ -145,49 +81,26 @@ public static class PlayerMods
     {
         ButtonManager.SetEnabled("Tag Self", false);
         ButtonManager.SetEnabled("Tag All", false);
-    }
-
-    private static void TGStopTagging()
-    {
-        RestoreRig();
-        Target = null;
-        TagTimer = 0f;
-        NextTagReport = 0f;
+        ButtonManager.SetEnabled("Tag Aura", false);
+        PortTools.ClaimPointer("Tag Gun");
     }
 
     [MenuDisable("Tag Gun")]
-    public static void TGStop()
-    {
-        TGStopTagging();
-        GunLib.Cleanup();
-    }
+    public static void TGStop() { gunTarget = null; GunLib.Cleanup(); }
 
-    [MenuButton("Tag Self", ButtonType.Toggle, Category = "Player", Order = 7, runOption = RunOption.Update, Description = "Attempt to tag yourself")]
+    [MenuButton("Tag Self", ButtonType.Toggle, Category = "Player", Order = 7, Description = "Private modded tag room master only; does not teleport your rig")]
     public static void TagSelf()
     {
-        if (!Ready() || TagManager.IsTagged(VRRig.LocalRig))
+        if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Self")) return;
+        ButtonManager.SetEnabled("Tag Self", false);
+        if (NetworkSystem.Instance == null || VRRig.LocalRig == null || TagManager.IsTagged(VRRig.LocalRig)) return;
+        if (!NetworkSystem.Instance.IsMasterClient || GorillaGameManager.instance is not GorillaTagManager)
         {
-            ButtonManager.SetEnabled("Tag Self", false);
+            ChudOS.Libraries.Notifications.NotifyLib.MessageToast("Tag Self requires the tag room master.", 3500);
             return;
         }
-        if (PhotonNetwork.IsMasterClient)
-        {
+        if (NetworkSystem.Instance.LocalPlayer != null && ChudOS.Mods.Safety.NetworkSafety.TryRPC())
             TagManager.Instance.AddInfected(NetworkSystem.Instance.LocalPlayer);
-            ButtonManager.SetEnabled("Tag Self", false);
-            return;
-        }
-        if (Time.time - SelfStartTime >= TagTimeout)
-        {
-            ButtonManager.SetEnabled("Tag Self", false);
-            return;
-        }
-        VRRig? taggedPlayer = GetRemoteRigs().FirstOrDefault(rig => TagManager.IsTagged(rig));
-        if (taggedPlayer == null || taggedPlayer.rightHand.rigTarget == null)
-        {
-            ButtonManager.SetEnabled("Tag Self", false);
-            return;
-        }
-        MoveRig(taggedPlayer.rightHand.rigTarget.transform.position);
     }
 
     [MenuEnable("Tag Self")]
@@ -195,87 +108,30 @@ public static class PlayerMods
     {
         ButtonManager.SetEnabled("Tag Gun", false);
         ButtonManager.SetEnabled("Tag All", false);
-        SelfStartTime = Time.time;
+        ButtonManager.SetEnabled("Tag Aura", false);
     }
 
-    [MenuDisable("Tag Self")]
-    public static void TagSelfStop()
-    {
-        RestoreRig();
-        SelfStartTime = 0f;
-    }
-
-    [MenuButton("Tag Aura", ButtonType.Toggle, Category = "Player", Order = 8, runOption = RunOption.Update, Description = "Increase your tag reach while tagged")]
+    [MenuButton("Tag Aura", ButtonType.Toggle, Category = "Player", Order = 8, Description = "Attempt nearby tags within normal hand reach; does not increase tag distance")]
     public static void TagAura()
     {
-        if (!Ready() || !TagManager.IsTagged(VRRig.LocalRig))
-        {
-            RestoreTagAura();
-            return;
-        }
-        if (!AuraModified)
-        {
-            PreviousTagDistance = GorillaTagger.Instance.maxTagDistance;
-            AuraModified = true;
-        }
-        GorillaTagger.Instance.maxTagDistance = float.MaxValue;
+        if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Aura")) return;
+        TagNearby();
     }
 
-    [MenuDisable("Tag Aura")]
-    public static void TagAuraStop() => RestoreTagAura();
-
-    private static void RestoreTagAura()
+    [MenuEnable("Tag Aura")]
+    public static void TagAuraStart()
     {
-        if (AuraModified && GorillaTagger.Instance != null) GorillaTagger.Instance.maxTagDistance = PreviousTagDistance;
-        AuraModified = false;
+        ButtonManager.SetEnabled("Tag Gun", false);
+        ButtonManager.SetEnabled("Tag Self", false);
+        ButtonManager.SetEnabled("Tag All", false);
     }
 
-    [MenuButton("Tag All", ButtonType.Toggle, Category = "Player", Order = 9, runOption = RunOption.Update, Description = "Attempt to tag all untagged players")]
+    [MenuButton("Tag All", ButtonType.Toggle, Category = "Player", Order = 9, Description = "One pass over players within normal hand reach; does not teleport your rig")]
     public static void TagAll()
     {
-        if (!Ready() || !TagManager.IsTagged(VRRig.LocalRig))
-        {
-            ButtonManager.SetEnabled("Tag All", false);
-            return;
-        }
-        if (AllTargets == null)
-        {
-            AllTargets = GetRemoteRigs().Where(rig => !TagManager.IsTagged(rig)).ToList();
-            TargetIndex = 0;
-            TargetStartTime = Time.time;
-        }
-        if (TargetIndex >= AllTargets.Count)
-        {
-            ButtonManager.SetEnabled("Tag All", false);
-            return;
-        }
-
-        VRRig rig = AllTargets[TargetIndex];
-        if (rig == null || TagManager.IsTagged(rig))
-        {
-            NextTarget();
-            return;
-        }
-        if (PhotonNetwork.IsMasterClient)
-        {
-            TagManager.Instance.AddInfected(rig.Creator);
-            NextTarget();
-            return;
-        }
-        if (Time.time - TargetStartTime >= TargetTimeout)
-        {
-            NextTarget();
-            return;
-        }
-        if (!CanMoveHand())
-        {
-            ButtonManager.SetEnabled("Tag All", false);
-            return;
-        }
-        Vector3 position = rig.transform.position;
-        MoveRig(position + Vector3.down * 3f);
-        MoveHand(position);
-        ReportTag(rig.Creator);
+        if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag All")) return;
+        try { TagNearby(); }
+        finally { ButtonManager.SetEnabled("Tag All", false); }
     }
 
     [MenuEnable("Tag All")]
@@ -283,84 +139,13 @@ public static class PlayerMods
     {
         ButtonManager.SetEnabled("Tag Gun", false);
         ButtonManager.SetEnabled("Tag Self", false);
-        AllTargets = null;
-        TargetIndex = 0;
-        TargetStartTime = Time.time;
-        NextTagReport = 0f;
+        ButtonManager.SetEnabled("Tag Aura", false);
     }
 
-    [MenuDisable("Tag All")]
-    public static void TagAllStop()
+    private static void TagNearby()
     {
-        RestoreRig();
-        AllTargets = null;
-        TargetIndex = 0;
-        TargetStartTime = 0f;
-        NextTagReport = 0f;
-    }
-
-    private static void NextTarget()
-    {
-        TargetIndex++;
-        TargetStartTime = Time.time;
-        NextTagReport = 0f;
-    }
-
-    private static IEnumerable<VRRig> GetRemoteRigs() => Resources.FindObjectsOfTypeAll<VRRig>().Where(rig => rig != null && rig.gameObject.activeInHierarchy && !rig.isLocal);
-
-    private static bool Ready()
-    {
-        return PhotonNetwork.InRoom && NetworkSystem.Instance != null && GorillaTagger.Instance != null && VRRig.LocalRig != null;
-    }
-
-    private static bool CanMoveHand()
-    {
-        return GTPlayer.Instance != null && VRRig.LocalRig != null && GTPlayer.Instance.LeftHand.controllerTransform != null && VRRig.LocalRig.leftHand.rigTarget != null;
-    }
-
-    private static void MoveRig(Vector3 position)
-    {
-        if (VRRig.LocalRig == null)  return;
-        if (!RigDisabled)
-        {
-            PreviousRigState = VRRig.LocalRig.enabled;
-            RigDisabled = true;
-        }
-        VRRig.LocalRig.enabled = false;
-        VRRig.LocalRig.transform.position = position;
-    }
-
-    private static void MoveHand(Vector3 position)
-    {
-        if (!CanMoveHand()) return;
-        Transform controller = GTPlayer.Instance.LeftHand.controllerTransform;
-        Transform rigHand = VRRig.LocalRig.leftHand.rigTarget.transform;
-        if (!HandMoved)
-        {
-            PreviousControllerHand = controller.position;
-            PreviousRigHand = rigHand.position;
-            HandMoved = true;
-        }
-        controller.position = position;
-        rigHand.position = position;
-    }
-
-    private static void ReportTag(NetPlayer player)
-    {
-        if (player == null || Time.time < NextTagReport) return;
-        GameMode.ReportTag(player);
-        NextTagReport = Time.time + TagReportInterval;
-    }
-
-    private static void RestoreRig()
-    {
-        if (HandMoved && CanMoveHand())
-        {
-            GTPlayer.Instance.LeftHand.controllerTransform.position = PreviousControllerHand;
-            VRRig.LocalRig.leftHand.rigTarget.transform.position = PreviousRigHand;
-        }
-        if (RigDisabled && VRRig.LocalRig != null) VRRig.LocalRig.enabled = PreviousRigState;
-        RigDisabled = false;
-        HandMoved = false;
+        if (VRRigCache.ActiveRigs == null) return;
+        foreach (VRRig rig in VRRigCache.ActiveRigs)
+            if (rig != null) ChudOS.Mods.Safety.NetworkSafety.TryTag(rig);
     }
 }
