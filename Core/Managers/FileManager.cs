@@ -34,6 +34,7 @@ public static class FileManager
     private static bool Initialized;
     private static bool Downloading;
     private static bool MenuStateLoaded;
+    public static event Action? SoundsAvailable;
 
     private const string SoundURL = "https://iimenu-lts-serverdata.vercel.app/nt4.mp3";
 
@@ -202,7 +203,7 @@ public static class FileManager
                 if (saved == null || string.IsNullOrWhiteSpace(saved.Name)) continue;
 
                 var button = ButtonManager.GetButton(saved.Name);
-                if (button == null || button.Type != ButtonType.Toggle) continue;
+                if (button == null || button.Type != ButtonType.Toggle || (saved.Enabled && button.Category == "Detected")) continue;
 
                 ButtonManager.SetEnabled(button, saved.Enabled);
                 restoredToggles++;
@@ -291,6 +292,7 @@ public static class FileManager
         {
             if (!File.Exists(SavePath))
                 File.WriteAllBytes(SavePath, req.downloadHandler.data);
+            SoundsAvailable?.Invoke();
         }
         catch (Exception ex)
         {

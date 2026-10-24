@@ -28,17 +28,17 @@ public static class SoundboardGUI
     private static int Tab;
     private static readonly string[] Tabs = { "Sounds", "Settings" };
 
-    public static void GUIWindow()
+    public static void CreateGUI()
     {
         if (!Visible) return;
-        // INIT() already checks WindowStyle, so this does not rebuild GUI textures each frame.
-        GlobalStyles.INIT();
-        Window = GUILayout.Window(847189, Window, UIM, "ChudOS Soundboard", GlobalStyles.WindowStyle);
+        Window = MenuHelper.MakeWindow(847189, Window, WindowContents, "ChudOS Soundboard");
     }
 
-    public static void UIM(int id)
+    private static void WindowContents(int id)
     {
-        Tab = GUILayout.Toolbar(Tab, Tabs, GlobalStyles.Buttonss);
+        Tabs[0] = TranslationManager.T("Sounds");
+        Tabs[1] = TranslationManager.T("Settings");
+        Tab = MenuHelper.Toolbar(Tab, Tabs);
         switch (Tab)
         {
             case 0: Sounds(); break;
@@ -53,6 +53,7 @@ public static class SoundboardGUI
     public static void Sounds()
     {
         MenuHelper.Label($"Selected: {SoundboardManager.CurrentName}");
+        MenuHelper.Label($"Playing: {SoundboardManager.Playing?.Title ?? "None"}");
         MenuHelper.Label($"{SoundManager.CurrentTime:F1}s / {SoundManager.CurrentLength:F1}s");
 
         float progress = SoundManager.CurrentLength > 0f ? Mathf.Clamp01(SoundManager.CurrentTime / SoundManager.CurrentLength) : 0f;
@@ -62,15 +63,13 @@ public static class SoundboardGUI
         GUI.enabled = enabled;
 
         GUILayout.BeginHorizontal();
-        if (MenuHelper.Button("<<")) { SoundboardManager.Previous(); SoundboardManager.Play(); }
+        if (MenuHelper.Button("<<")) SoundboardManager.Previous();
         if (MenuHelper.Button(SoundManager.IsPaused ? "Resume" : SoundManager.IsPlaying ? "Pause" : "Play"))
         {
-            if (SoundManager.IsPaused) SoundManager.Resume();
-            else if (SoundManager.IsPlaying) SoundManager.Pause();
-            else SoundboardManager.Play();
+            SoundboardManager.TogglePause();
         }
         if (MenuHelper.Button("Stop")) SoundboardManager.Stop();
-        if (MenuHelper.Button(">>")) { SoundboardManager.Next(); SoundboardManager.Play(); }
+        if (MenuHelper.Button(">>")) SoundboardManager.Next();
         GUILayout.EndHorizontal();
 
         MenuHelper.Space(8f);
@@ -78,12 +77,16 @@ public static class SoundboardGUI
         Scroll = GUILayout.BeginScrollView(Scroll, GUILayout.Height(225f));
         if (SoundboardManager.Sounds.Count == 0) MenuHelper.Label("No sounds found. Add sounds to the Sounds folder.");
 
+        int selectedIndex = SoundboardManager.SelectedIndex;
         for (int i = 0; i < SoundboardManager.Sounds.Count; i++)
         {
             int index = i;
-            bool selected = SoundboardManager.SelectedIndex == index;
-            string name = $"{(selected ? "> " : "")}{SoundboardManager.Sounds[i].Name}";
-            if (GUILayout.Button(name, GlobalStyles.Buttonss))
+            bool selected = selectedIndex == index;
+            bool playing = SoundboardManager.Playing?.Path == SoundboardManager.Sounds[i].Path && (SoundManager.IsPlaying || SoundManager.IsPaused || SoundboardManager.IsLoading);
+            string title = SoundboardManager.Sounds[i].Name;
+            if (title.Length > 40) title = title.Substring(0, 37) + "...";
+            string name = $"{(playing ? "[Playing] " : selected ? "[Selected] " : "")}{title}";
+            if (MenuHelper.Button(name))
             {
                 SoundboardManager.Select(index);
                 SoundboardManager.Play();
@@ -118,7 +121,7 @@ public static class SoundboardGUI
 
         MenuHelper.Space(10f);
         // The manager synchronizes these GUI controls with the registered Toggle buttons.
-        if (MenuHelper.Button($"AutoPlay: {(SoundboardManager.AutoPlay ? "ON" : "OFF")}")) SoundboardManager.SetAutoPlay(!SoundboardManager.AutoPlay);
+        if (MenuHelper.Button($"Autoplay: {(SoundboardManager.AutoPlay ? "ON" : "OFF")}")) SoundboardManager.SetAutoPlay(!SoundboardManager.AutoPlay);
         if (MenuHelper.Button($"Repeat: {(SoundboardManager.Repeat ? "ON" : "OFF")}")) SoundboardManager.SetRepeat(!SoundboardManager.Repeat);
         if (MenuHelper.Button($"Shuffle: {(SoundboardManager.Shuffle ? "ON" : "OFF")}")) SoundboardManager.SetShuffle(!SoundboardManager.Shuffle);
 

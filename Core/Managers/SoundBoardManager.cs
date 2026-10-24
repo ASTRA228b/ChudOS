@@ -26,10 +26,19 @@ public static class SoundboardManager
     {
         public string Name;
         public string Path;
-        public SoundData(string name, string path) { Name = name; Path = path; }
+        public string Title;
+        public string Artist = "";
+        private bool metadataLoaded;
+        public SoundData(string name, string path) { Name = Title = name; Path = path; }
+        public void ReadMetadata()
+        {
+            if (metadataLoaded) return;
+            metadataLoaded = true;
+            (Title, Artist) = AudioMetadata.Read(Path, Name);
+        }
     }
     public static readonly List<SoundData> Sounds = new();
-    public static readonly float[] Presets = { 0.25f, 0.99f, 7.5f, 10f };
+    public static readonly float[] Presets = { 0.25f, 0.50f, 0.75f, 1f };
     public static int SelectedIndex;
     public static int VolumeIndex = 2;
     public static int MicVolumeIndex = 3;
@@ -38,6 +47,9 @@ public static class SoundboardManager
     public static bool Repeat;
     public static string CurrentName => Sounds.Count == 0 ? "No Sounds" : Sounds[Mathf.Clamp(SelectedIndex, 0, Sounds.Count - 1)].Name;
     public static bool IsPlaying => SoundManager.IsPlaying;
+    public static SoundData? Selected => Sounds.Count == 0 ? null : Sounds[Mathf.Clamp(SelectedIndex, 0, Sounds.Count - 1)];
+    public static SoundData? Playing { get; private set; }
+    public static bool IsLoading => LoadingClip;
     public static event Action? Changed;
     private static MonoBehaviour? Host;
     private static Coroutine? Loading;
@@ -52,6 +64,7 @@ public static class SoundboardManager
         Started = true;
         SoundManager.Init();
         SoundManager.ClipFinished += Finished;
+        FileManager.SoundsAvailable += RefreshList;
         SetVolume(VolumeIndex);
         SetMicVolume(MicVolumeIndex);
         Reload();
@@ -59,9 +72,19 @@ public static class SoundboardManager
     public static void Reload()
     {
         Stop();
+        SoundManager.ClearCache();
+        RefreshList();
+    }
+    private static void RefreshList()
+    {
+        string? selected = Selected?.Path;
         Sounds.Clear();
-        foreach (var sound in FileManager.GetSounds()) Sounds.Add(new SoundData(sound.Name, sound.Source));
+        HashSet<string> paths = new(StringComparer.Ordinal);
+        foreach (var sound in FileManager.GetSounds()) if (paths.Add(sound.Source)) Sounds.Add(new SoundData(sound.Name, sound.Source));
+        int previous = Sounds.FindIndex(sound => sound.Path == selected);
+        if (previous >= 0) SelectedIndex = previous;
         SelectedIndex = Mathf.Clamp(SelectedIndex, 0, Mathf.Max(0, Sounds.Count - 1));
+        Selected?.ReadMetadata();
         Debug.Log($"[{Constantss.GUID}] Loaded {Sounds.Count} sounds.");
         Changed?.Invoke();
     }
@@ -92,10 +115,19 @@ public static class SoundboardManager
     {
         if (Sounds.Count == 0) return;
         SelectedIndex = (index % Sounds.Count + Sounds.Count) % Sounds.Count;
+        Selected?.ReadMetadata();
         Changed?.Invoke();
     }
-    public static void Next() => Select(SelectedIndex + 1);
-    public static void Previous() => Select(SelectedIndex - 1);
+    public static void Next() => Navigate(1);
+    public static void Previous() => Navigate(-1);
+    private static void Navigate(int direction)
+    {
+        bool paused = SoundManager.IsPaused;
+        bool active = SoundManager.IsPlaying || paused || LoadingClip;
+        int current = active && Playing != null ? Sounds.FindIndex(sound => sound.Path == Playing.Path) : SelectedIndex;
+        Select((current < 0 ? SelectedIndex : current) + direction);
+        if (active) Play(paused);
+    }
    
     public static void SetRepeat(bool value)
     {
@@ -119,23 +151,27 @@ public static class SoundboardManager
         ButtonManager.SetEnabled("Shuffle", value);
         Changed?.Invoke();
     }
-    public static void Play()
+    public static void Play(bool pauseOnStart = false)
     {
         if (Host == null || Sounds.Count == 0) return;
         Stop();
         int generation = Generation;
-        string path = Sounds[SelectedIndex].Path;
-        Loading = Host.StartCoroutine(PlayRoutine(path, generation));
+        Playing = Selected;
+        Playing?.ReadMetadata();
+        LoadingClip = true;
+        Loading = Host.StartCoroutine(PlayRoutine(Playing!.Path, generation, pauseOnStart));
+        Changed?.Invoke();
     }
-    private static IEnumerator PlayRoutine(string path, int generation)
+    private static IEnumerator PlayRoutine(string path, int generation, bool pauseOnStart)
     {
         LoadingClip = true;
         AudioClip? loaded = null;
         yield return SoundManager.Load(path, clip => loaded = clip);
+        if (generation != Generation) yield break;
         LoadingClip = false;
         Loading = null;
-        if (generation != Generation || loaded == null) yield break;
-        SoundManager.Play(loaded);
+        if (loaded == null) { Playing = null; Changed?.Invoke(); yield break; }
+        SoundManager.Play(loaded, pauseOnStart);
         Changed?.Invoke();
     }
     public static void Stop()
@@ -145,6 +181,7 @@ public static class SoundboardManager
         Loading = null;
         LoadingClip = false;
         SoundManager.Stop();
+        Playing = null;
         Changed?.Invoke();
     }
     public static void TogglePlay()
@@ -153,16 +190,26 @@ public static class SoundboardManager
         else Play();
     }
     public static void Tick() => SoundManager.Tick();
+    public static void TogglePause()
+    {
+        if (LoadingClip) return;
+        if (SoundManager.IsPaused) SoundManager.Resume();
+        else if (SoundManager.IsPlaying) SoundManager.Pause();
+        else { Play(); return; }
+        Changed?.Invoke();
+    }
     private static void Finished()
     {
-        if (!AutoPlay || Repeat || Sounds.Count == 0) return;
+        if (!AutoPlay || Repeat || Sounds.Count == 0) { Changed?.Invoke(); return; }
+        int current = Playing == null ? SelectedIndex : Sounds.FindIndex(sound => sound.Path == Playing.Path);
+        if (current >= 0) SelectedIndex = current;
         if (Shuffle && Sounds.Count > 1)
         {
             int next = UnityEngine.Random.Range(0, Sounds.Count - 1);
             if (next >= SelectedIndex) next++;
             Select(next);
         }
-        else Next();
+        else Select(SelectedIndex + 1);
         Play();
     }
     public static void Shutdown()
@@ -170,6 +217,7 @@ public static class SoundboardManager
         if (!Started) return;
         Stop();
         SoundManager.ClipFinished -= Finished;
+        FileManager.SoundsAvailable -= RefreshList;
         SoundManager.Shutdown();
         Host = null;
         Started = false;

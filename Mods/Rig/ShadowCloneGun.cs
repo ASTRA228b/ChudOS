@@ -23,20 +23,22 @@ internal sealed class ShadowCloneGun : RigBehaviour
 {
     private const float SideOffset = 0.9f;
     private VRRig? target;
+    private bool posed;
 
     protected override void LateUpdate()
     {
-        if (!GunLib.UpdateRigGun(GorillaTagger.Instance.rightHandTransform, InputLib.RightGrab, InputLib.RightTrigger, ref target) || target == null)
+        if (!GunLib.UpdateRigGun(GunLib.AimHand, GunLib.AimPressed, GunLib.SelectPressed, ref target) || target == null)
         {
-            RigRuntime.ToggleRig(true);
+            if (posed) { RigRuntime.RestorePose(); posed = false; }
             return;
         }
 
         RigRuntime.ToggleRig(false);
+        posed = true;
         VRRig local = VRRig.LocalRig;
         Vector3 offset = target.transform.right * SideOffset;
         local.transform.SetPositionAndRotation(target.transform.position + offset, target.transform.rotation);
-        local.head.rigTarget.rotation = target.head.rigTarget.rotation;
+        local.head.rigTarget.SetPositionAndRotation(target.head.rigTarget.position + offset, target.head.rigTarget.rotation);
         local.leftHand.rigTarget.SetPositionAndRotation(target.leftHand.rigTarget.position + offset, target.leftHand.rigTarget.rotation);
         local.rightHand.rigTarget.SetPositionAndRotation(target.rightHand.rigTarget.position + offset, target.rightHand.rigTarget.rotation);
         local.leftHand.calcT = target.leftHand.calcT;
@@ -46,6 +48,7 @@ internal sealed class ShadowCloneGun : RigBehaviour
     protected override void OnDisable()
     {
         target = null;
+        posed = false;
         GunLib.Hide();
         RigRuntime.ToggleRig(true);
     }

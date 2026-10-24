@@ -26,9 +26,9 @@ public static class MenuSettings
     public static void PCView() => ChudOS.Core.Main.OpenPC();
 
     [MenuButton("Array List", ButtonType.Toggle, Category = "Settings", Order = 1, DefaultEnabled = true, runOption = RunOption.Once, Notify = false)]
-    public static void ArrayList() => GUIManager.ArrayListEnabled = true;
+    public static void ArrayList() => ChudOS.Core.AGUI.ArrayListGUI.SetVisible(true);
     [MenuDisable("Array List")]
-    public static void ArrayListOff() => GUIManager.ArrayListEnabled = false;
+    public static void ArrayListOff() => ChudOS.Core.AGUI.ArrayListGUI.SetVisible(false);
 
     [MenuButton("GUI Input", ButtonType.Option, Category = "Settings", Order = 2, Options = new[] { "CTRL", "Alt", "X", "Down Arrow" }, Notify = false)]
     public static void GUIInput() => GUIManager.SetOpenKey(ButtonManager.GetButton("GUI Input")!.OptionIndex);
@@ -45,7 +45,7 @@ public static class MenuSettings
 
 
     [MenuButton("Canvas Notifications", ButtonType.Toggle, Category = "Settings", Order = 6, DefaultEnabled = true, runOption = RunOption.Once, Notify = false)]
-    public static void Notifications() => CanvasNotifyLib.Enabled = true;
+    public static void Notifications() => CanvasNotifyLib.SetEnabled(true);
     [MenuDisable("Canvas Notifications")]
-    public static void NotificationsOff() => CanvasNotifyLib.Enabled = false;
+    public static void NotificationsOff() => CanvasNotifyLib.SetEnabled(false);
 }

@@ -37,7 +37,7 @@ public static class ButtonManager
         public ButtonType Type => Attribute.Type;
         public string Category => Attribute.Category;
         public string Option => Type == ButtonType.Option && Attribute.Options.Length > 0 ? Attribute.Options[OptionIndex] : "";
-        public string DisplayName => Type == ButtonType.Toggle ? $"{Name} [{(Enabled ? "ON" : "OFF")}]" : Type == ButtonType.Option ? $"{Name}: {Option}" : Name;
+        public string DisplayName => Type == ButtonType.Toggle ? $"{TranslationManager.T(Name)} [{TranslationManager.T(Enabled ? "ON" : "OFF")}]" : Type == ButtonType.Option ? $"{TranslationManager.T(Name)}: {TranslationManager.T(Option)}" : TranslationManager.T(Name);
     }
 
     private static readonly List<ButtonData> All = new();
@@ -114,7 +114,11 @@ public static class ButtonManager
         if (!All.Contains(button)) return;
         if (button.Type == ButtonType.Toggle) SetEnabled(button, !button.Enabled);
         else if (button.Type == ButtonType.Option) ChangeOption(button, 1);
-        else if (Execute(button.Run, button.Name)) Notify(button, button.Attribute.messagePress, $"{button.Name} pressed");
+        else
+        {
+            if (button.Category == "Detected") ChudOS.Mods.Safety.ModGuards.WarnDetected();
+            if (Execute(button.Run, button.Name)) Notify(button, button.Attribute.messagePress, $"{button.Name} pressed");
+        }
     }
     public static void SetEnabled(string name, bool state) { ButtonData? button = GetButton(name); if (button != null) SetEnabled(button, state); }
     public static void SetEnabled(ButtonData button, bool state)
@@ -123,6 +127,7 @@ public static class ButtonManager
         button.Enabled = state;
         if (state)
         {
+            ChudOS.Mods.Safety.ModGuards.OnEnable(button);
             Execute(button.OnEnable, button.Name);
             if (button.Attribute.runOption == RunOption.Once && !Execute(button.Run, button.Name)) button.Enabled = false;
             Notify(button, button.Attribute.messageEnable, $"{button.Name} enabled");
@@ -178,7 +183,7 @@ public static class ButtonManager
     {
         if (action == null) return true;
         try { action(); return true; }
-        catch (Exception ex) { Debug.LogError($"[{Constantss.GUID}] {name}: {ex}"); return false; }
+        catch (Exception ex) { if (ChudOS.Mods.Safety.ModGuards.ShouldLogError(name)) Debug.LogError($"[{Constantss.GUID}] {name}: {ex}"); return false; }
     }
     private static void Notify(ButtonData button, string message, string fallback)
     {

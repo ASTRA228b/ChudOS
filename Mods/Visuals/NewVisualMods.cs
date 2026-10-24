@@ -162,7 +162,7 @@ public static class NewVisualMods
     public static void DrawGun()
     {
         if (!PortTools.Ready) return;
-        bool draw = GunLib.UpdateGun(GorillaTagger.Instance.rightHandTransform, InputLib.RightGrab, InputLib.RightTrigger, out Vector3 point);
+        bool draw = GunLib.UpdateGun(GunLib.AimHand, GunLib.AimPressed, GunLib.SelectPressed, out Vector3 point);
         if (!draw) { stroke = null; strokePoints = 0; return; }
         if (stroke == null || strokePoints >= 512)
         {

@@ -78,12 +78,13 @@ public sealed class EvolvingCosmeticManager : MonoBehaviour
         }
     }
 
-    private void Awake() => GUIManager.Register(WindowName, SetVisible, () => visible);
-    private void SetVisible(bool value) { visible = value; if (value) RefreshCosmetics(); }
+    private void Awake() => GUIManager.Register(WindowName, SetVisible, () => visible, CreateGUI, () => window);
+    private void SetVisible(bool value) { visible = value; enabled = value || cosmetics.Exists(info => info.Cycling); if (value) RefreshCosmetics(); }
     public void Open() => SetVisible(true);
 
     private void Update()
     {
+        if (!visible && !cosmetics.Exists(info => info.Cycling)) { enabled = false; return; }
         if (subscribed != CosmeticsController.instance)
         {
             if (subscribed != null) subscribed.OnCosmeticsUpdated -= RefreshCosmetics;
@@ -208,18 +209,17 @@ public sealed class EvolvingCosmeticManager : MonoBehaviour
         VRRig.LocalRig?.reliableState?.SetIsDirty();
     }
 
-    private void OnGUI()
+    private void CreateGUI()
     {
         if (!visible) return;
-        GlobalStyles.INIT();
-        window = GUILayout.Window(18573491, window, UIM, WindowName, GlobalStyles.WindowStyle);
+        window = MenuHelper.MakeWindow(18573491, window, WindowContents, WindowName);
     }
 
-    private void UIM(int id)
+    private void WindowContents(int id)
     {
         GUILayout.BeginHorizontal();
         if (MenuHelper.Button("Refresh Cosmetics")) RefreshCosmetics();
-        if (MenuHelper.Button("Close")) visible = false;
+        if (MenuHelper.Button("Close")) SetVisible(false);
         GUILayout.EndHorizontal();
         scroll = GUILayout.BeginScrollView(scroll);
         if (cosmetics.Count == 0) MenuHelper.Label("No evolving cosmetics found in your currently worn set.");
@@ -264,7 +264,7 @@ public sealed class EvolvingCosmeticManager : MonoBehaviour
     private void OnDestroy()
     {
         if (subscribed != null) subscribed.OnCosmeticsUpdated -= RefreshCosmetics;
-        GUIManager.Register(WindowName, _ => { }, () => false);
+        GUIManager.Unregister(WindowName);
         var originals = new List<EvolvingCosmetic>(changed.Keys);
         foreach (EvolvingCosmetic cosmetic in originals) Restore(cosmetic);
         cosmetics.Clear();

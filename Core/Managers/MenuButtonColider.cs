@@ -17,6 +17,7 @@
 using ChudOS.Stuff;
 using Photon.Pun;
 using UnityEngine;
+using System.Collections;
 using static ChudOS.Core.Main;
 
 namespace ChudOS.Core.Managers;
@@ -31,24 +32,48 @@ public sealed class MenuButtonCollider : MonoBehaviour
     public bool Incremental, Positive;
     public string KeyboardKey = "";
     public TextMesh? Label;
+    public Action? OnPress;
     public float TextWidth = 0.84f;
     public Color IdleColor = Main.ButtonColorValue;
     private Renderer? Render;
     private MaterialPropertyBlock? Properties;
     private float PressedUntil;
 
-    private void Awake() { Render = GetComponent<Renderer>(); Properties = new MaterialPropertyBlock(); }
-    private void Update()
+    private Coroutine? pressReset;
+    private Color lastColor;
+    private bool hasColor;
+
+    private void Awake()
+    {
+        Render = GetComponent<Renderer>();
+        Properties = new MaterialPropertyBlock();
+        ButtonManager.OnButtonsChanged += RefreshAppearance;
+    }
+    private void Start() => RefreshAppearance();
+    private void OnDestroy() => ButtonManager.OnButtonsChanged -= RefreshAppearance;
+
+    public void RefreshAppearance()
     {
         if (Render == null || Properties == null) return;
-        bool enabled = RelatedButton?.Type == ButtonType.Toggle && RelatedButton.Enabled;
-        Properties.SetColor("_Color", enabled || Time.unscaledTime < PressedUntil ? Main.PrimaryColorValue : IdleColor);
-        Render.SetPropertyBlock(Properties);
-        if (Label != null && RelatedButton != null)
+        bool active = RelatedButton?.Type == ButtonType.Toggle && RelatedButton.Enabled;
+        Color color = active || Time.unscaledTime < PressedUntil ? Main.PrimaryColorValue : IdleColor;
+        if (!hasColor || color != lastColor)
         {
-            string value = Main.GetButtonLabel(RelatedButton);
-            if (Label.text != value) { Label.text = value; Main.FitButtonText(Label, value, TextWidth); }
+            hasColor = true;
+            lastColor = color;
+            Properties.SetColor("_Color", color);
+            Render.SetPropertyBlock(Properties);
         }
+        if (Label == null || RelatedButton == null) return;
+        string value = Main.GetButtonLabel(RelatedButton);
+        if (Label.text != value) { Label.text = value; Main.FitButtonText(Label, value, TextWidth); }
+    }
+
+    private IEnumerator ResetPress()
+    {
+        yield return new WaitForSecondsRealtime(0.25f);
+        pressReset = null;
+        RefreshAppearance();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -61,20 +86,24 @@ public sealed class MenuButtonCollider : MonoBehaviour
         if (MenuMain == null || Time.unscaledTime < ButtonCooldown) return;
         ButtonCooldown = Time.unscaledTime + 0.2f;
         PressedUntil = Time.unscaledTime + 0.25f;
-        if (rightHand.HasValue && GorillaTagger.Instance != null)
-        {
-            GorillaTagger.Instance.StartVibration(rightHand.Value, GorillaTagger.Instance.tagHapticStrength / 2f, GorillaTagger.Instance.tagHapticDuration / 2f);
-            if (VRRig.LocalRig != null) VRRig.LocalRig.PlayHandTapLocal(8, rightHand.Value, 0.4f);
-        }
+        RefreshAppearance();
+        if (pressReset != null) StopCoroutine(pressReset);
+        pressReset = StartCoroutine(ResetPress());
+        MenuFeedback.Play(rightHand);
+        if (OnPress != null) { OnPress(); return; }
         if (Disconnect) { ScheduleAction(() => { if (PhotonNetwork.IsConnected) PhotonNetwork.Disconnect(); }); return; }
         if (SearchToggle) { SearchManager.Toggle(); RequestRefresh(); return; }
         if (KeyboardKey.Length > 0) { SearchManager.Key(KeyboardKey); RequestRefresh(); return; }
         if (SearchManager.KeyboardVisible) SearchManager.Blur();
-        if (Home) { CategoryManager.GoHome(); return; }
+        if (Home) { if (Main.SoundboardControlOpen) Main.CloseSoundboardControl(); else CategoryManager.GoHome(); return; }
+        if (Main.SoundboardControlOpen && (NextPage || PreviousPage || SearchToggle)) return;
         if (NextPage) { CategoryManager.NextPage(); return; }
         if (PreviousPage) { CategoryManager.PreviousPage(); return; }
         if (!string.IsNullOrEmpty(RelatedCategory)) { CategoryManager.Open(RelatedCategory); return; }
         if (RelatedButton == null) return;
+        bool favorite = rightHand.HasValue ? ControllerInputPoller.instance != null && ChudOS.Libraries.InputLib.RightGrab : UnityEngine.InputSystem.Keyboard.current?.leftShiftKey.isPressed == true || UnityEngine.InputSystem.Keyboard.current?.rightShiftKey.isPressed == true;
+        if (favorite) { MenuPreferences.ToggleFavorite(RelatedButton); return; }
+        MenuPreferences.ShowHelp(RelatedButton);
         if (Incremental) ButtonManager.ChangeOption(RelatedButton, Positive ? 1 : -1);
         else ButtonManager.Press(RelatedButton);
     }

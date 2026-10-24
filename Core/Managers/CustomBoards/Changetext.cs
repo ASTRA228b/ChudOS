@@ -46,7 +46,7 @@ public sealed class Changetext : MonoBehaviour
     private static Changetext? instance;
     private static bool boardsEnabled = true, motdEnabled = true, cocEnabled = true, uppercase;
     private static int colorIndex;
-    private float nextScan, nextApply;
+    private float nextScan;
     private string[] displayText = Array.Empty<string>();
     private readonly BoardSlot[] slots =
     {
@@ -131,6 +131,7 @@ public sealed class Changetext : MonoBehaviour
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
         ReloadText();
+        TranslationManager.Changed += RefreshText;
     }
 
     private void LateUpdate()
@@ -142,10 +143,8 @@ public sealed class Changetext : MonoBehaviour
             nextScan = now + 1f;
             foreach (BoardSlot slot in slots)
                 if (slot.Text == null) slot.Find();
+            ApplyBoards();
         }
-        if (now < nextApply) return;
-        nextApply = now + 0.25f;
-        ApplyBoards();
     }
 
     private void ApplyBoards()
@@ -162,9 +161,11 @@ public sealed class Changetext : MonoBehaviour
     {
         displayText = new[] { MOTDHeadingTXT, MOTDbodyTXT, COCHeadingTXT, COCbodyTXT };
         for (int i = 0; i < displayText.Length; i++)
-            displayText[i] = uppercase ? (displayText[i] ?? "").ToUpperInvariant() : displayText[i] ?? "";
+        {
+            string translated = TranslationManager.Board(displayText[i] ?? "");
+            displayText[i] = uppercase ? translated.ToUpper(System.Globalization.CultureInfo.GetCultureInfo(TranslationManager.Language)) : translated;
+        }
         ApplyBoards();
-        nextApply = 0f;
     }
 
     private void ReloadText()
@@ -199,10 +200,11 @@ public sealed class Changetext : MonoBehaviour
         foreach (BoardSlot slot in slots) slot.Restore();
     }
 
-    private void OnEnable() { nextScan = 0f; nextApply = 0f; }
+    private void OnEnable() => nextScan = 0f;
 
     private void OnDestroy()
     {
+        TranslationManager.Changed -= RefreshText;
         foreach (BoardSlot slot in slots) slot.Restore();
         if (instance == this) instance = null;
     }

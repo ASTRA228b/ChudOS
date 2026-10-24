@@ -133,10 +133,10 @@ public static class PlayerESPRuntime
 
     public static void BodyTracers()
     {
-        GTPlayer player = GTPlayer.Instance;
-        if (player == null || player.headCollider == null) return;
+        Transform? hand = GorillaTagger.Instance != null ? GorillaTagger.Instance.rightHandTransform : null;
+        if (hand == null) { ClearBodyTracers(); return; }
         Sync(Tracers, rig => MakeLine("ChudOS Body Tracer", rig, 2, true, 0.012f), line => { if (line != null) Object.Destroy(line.gameObject); });
-        Vector3 origin = player.headCollider.transform.position + Vector3.down * 0.6f;
+        Vector3 origin = hand.position;
         foreach (var pair in Tracers)
         {
             if (pair.Key == null || pair.Value == null) continue;

@@ -30,10 +30,10 @@ public static class MovementMods
     private static bool DashWasHeld;
     private static float flyspeed = 15f;
     private static float LastSpawn;
-    private static GameObject? LeftPlatform;
-    private static GameObject? RightPlatform;
-    private static bool Leftspawn;
-    private static bool Rightspawn;
+
+
+
+
     public static float FlySpeed = 10f;
     public static float ShiftMultiplier = 2.5f;
     public static float MouseSensitivity = 0.15f;
@@ -50,8 +50,8 @@ public static class MovementMods
     {
         GTPlayer player = GTPlayer.Instance;
         if (player == null) return;
-        player.maxJumpSpeed = 8.5f;
-        player.jumpMultiplier = 1.5f;
+        player.maxJumpSpeed = SpeedBoostSettings.JumpSpeed;
+        player.jumpMultiplier = SpeedBoostSettings.Multiplier;
     }
 
 
@@ -299,61 +299,12 @@ public static class MovementMods
             CreateForzonPlatfrom(GTPlayer.Instance.RightHand.controllerTransform.position - GTPlayer.Instance.RightHand.controllerTransform.right * 0.05f, GTPlayer.Instance.RightHand.controllerTransform.rotation);
     }
 
-    [MenuButton("Platforms", ButtonType.Toggle, Category = "Movement", Order = 18, runOption = RunOption.Update, Description = "hand platfroms.")]
-    public static void UpdatePlatforms()
-    {
-        if (!PortTools.Ready) return;
-        bool leftGrip = InputLib.LeftGrab;
-        bool rightGrip = InputLib.RightGrab;
-        if (leftGrip && LeftPlatform == null) LeftPlatform = CreateLeftPlatform();
-        if (rightGrip && RightPlatform == null) RightPlatform = CreateRightPlatfrom();
-        if (leftGrip && LeftPlatform != null && !Leftspawn)
-        {
-            LeftPlatform.transform.position = GTPlayer.Instance.LeftHand.controllerTransform.position;
-            LeftPlatform.transform.rotation = GTPlayer.Instance.LeftHand.controllerTransform.rotation;
-            Leftspawn = true;
-        }
-        if (rightGrip && RightPlatform != null && !Rightspawn)
-        {
-            RightPlatform.transform.position = GTPlayer.Instance.RightHand.controllerTransform.position;
-            RightPlatform.transform.rotation = GTPlayer.Instance.RightHand.controllerTransform.rotation;
-            Rightspawn = true;
-        }
-
-        if (!leftGrip && LeftPlatform != null)
-        {
-            GameObject.Destroy(LeftPlatform);
-            LeftPlatform = null;
-            Leftspawn = false;
-        }
-        if (!rightGrip && RightPlatform != null)
-        {
-            GameObject.Destroy(RightPlatform);
-            RightPlatform = null;
-            Rightspawn = false;
-        }
-    }
-
+    [MenuButton("Platforms", ButtonType.Toggle, Category = "Movement", Order = 18, runOption = RunOption.FixedUpdate, Description = "Hold either grip to place a platform")]
+    public static void UpdatePlatforms() => PlatformMods.Tick(0);
     [MenuDisable("Platforms")]
-    public static void DisablePlatforms()
-    {
-        if (LeftPlatform != null) GameObject.Destroy(LeftPlatform);
-        if (RightPlatform != null) GameObject.Destroy(RightPlatform);
-        RightPlatform = null;
-        LeftPlatform = null;
-        Leftspawn = false;
-        Rightspawn = false;
-    }
-
+    public static void DisablePlatforms() => PlatformMods.ClearHands();
     [MenuEnable("Platforms")]
-    public static void EnablePlatfroms()
-    {
-        LeftPlatform = null;
-        RightPlatform = null;
-        Leftspawn = false;
-        Rightspawn = false;
-    }
-
+    public static void EnablePlatfroms() => PlatformMods.Activate("Platforms");
     [MenuButton("Platform Spam", ButtonType.Toggle, Category = "Movement", Order = 19)]
     public static void SpamPlatfrom()
     {
@@ -410,41 +361,9 @@ public static class MovementMods
     }
 
 
-    private static GameObject CreateLeftPlatform()
-    {
-        GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject.Destroy(platform.GetComponent<Rigidbody>());
-        GameObject.Destroy(platform.GetComponent<Renderer>());
-        platform.transform.localScale = new Vector3(0.25f, 0.3f, 0.25f);
-        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject.Destroy(visual.GetComponent<Rigidbody>());
-        visual.transform.SetParent(platform.transform);
-        visual.transform.rotation = Quaternion.identity;
-        visual.transform.localScale = new Vector3(0.1f, 1f, 1f);
-        Renderer renderer = visual.GetComponent<Renderer>();
-        renderer.material.shader = Shader.Find("GorillaTag/UberShader");
-        renderer.material.color = GorillaTagger.Instance.offlineVRRig.playerColor;
-        visual.transform.localPosition = new Vector3(0.02f, 0f, 0f);
-        return platform;
-    }
 
-    private static GameObject CreateRightPlatfrom() // Platfrom - lol
-    {
-        GameObject platform = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject.Destroy(platform.GetComponent<Rigidbody>());
-        GameObject.Destroy(platform.GetComponent<Renderer>());
-        platform.transform.localScale = new Vector3(0.25f, 0.3f, 0.25f);
-        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject.Destroy(visual.GetComponent<Rigidbody>());
-        visual.transform.SetParent(platform.transform);
-        visual.transform.rotation = Quaternion.identity;
-        visual.transform.localScale = new Vector3(0.1f, 1f, 1f);
-        Renderer renderer = visual.GetComponent<Renderer>();
-        renderer.material.shader = Shader.Find("GorillaTag/UberShader");
-        renderer.material.color = GorillaTagger.Instance.offlineVRRig.playerColor;
-        visual.transform.localPosition = new Vector3(-0.02f, 0f, 0f);
-        return platform;
-    }
+
+
 
     private static void CreateForzonPlatfrom(Vector3 pos, Quaternion rot)
     {

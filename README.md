@@ -2,7 +2,7 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.7** has **150 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. The local **0.0.8 development build** has **214 total menu buttons**, including mods, settings, and actions. The 0.0.8 GitHub release has not been published yet.
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -19,6 +19,16 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - A text-only menu with clickable buttons and a setting to reset the theme to OG.
 - Safety options for ChudOS RPC request limits, mod errors, room changes, and rapid master changes.
 - Player-targeting guns that include player trigger hitboxes and skip your local body.
+- SB Control on the tablet: music-note icon, track title/artist, progress, elapsed/remaining time, previous, play/pause, next, and Back to Main.
+- Independent local/microphone volumes, position-aware microphone resume, consistent track navigation, and audio-cache reloads.
+- Click sound, click volume, and click vibration settings.
+- English, Spanish, Portuguese, French, German, and Italian menu and standard-board translations. Optional automatic custom-board translation sends board text to Google only when enabled.
+- Hug Gun, Follow Player Gun, Orbit Player Gun, and PC mouse targeting for rig guns.
+- PC Button Click for the gorilla computer keyboard and other in-game buttons.
+- Body Tracers start at the right hand.
+- Wall Walk V2 with strength presets and configurable controller inputs.
+- Pull Mod with all 12 APMH methods, activation settings, and three preset slots.
+- A themed overlay for FPS, velocity, ping, room, and player count.
 
 ## Installation
 
@@ -35,6 +45,275 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - **Custom boards:** use **Open Board Text** and **Reload Board Text** in Settings.
 - **Saved settings:** use **Save Menu State** in Settings.
 - **Themes:** open **Settings → Menu Theme**. Use **Save Menu State** to keep your selection for next time.
+- **SB Control:** open **Main → SB Control**. Missing MP3 title/artist tags fall back to the filename and Unknown Artist.
+- **Rig guns on PC:** hold the right mouse button to aim and the left mouse button to select. In VR, use right grip and trigger.
+- **PC Button Click:** enable it in Main, then left-click in-game buttons. Disable it to restore the previous cursor state.
+- **Language and click feedback:** change them in Settings, then use Save Menu State.
 - **Tag tools:** Modded Tag Guard is on by default and restricts them to private MODDED rooms. Tag Gun, Tag All, and Tag Aura use bounded normal hand reach; they no longer teleport your rig or set unlimited reach. Tag Self requires the tag room master.
 
 Safety options reduce specific errors and limit ChudOS requests. They do not guarantee protection from bans. Head pose mods remain usable online; using mods can still lead to a ban.
+
+## Additional 0.0.8 features
+
+- Favorites: grip + click in VR or Shift + click on PC adds/removes a favorite without activating it. [F] marks favorites.
+- Optional Button Help and Remember Last Category; shared left/right Gun Hand setting.
+- Detected category for higher-risk tag and head mods, with warnings on opening or activation. This is a risk grouping, not a claim of confirmed server detection. Detected toggles are not automatically restored from saved state.
+- Astra NoLeaves V2 with cached/downloaded object names, bounded detection, cancellation and restoration.
+- Car, Reverse Velocity (X), Air Brake (both grips), and Ender Pearl (hold/release either grip).
+- Invisible, Sticky, Plank and Custom Platforms. Settings control custom width, height, length, color, visibility and rotation.
+- Platform Gun places at most 20 temporary platforms; placements expire after 30 seconds and clear when disabled or changing rooms.
+- Speed Boost presets from Astra's PullMod V2: Normal 6.5/1.1, Boost 8.5/1.5, Strong 10/1.8; custom jump speed/multiplier options. Mosa Speed Boost uses 999/2.2. Only one boost mode runs at a time.
+- Reset Temporary Mod State, movement-controller conflict handling and grouped repeated errors.
+
+
+## Full feature list
+
+## Main — 4
+
+- Join Discord
+- SB Control
+- Menu Source
+- PC Button Click
+
+## Movement — 45
+
+- Speed Boost
+- Low Gravity
+- Mosa Speed Boost
+- High Gravity
+- Zero Gravity
+- Dash (X)
+- Fly (X)
+- Slingshot Fly (A)
+- Up And Down
+- Iron Man
+- Trigger Fly
+- Joystick Fly (LJ)
+- Zero Grav Fly (A)
+- BarkFly (JR)(JL)
+- Velocity BarkFly (JR)(JL)
+- Hand Fly (B)
+- NoGrav SlingshotFly (B)
+- WASD Fly
+- Forzone
+- Platforms
+- Platform Spam
+- No Tag Freeze
+- Tag Freeze
+- Pull Mod
+- Wall Walk
+- Grappling Hooks
+- Rewind
+- Teleport Gun
+- Checkpoint
+- Size Changer
+- Bouncy
+- Slide Control
+- Swim Momentum
+- Rope Grab Reach
+- Hoverboard Boost
+- Glider Tuning
+- Car
+- Reverse Velocity
+- Air Brake
+- Ender Pearl
+- Invisible Platforms
+- Sticky Platforms
+- Plank Platforms
+- Custom Platforms
+- Platform Gun
+
+## Player — 6
+
+- Body Tracers
+- Bone ESP
+- 2D Box ESP
+- 3D Box ESP
+- 4D Box ESP
+- Trails ESP
+
+## Rig — 21
+
+- Copy Movement Gun
+- Dance
+- Ghost Animations
+- Ghost Monke
+- Griddy
+- Invis Monke
+- Jerk Off
+- Look At Gun
+- PC Rig
+- Rec Room Rig
+- Rig Tweaks
+- Rig Tweaks V2
+- Shadow Clone Gun
+- Smooth Rig
+- Spin Bot
+- PC Rig Mode
+- Max Quest Score
+- Evolving Cosmetic
+- Hug Gun
+- Follow Player Gun
+- Orbit Player Gun
+
+## Fun — 5
+
+- Fix Head
+- Fix All
+- Free Camera
+- Camera FOV
+- Silent Hand Taps
+
+## Visuals — 10
+
+- Hide Fog
+- Ambient Tint
+- Visual Info
+- Name Tags
+- Overlay
+- Jump Predictions
+- Show Room Triggers
+- Draw Gun
+- Hide Head Cosmetics
+- No Leaves
+
+## Detected — 9
+
+- UpsideDown Head
+- Broken Neck
+- Backwards Head
+- Sideways Head
+- HeadBang
+- Tag Gun
+- Tag Self
+- Tag Aura
+- Tag All
+
+## Safety — 29
+
+- Disable Movement
+- Disable All Mods
+- Stop All Sounds
+- Close All Windows
+- Return Home
+- Leave Room
+- No Finger Gestures
+- Fake Valve Tracking
+- Hide Mode Selector
+- Room Status
+- Check My Nickname
+- Random Nickname
+- Custom Nickname
+- Name On Room Leave
+- Nickname Length Alert
+- Report Proximity Alert
+- Report Alert Range
+- Visualize Report Zone
+- Auto GC (60s)
+- Fake Power Off
+- Fake Report Overlay
+- Anti Lurker (Local)
+- Clear My Buffered RPCs
+- Anti Report Disconnect
+- RPC Protection
+- Mod Error Protection
+- Disable Mods On Leave
+- Rapid Master Protection
+- Reset Temporary Mod State
+
+## Room — 8
+
+- Leave
+- JoinRandom
+- JoinRandom Private
+- EU
+- US
+- USW
+- Quit Game
+- Disable Network Triggers
+
+## SoundBoard — 13
+
+- Play / Stop
+- Next Sound
+- Volume
+- Sound Output
+- Mic Volume
+- Autoplay
+- Repeat
+- Shuffle
+- Open Soundboard GUI
+- Reload Sounds
+- Mute Other Players
+- Microphone Mute
+- Microphone Pitch
+
+## Weather — 2
+
+- Time
+- No Rain
+
+## Settings — 62
+
+- PC View
+- Array List
+- GUI Input
+- Close GUI Input
+- Close All GUIs
+- Save Menu State
+- Canvas Notifications
+- Custom Boards
+- Custom MOTD Board
+- Custom COC Board
+- Board Uppercase
+- Board Color
+- Open Board Text
+- Reload Board Text
+- Menu Theme
+- Reset Menu Theme
+- Modded Tag Guard
+- Click Sound
+- Click Volume
+- Click Vibrations
+- Menu Language
+- Auto Translate Boards
+- Wall Walk Strength
+- Wall Walk Input
+- Pull Method
+- Pull Hand
+- Pull Input
+- Pull Activation
+- Pull Power
+- Pull Uphill Power
+- Pull Momentum
+- Pull Maximum
+- Pull Velocity Limit
+- Pull Extra Power
+- Pull Clamp Velocity
+- Pull Release Window
+- Pull Touch Linger
+- Pull Preset Slot
+- Save Pull Preset
+- Load Pull Preset
+- Reset Pull Settings
+- Overlay Size
+- Overlay Position
+- Overlay FPS
+- Overlay Velocity
+- Overlay Ping
+- Overlay Room
+- Overlay Players
+- Remember Last Category
+- Button Help
+- Gun Hand
+- Car Speed
+- Air Brake Strength
+- Platform Width
+- Platform Height
+- Platform Length
+- Platform Color
+- Platform Visibility
+- Platform Rotation
+- Speed Boost Preset
+- Speed Boost Jump Speed
+- Speed Boost Multiplier

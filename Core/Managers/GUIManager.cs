@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using UnityEngine;
 
 namespace ChudOS.Core.Managers;
 
@@ -27,8 +28,29 @@ public static class GUIManager
     public static Key GUIInput = Key.LeftAlt;
     public static Key CloseAllInput = Key.LeftCtrl;
     public static readonly Key[] Inputs = { Key.LeftCtrl, Key.LeftAlt, Key.X, Key.DownArrow };
-    private static readonly Dictionary<string, (Action<bool> Set, Func<bool> Get)> Windows = new();
-    public static void Register(string name, Action<bool> setter, Func<bool> getter) => Windows[name] = (setter, getter);
+    private static readonly Dictionary<string, (Action<bool> Set, Func<bool> Get, Action? CreateGUI, Func<Rect>? Bounds)> Windows = new();
+    public static void Register(string name, Action<bool> setter, Func<bool> getter, Action? createGUI = null, Func<Rect>? bounds = null) => Windows[name] = (setter, getter, createGUI, bounds);
+    public static bool ContainsPointer(Vector2 position)
+    {
+        foreach (var window in Windows.Values)
+            if (window.Get() && window.Bounds != null && window.Bounds().Contains(position)) return true;
+        return false;
+    }
+    public static void Unregister(string name) => Windows.Remove(name);
+    public static bool HasVisibleWindows
+    {
+        get
+        {
+            foreach (var window in Windows.Values)
+                if (window.CreateGUI != null && window.Get()) return true;
+            return false;
+        }
+    }
+    public static void CreateGUIs()
+    {
+        foreach (var window in Windows.Values)
+            if (window.Get()) window.CreateGUI?.Invoke();
+    }
     public static void Toggle(string name) { if (Windows.TryGetValue(name, out var window)) window.Set(!window.Get()); }
     public static void CloseAll() { foreach (var window in Windows.Values) window.Set(false); }
     public static void ToggleAll()

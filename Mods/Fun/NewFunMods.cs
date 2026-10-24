@@ -163,6 +163,7 @@ public static class NewFunMods
 
     private static void RestoreFov()
     {
+        PortTools.RemoveTick(MaintainFov);
         if (desktopCamera != null && fovSaved) desktopCamera.fieldOfView = originalFov;
         if (freeCamera != null) freeCamera.fieldOfView = Camera.main != null ? Camera.main.fieldOfView : 60f;
         desktopCamera = null; fovSaved = false; nextCameraScan = 0f;

@@ -40,6 +40,7 @@ internal sealed class ModSafetyMonitor : MonoBehaviourPunCallbacks
             previousRoom = PhotonNetwork.CurrentRoom;
             masterChanges.Reset();
             NetworkSafety.Reset();
+            ModGuards.ClearTemporaryState();
             if (left && LeaveProtection) DisableGameplayMods();
         }
         if (failed.Count == 0) return;

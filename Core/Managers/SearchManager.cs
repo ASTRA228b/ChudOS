@@ -62,6 +62,7 @@ public static class SearchManager
     {
         Matches.Clear();
         if (!Active || Query.Length == 0) return;
-        Matches.AddRange(ButtonManager.Buttons.Where(b => b.Name.IndexOf(Query, StringComparison.OrdinalIgnoreCase) >= 0));
+        Matches.AddRange(ButtonManager.Buttons.Where(b => b.Name.IndexOf(Query, StringComparison.OrdinalIgnoreCase) >= 0 || System.Globalization.CultureInfo.InvariantCulture.CompareInfo.IndexOf(TranslationManager.T(b.Name), Query, System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace) >= 0));
     }
+    public static void RefreshLanguage() => Rebuild();
 }

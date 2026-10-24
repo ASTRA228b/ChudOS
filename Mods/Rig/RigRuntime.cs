@@ -48,7 +48,7 @@ internal sealed class RigRuntime : MonoBehaviour
     private Snapshot? snapshot;
     private bool changing;
     private static readonly string[] ExternalPoses = { "Tag Gun", "Tag Self", "Tag All", "Fake Power Off", "Rewind" };
-    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun" };
+    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun", "Platform Gun" };
 
     internal static bool Ready => PortTools.Ready && VRRig.LocalRig != null &&
         VRRig.LocalRig.head.rigTarget != null && VRRig.LocalRig.leftHand.rigTarget != null && VRRig.LocalRig.rightHand.rigTarget != null &&
@@ -89,6 +89,7 @@ internal sealed class RigRuntime : MonoBehaviour
             manager.Stop();
             manager.owner = name;
             manager.active = new T();
+            manager.enabled = true;
             manager.BeginWhenReady();
         }
         catch
@@ -108,6 +109,7 @@ internal sealed class RigRuntime : MonoBehaviour
     {
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
+        enabled = false;
         PortTools.Register(Cleanup);
         ButtonManager.OnButtonsChanged += CheckConflicts;
     }
@@ -124,7 +126,7 @@ internal sealed class RigRuntime : MonoBehaviour
             if (ButtonManager.GetButton(name)?.Enabled == true) { ButtonManager.SetEnabled(owner, false); return; }
     }
 
-    private static bool IsGun(string name) => name == "Copy Movement Gun" || name == "Shadow Clone Gun" || name == "Look At Gun";
+    private static bool IsGun(string name) => name.EndsWith(" Gun", StringComparison.Ordinal);
 
     private void BeginWhenReady()
     {
@@ -162,6 +164,7 @@ internal sealed class RigRuntime : MonoBehaviour
     {
         RigBehaviour? previous = active;
         active = null;
+        enabled = false;
         owner = "";
         try { if (previous?.Enabled == true) previous.End(); }
         finally { snapshot?.Restore(); snapshot = null; }
@@ -171,6 +174,11 @@ internal sealed class RigRuntime : MonoBehaviour
     {
         if (VRRig.LocalRig == null) return;
         VRRig.LocalRig.enabled = enabled ? instance?.snapshot?.WasEnabled ?? true : false;
+    }
+    internal static void RestorePose()
+    {
+        instance?.snapshot?.Restore();
+        ToggleRig(true);
     }
     internal static void ToggleRig(bool enabled, Vector3 position)
     {

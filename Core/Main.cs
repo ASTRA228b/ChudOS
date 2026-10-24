@@ -29,7 +29,7 @@ using UnityEngine.InputSystem;
 namespace ChudOS.Core;
 
 
-public sealed class Main : MonoBehaviour
+public sealed partial class Main : MonoBehaviour
 {
     public static bool IsMenuOpen;
     public static GameObject? MenuMain;
@@ -49,12 +49,14 @@ public sealed class Main : MonoBehaviour
     private static Color SecondaryTextColor = new Color32(142, 145, 154, 255);
     public static Color PrimaryColorValue => PrimaryColor;
     public static Color ButtonColorValue => ButtonColor;
+    public static Color TextColorValue => TextColor;
     public static bool TextOnlyMenu { get; private set; }
 
     private static readonly Vector3 VRMenuScale = new(0.129f, 0.221f, 0.297f);
     private static readonly Vector3 DesktopMenuScale = new(0.1f, 0.3f, 0.3825f);
     public static Vector3 VRMenuPosition = new(0f, 0.02f, 0f);
 
+    private GUIRuntime? gui;
     private static Main? Instance;
     private static GameObject? RightReference;
     private static SphereCollider? RightButtonCollider;
@@ -63,6 +65,7 @@ public sealed class Main : MonoBehaviour
     private static Material? BackgroundMat, MenuMat, ButtonMat, HeaderMat, BorderMat, DividerMat, SearchBorderMat;
     private static TextMesh? SearchText;
     private static readonly List<GameObject> PageObjects = new();
+    private static readonly Dictionary<TextMesh, string> MenuTextOriginal = new();
     private static readonly List<GameObject> KeyboardObjects = new();
     private static bool KeyboardBuilt;
     private static float LastFpsTime;
@@ -71,13 +74,19 @@ public sealed class Main : MonoBehaviour
     {
         Instance = this;
         FileManager.Initialize(this);
+        TranslationManager.Initialize(this);
+        TranslationManager.Changed += RefreshLanguage;
         ButtonManager.Initialize();
+        MenuPreferences.Initialize();
         ChudOS.Mods.Settings.MenuThemes.Apply();
         CategoryManager.PageLimit = 3;
         CategoryManager.Initialize();
         SoundboardManager.Initialize(this);
-        GUIManager.Register("Soundboard", state => SoundboardGUI.Visible = state, () => SoundboardGUI.Visible);
+        SoundboardManager.Changed += RequestRefresh;
+        GUIManager.Register("Soundboard", state => SoundboardGUI.Visible = state, () => SoundboardGUI.Visible, SoundboardGUI.CreateGUI, () => SoundboardGUI.Window);
         ArrayListGUI.Initialize();
+        gui = gameObject.AddComponent<GUIRuntime>();
+        gui.enabled = false;
         ButtonManager.OnNotification += Notify;
         ButtonManager.OnButtonsChanged += RequestRefresh;
         CategoryManager.OnPageChanged += RequestRefresh;
@@ -101,14 +110,6 @@ public sealed class Main : MonoBehaviour
     }
 
 
-    private void OnGUI()
-    {
-        if (!NotifyLib.HasToasts && !ArrayListGUI.HasEntries && !SoundboardGUI.Visible) return;
-        NotifyLib.InitToast();
-        ArrayListGUI.CreateArray();
-        SoundboardGUI.GUIWindow();
-    }
-
     private void Update()
     {
         ButtonManager.Update();
@@ -116,6 +117,8 @@ public sealed class Main : MonoBehaviour
         GUIManager.Tick();
         CanvasNotifyLib.CanvasUpdate();
         NotifyLib.Tick();
+        bool showGUI = NotifyLib.HasToasts || GUIManager.HasVisibleWindows;
+        if (gui != null && gui.enabled != showGUI) gui.enabled = showGUI;
 
         Keyboard? keyboard = Keyboard.current;
         bool vrInput = ControllerInputPoller.instance != null && ControllerInputPoller.instance.leftControllerSecondaryButton;
@@ -130,7 +133,7 @@ public sealed class Main : MonoBehaviour
         if (OnPC && PCamera != null)
         {
 
-            if (Mouse.current?.leftButton.wasPressedThisFrame == true)
+            if (Mouse.current?.leftButton.wasPressedThisFrame == true && !GUIManager.ContainsPointer(new Vector2(Mouse.current.position.ReadValue().x, Screen.height - Mouse.current.position.ReadValue().y)))
             {
                 Ray ray = PCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
                 if (Physics.Raycast(ray, out RaycastHit hit, 3f, 1 << 2, QueryTriggerInteraction.Collide) && hit.collider.TryGetComponent(out MenuButtonCollider button))
@@ -139,6 +142,7 @@ public sealed class Main : MonoBehaviour
             }
         }
         if (NeedsRefresh) { NeedsRefresh = false; RefreshPage(); }
+        UpdateSoundboardControl();
         if (Time.unscaledTime - LastFpsTime >= 0.25f)
         {
             LastFpsTime = Time.unscaledTime;
@@ -162,7 +166,15 @@ public sealed class Main : MonoBehaviour
         ButtonManager.OnNotification -= Notify;
         ButtonManager.OnButtonsChanged -= RequestRefresh;
         CategoryManager.OnPageChanged -= RequestRefresh;
+        TranslationManager.Changed -= RefreshLanguage;
+        TranslationManager.Shutdown();
+        if (gui != null) Destroy(gui);
+        GUIManager.Unregister("Soundboard");
         ArrayListGUI.Shutdown();
+        ChudOS.Mods.Visuals.OverlayMod.Shutdown();
+        ChudOS.Mods.Movement.PullMod.Stop();
+        SoundboardManager.Changed -= RequestRefresh;
+        MenuFeedback.Shutdown();
         RemoveMenu();
         SoundboardManager.Shutdown();
         CanvasNotifyLib.Shutdown();
@@ -176,6 +188,16 @@ public sealed class Main : MonoBehaviour
     private static void DestroyMaterial(Material? m) { if (m != null) Destroy(m); }
     private static void Notify(string text) => NotifyLib.SendNotificationALL(text, 3500);
     public static void RequestRefresh() { NeedsRefresh = true; }
+    private static void RefreshLanguage()
+    {
+        foreach (var item in MenuTextOriginal.ToArray())
+        {
+            if (item.Key == null) { MenuTextOriginal.Remove(item.Key!); continue; }
+            item.Key.text = TranslationManager.UI(item.Value);
+        }
+        SearchManager.RefreshLanguage();
+        RequestRefresh();
+    }
     public static void ApplyMenuTheme(ChudOS.Mods.Settings.MenuThemes.Theme theme)
     {
         Color oldSecondary = SecondaryTextColor;
@@ -190,6 +212,7 @@ public sealed class Main : MonoBehaviour
         TextColor = theme.Text;
         SecondaryTextColor = theme.SecondaryText;
         TextOnlyMenu = theme.TextOnly;
+        ArrayListGUI.RefreshTheme();
 
         if (BackgroundMat != null) BackgroundMat.color = BackgroundColor;
         if (MenuMat != null) MenuMat.color = MenuColor;
@@ -216,6 +239,7 @@ public sealed class Main : MonoBehaviour
         {
             Renderer renderer = button.GetComponent<Renderer>();
             button.IdleColor = renderer != null && renderer.sharedMaterial == HeaderMat ? HeaderColor : ButtonColor;
+            button.RefreshAppearance();
             if ((button.PreviousPage || button.NextPage) && button.Label != null)
             {
                 Renderer labelRenderer = button.Label.GetComponent<Renderer>();
@@ -234,7 +258,7 @@ public sealed class Main : MonoBehaviour
     public static void ManageEnableMenu()
     {
         if (IsMenuOpen) { RemoveMenu(); return; }
-        CategoryManager.GoHome();
+        MenuPreferences.Reopen();
         IsMenuOpen = true;
         CreateMenu();
     }
@@ -276,10 +300,13 @@ public sealed class Main : MonoBehaviour
         MakeButton("Disconnect", 0.985f, 0f, 0.91f, 0.175f, disconnect: true, material: HeaderMat);
         Text("ChudOS", 0.738f, 0f, 0.030f, color: TextColor);
         FPS = Text("FPS: --", 0.568f, 0f, 0.015f, color: SecondaryTextColor);
+        int searchStart = MenuMain.transform.childCount;
         Cube("Search Border", new Vector3(0.615f, 0.348f, 0f), new Vector3(0.035f, 0.171f, 0.915f), SearchBorderMat);
         MakeButton("", 0.348f, 0f, 0.902f, 0.157f, search: true);
         SearchText = Text("Search...", 0.348f, -0.355f, 0.017f, color: SecondaryTextColor, anchor: TextAnchor.MiddleLeft);
         IconLoader.Create("Search", MenuMain.transform, new Vector3(0.703f, 0.348f, 0.361f), new Vector2(0.076f, 0.070f));
+        SearchObjects.Clear();
+        for (int i = searchStart; i < MenuMain.transform.childCount; i++) SearchObjects.Add(MenuMain.transform.GetChild(i).gameObject);
         Cube("Footer Divider", new Vector3(0.617f, -0.793f, 0f), new Vector3(0.022f, 0.010f, 0.93f), DividerMat);
         MakeButton("", -0.99f, -0.375f, 0.2f, 0.18f, previous: true);
         MakeButton("Home", -0.99f, 0f, 0.405f, 0.18f, home: true);
@@ -334,7 +361,8 @@ public sealed class Main : MonoBehaviour
         text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         text.fontSize = 48;
         text.characterSize = size;
-        text.text = value;
+        text.text = TranslationManager.UI(value);
+        MenuTextOriginal[text] = value;
         text.anchor = anchor;
         text.alignment = anchor == TextAnchor.MiddleLeft ? TextAlignment.Left : TextAlignment.Center;
         text.color = color ?? TextColor;
@@ -367,7 +395,7 @@ public sealed class Main : MonoBehaviour
         track?.Add(obj);
         return obj;
     }
-    public static string GetButtonLabel(ButtonManager.ButtonData button) => button.Category == "Main" && button.Name.StartsWith("Placeholder ", StringComparison.Ordinal) ? "Placeholder" : button.DisplayName;
+    public static string GetButtonLabel(ButtonManager.ButtonData button) => (MenuPreferences.IsFavorite(button.Name) ? "[F] " : "") + (button.Category == "Main" && button.Name.StartsWith("Placeholder ", StringComparison.Ordinal) ? "Placeholder" : button.DisplayName);
     public static void FitButtonText(TextMesh mesh, string value, float availableWidth = 0.84f)
     {
         if (mesh == null) return;
@@ -380,11 +408,19 @@ public sealed class Main : MonoBehaviour
     public static void RefreshPage()
     {
         if (MenuMain == null) return;
-        foreach (GameObject go in PageObjects) if (go != null) Destroy(go);
+        foreach (GameObject go in PageObjects) if (go != null) { if (go.TryGetComponent(out TextMesh label)) MenuTextOriginal.Remove(label); Destroy(go); }
         PageObjects.Clear();
+        foreach (GameObject go in SearchObjects) if (go != null) go.SetActive(!SoundboardControlOpen);
+        if (SoundboardControlOpen)
+        {
+            ClearKeyboard();
+            BuildSoundboardControl();
+            RefreshThemeObjects();
+            return;
+        }
         if (SearchText != null)
         {
-            SearchText.text = SearchManager.Query.Length == 0 ? "Search..." : SearchManager.Query;
+            SearchText.text = SearchManager.Query.Length == 0 ? TranslationManager.T("Search...") : SearchManager.Query;
             SearchText.color = SearchManager.Query.Length == 0 ? SecondaryTextColor : TextColor;
             SearchText.characterSize = Mathf.Min(0.017f, 0.72f / Mathf.Max(3f, SearchText.text.Length * 3f));
         }
@@ -448,7 +484,7 @@ public sealed class Main : MonoBehaviour
     private static void ClearKeyboard()
     {
         if (!KeyboardBuilt) return;
-        foreach (GameObject go in KeyboardObjects) if (go != null) Destroy(go);
+        foreach (GameObject go in KeyboardObjects) if (go != null) { if (go.TryGetComponent(out TextMesh label)) MenuTextOriginal.Remove(label); Destroy(go); }
         KeyboardObjects.Clear();
         KeyboardBuilt = false;
     }
@@ -486,7 +522,13 @@ public sealed class Main : MonoBehaviour
     }
     public static void RemoveMenu()
     {
+        if (IsMenuOpen) MenuPreferences.RememberLocation();
         IsMenuOpen = false; NeedsRefresh = false; Pending = false;
+        SoundboardControlOpen = false;
+        SongTitle = SongArtist = SongElapsed = SongRemaining = SongStatus = null;
+        SongProgress = null;
+        SearchObjects.Clear();
+        MenuTextOriginal.Clear();
         ClearKeyboard();
         PageObjects.Clear();
         if (MenuMain != null) { MenuMain.SetActive(false); Destroy(MenuMain); }

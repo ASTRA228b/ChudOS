@@ -31,7 +31,7 @@ public static class NewMovementMods
     private static readonly Vector3[] anchors = new Vector3[2];
     private static readonly bool[] grappling = new bool[2];
     private static readonly LineRenderer?[] grappleLines = new LineRenderer?[2];
-    private static Vector3 wallNormal;
+
     private static LineRenderer? checkpointMarker;
     private static Vector3 checkpoint;
     private static bool hasCheckpoint, wasTeleporting, wasReturning;
@@ -59,20 +59,8 @@ public static class NewMovementMods
         action();
     }
 
-    [MenuButton("Wall Walk", ButtonType.Toggle, Category = "Movement", Order = 100, runOption = RunOption.FixedUpdate, Description = "Hold right grip against a surface to walk along it")]
-    public static void WallWalk()
-    {
-        if (!PortTools.Ready) return;
-        PortTools.Register(Cleanup);
-        GTPlayer p = GTPlayer.Instance;
-        if (p.IsHandTouching(true)) wallNormal = p.GetTouchHitInfo(true).normal;
-        else if (p.IsHandTouching(false)) wallNormal = p.GetTouchHitInfo(false).normal;
-        if (InputLib.RightGrab && wallNormal.sqrMagnitude > 0.1f)
-            GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity - wallNormal * 9.81f, ForceMode.Acceleration);
-    }
-    [MenuDisable("Wall Walk")]
-    public static void StopWallWalk() => wallNormal = Vector3.zero;
-
+    [MenuButton("Wall Walk", ButtonType.Toggle, Category = "Movement", Order = 100, runOption = RunOption.FixedUpdate, Description = "Hold the selected inputs for Astra's Wall Walk V2")]
+    public static void WallWalk() => WallWalkV2.Tick();
     [MenuButton("Grappling Hooks", ButtonType.Toggle, Category = "Movement", Order = 101, runOption = RunOption.FixedUpdate, Description = "Hold either grip to pull toward a hand anchor")]
     public static void GrapplingHooks()
     {
@@ -157,8 +145,8 @@ public static class NewMovementMods
     public static void TeleportGun()
     {
         if (!PortTools.Ready) return;
-        bool held = InputLib.RightGrab, trigger = InputLib.RightTrigger;
-        bool selected = GunLib.UpdateGun(GorillaTagger.Instance.rightHandTransform, held, trigger, out Vector3 point);
+        bool held = GunLib.AimPressed, trigger = GunLib.SelectPressed;
+        bool selected = GunLib.UpdateGun(GunLib.AimHand, held, trigger, out Vector3 point);
         if (selected && !wasTeleporting) PortTools.Teleport(point + Vector3.up * GTPlayer.Instance.scale);
         wasTeleporting = held && trigger;
     }
@@ -345,7 +333,7 @@ public static class NewMovementMods
     {
         foreach (Action action in restore.Values) action();
         restore.Clear();
-        StopWallWalk(); StopGrappling(); StopRewind(); StopTeleportGun(); StopCheckpoint();
+        StopGrappling(); StopRewind(); StopTeleportGun(); StopCheckpoint();
         StopRopeGrabReach(); StopGliderTuning();
     }
 }

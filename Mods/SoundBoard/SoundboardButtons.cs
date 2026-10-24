@@ -21,6 +21,9 @@ namespace ChudOS.Mods.SoundBoard;
 
 public static class SoundboardButtons
 {
+    [MenuButton("SB Control", ButtonType.Press, Category = "Main", Order = 1, Notify = false)]
+    public static void ControlPage() => ChudOS.Core.Main.OpenSoundboardControl();
+
     [MenuButton("Play / Stop", ButtonType.Press, Category = "Soundboard", Order = 0)]
     public static void PlayStop() => SoundboardManager.TogglePlay();
 

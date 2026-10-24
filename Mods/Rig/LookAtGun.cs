@@ -21,16 +21,22 @@ namespace ChudOS.Mods.Rig;
 internal sealed class LookAtGun : RigBehaviour
 {
     private VRRig? target;
+    private bool looking;
 
     protected override void LateUpdate()
     {
-        if (GunLib.UpdateRigGun(GorillaTagger.Instance.rightHandTransform, InputLib.RightGrab, InputLib.RightTrigger, ref target) && target != null)
+        if (GunLib.UpdateRigGun(GunLib.AimHand, GunLib.AimPressed, GunLib.SelectPressed, ref target) && target != null)
+        {
             VRRig.LocalRig.head.rigTarget.LookAt(target.head.rigTarget);
+            looking = true;
+        }
+        else if (looking) { RigRuntime.RestorePose(); looking = false; }
     }
 
     protected override void OnDisable()
     {
         target = null;
+        looking = false;
         GunLib.Hide();
     }
 }

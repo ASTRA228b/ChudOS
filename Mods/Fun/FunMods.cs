@@ -34,19 +34,19 @@ public static class FunMods
     private static Vector3 headGoal;
     private static int lastHeadFrame = -1;
 
-    [MenuButton("UpsideDown Head", ButtonType.Press, Category = "Fun", Order = 0, Description = "Smoothly rotate your head upside down")]
+    [MenuButton("UpsideDown Head", ButtonType.Press, Category = "Detected", Order = 0, Description = "Smoothly rotate your head upside down")]
     public static void UpsideDownHead() => SetHeadAxis(2, 180f);
 
-    [MenuButton("Broken Neck", ButtonType.Press, Category = "Fun", Order = 1, Description = "Smoothly roll your head sideways")]
+    [MenuButton("Broken Neck", ButtonType.Press, Category = "Detected", Order = 1, Description = "Smoothly roll your head sideways")]
     public static void BrokenNeck() => SetHeadAxis(2, 90f);
 
-    [MenuButton("Backwards Head", ButtonType.Press, Category = "Fun", Order = 2, Description = "Smoothly turn your head backwards")]
+    [MenuButton("Backwards Head", ButtonType.Press, Category = "Detected", Order = 2, Description = "Smoothly turn your head backwards")]
     public static void BackwardsHead() => SetHeadAxis(1, 180f);
 
-    [MenuButton("Sideways Head", ButtonType.Press, Category = "Fun", Order = 3, Description = "Smoothly turn your head sideways")]
+    [MenuButton("Sideways Head", ButtonType.Press, Category = "Detected", Order = 3, Description = "Smoothly turn your head sideways")]
     public static void SidewaysHead() => SetHeadAxis(1, 90f);
 
-    [MenuButton("HeadBang", ButtonType.Toggle, Category = "Fun", Order = 4, Description = "Smooth head animation with a bounded rotation speed")]
+    [MenuButton("HeadBang", ButtonType.Toggle, Category = "Detected", Order = 4, Description = "Smooth head animation with a bounded rotation speed")]
     public static void HeadBang()
     {
         if (!PrepareHead()) return;
@@ -134,6 +134,7 @@ public static class FunMods
 
     private static void RestoreHeadOffsets()
     {
+        PortTools.RemoveTick(MaintainHead);
         ButtonManager.SetEnabled("HeadBang", false);
         StopHeadBang();
         if (offsetOwner != null) offsetOwner.head.trackingRotationOffset = originalOffset;

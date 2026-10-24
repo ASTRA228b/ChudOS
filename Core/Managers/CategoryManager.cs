@@ -24,7 +24,7 @@ public static class CategoryManager
 {
     public const string Home = "Home";
     public const string Main = "Main";
-    private static readonly List<string> Categories = new() { "Main", "Enabled Mods", "Movement", "Player", "Rig", "Visuals", "Weather", "Fun", "Room", "Soundboard", "Safety", "Settings" };
+    private static readonly List<string> Categories = new() { "Main", "Enabled Mods", "Favorites", "Detected", "Movement", "Player", "Rig", "Visuals", "Weather", "Fun", "Room", "Soundboard", "Safety", "Settings" };
     public static string CurrentCategory { get; private set; } = Home;
     public static int PageNumber { get; private set; }
     public static int PageLimit = 3;
@@ -46,7 +46,7 @@ public static class CategoryManager
 
     public static IReadOnlyList<ButtonManager.ButtonData> GetVisibleButtons()
     {
-        IEnumerable<ButtonManager.ButtonData> buttons = IsSearching ? SearchManager.Results : CurrentCategory == "Enabled Mods" ? ButtonManager.Buttons.Where(IsEnabledMod) : ButtonManager.GetCategory(CurrentCategory);
+        IEnumerable<ButtonManager.ButtonData> buttons = IsSearching ? SearchManager.Results : CurrentCategory == "Enabled Mods" ? ButtonManager.Buttons.Where(IsEnabledMod) : CategoryButtons();
         PageNumber = Mathf.Clamp(PageNumber, 0, TotalPages - 1);
         return buttons.Skip(PageNumber * PageLimit).Take(PageLimit).ToList();
     }
@@ -56,18 +56,21 @@ public static class CategoryManager
     {
         get
         {
-            int count = IsSearching ? SearchManager.Results.Count : IsHome ? Categories.Count : CurrentCategory == "Enabled Mods" ? ButtonManager.Buttons.Count(IsEnabledMod) : ButtonManager.GetCategory(CurrentCategory).Count;
+            int count = IsSearching ? SearchManager.Results.Count : IsHome ? Categories.Count : CurrentCategory == "Enabled Mods" ? ButtonManager.Buttons.Count(IsEnabledMod) : CategoryButtons().Count;
             return Mathf.Max(1, Mathf.CeilToInt(count / (float)PageLimit));
         }
     }
 
-    public static void Open(string category)
+    private static List<ButtonManager.ButtonData> CategoryButtons() => CurrentCategory == "Favorites" ? MenuPreferences.Favorites.ToList() : ButtonManager.GetCategory(CurrentCategory);
+
+    public static void Open(string category, int page = 0)
     {
         string? match = Categories.FirstOrDefault(c => string.Equals(c, category, StringComparison.OrdinalIgnoreCase));
         if (match == null) return;
         SearchManager.Close();
         CurrentCategory = match;
-        PageNumber = 0;
+        PageNumber = Mathf.Clamp(page, 0, TotalPages - 1);
+        if (match == "Detected") ChudOS.Mods.Safety.ModGuards.WarnDetected();
         OnPageChanged?.Invoke();
     }
     public static void GoHome()

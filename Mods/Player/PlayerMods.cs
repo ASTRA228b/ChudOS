@@ -30,7 +30,7 @@ namespace ChudOS.Mods.Player;
 public static class PlayerMods
 {
     private static VRRig? gunTarget;
-    [MenuButton("Body Tracers", ButtonType.Toggle, Category = "Player", Order = 0, runOption = RunOption.LateUpdate, Description = "Draw local tracers from you to other players")]
+    [MenuButton("Body Tracers", ButtonType.Toggle, Category = "Player", Order = 0, runOption = RunOption.LateUpdate, Description = "Draw local tracers from your right hand to other players")]
     public static void BodyTracers() => PlayerESPRuntime.BodyTracers();
 
     [MenuDisable("Body Tracers")]
@@ -66,13 +66,13 @@ public static class PlayerMods
     [MenuDisable("Trails ESP")]
     public static void StopTrailsESP() => PlayerESPRuntime.ClearTrailsESP();
 
-    [MenuButton("Tag Gun", ButtonType.Toggle, Category = "Player", Order = 6, Description = "Select a player within normal hand reach; does not move your rig")]
+    [MenuButton("Tag Gun", ButtonType.Toggle, Category = "Detected", Order = 6, Description = "Select a player within normal hand reach; does not move your rig")]
     public static void TG()
     {
         if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Gun")) { GunLib.Hide(); return; }
         if (!PortTools.Ready || GorillaTagger.Instance.rightHandTransform == null) { GunLib.Hide(); return; }
-        bool grip = InputLib.RightGrab, trigger = InputLib.RightTrigger;
-        if (GunLib.UpdateRigGun(GorillaTagger.Instance.rightHandTransform, grip, trigger, ref gunTarget) && gunTarget != null)
+        bool grip = GunLib.AimPressed, trigger = GunLib.SelectPressed;
+        if (GunLib.UpdateRigGun(GunLib.AimHand, grip, trigger, ref gunTarget) && gunTarget != null)
             ChudOS.Mods.Safety.NetworkSafety.TryTag(gunTarget);
     }
 
@@ -88,7 +88,7 @@ public static class PlayerMods
     [MenuDisable("Tag Gun")]
     public static void TGStop() { gunTarget = null; GunLib.Cleanup(); }
 
-    [MenuButton("Tag Self", ButtonType.Toggle, Category = "Player", Order = 7, Description = "Private modded tag room master only; does not teleport your rig")]
+    [MenuButton("Tag Self", ButtonType.Toggle, Category = "Detected", Order = 7, Description = "Private modded tag room master only; does not teleport your rig")]
     public static void TagSelf()
     {
         if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Self")) return;
@@ -111,7 +111,7 @@ public static class PlayerMods
         ButtonManager.SetEnabled("Tag Aura", false);
     }
 
-    [MenuButton("Tag Aura", ButtonType.Toggle, Category = "Player", Order = 8, Description = "Attempt nearby tags within normal hand reach; does not increase tag distance")]
+    [MenuButton("Tag Aura", ButtonType.Toggle, Category = "Detected", Order = 8, Description = "Attempt nearby tags within normal hand reach; does not increase tag distance")]
     public static void TagAura()
     {
         if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag Aura")) return;
@@ -126,7 +126,7 @@ public static class PlayerMods
         ButtonManager.SetEnabled("Tag All", false);
     }
 
-    [MenuButton("Tag All", ButtonType.Toggle, Category = "Player", Order = 9, Description = "One pass over players within normal hand reach; does not teleport your rig")]
+    [MenuButton("Tag All", ButtonType.Toggle, Category = "Detected", Order = 9, Description = "One pass over players within normal hand reach; does not teleport your rig")]
     public static void TagAll()
     {
         if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag All")) return;

@@ -21,6 +21,21 @@ namespace ChudOS.Mods.Rig;
 
 public static class RigMods
 {
+    [MenuButton("Hug Gun", ButtonType.Toggle, Category = "Rig", Order = 18, runOption = RunOption.Once, Description = "Aim and hold trigger to hug the front of the selected avatar")]
+    public static void EnableHugGun() => RigRuntime.Enable<HugGun>("Hug Gun");
+    [MenuDisable("Hug Gun")]
+    public static void DisableHugGun() => RigRuntime.Disable("Hug Gun");
+
+    [MenuButton("Follow Player Gun", ButtonType.Toggle, Category = "Rig", Order = 19, runOption = RunOption.Once, Description = "Aim and hold trigger to follow behind a selected player")]
+    public static void EnableFollowGun() => RigRuntime.Enable<FollowPlayerGun>("Follow Player Gun");
+    [MenuDisable("Follow Player Gun")]
+    public static void DisableFollowGun() => RigRuntime.Disable("Follow Player Gun");
+
+    [MenuButton("Orbit Player Gun", ButtonType.Toggle, Category = "Rig", Order = 20, runOption = RunOption.Once, Description = "Aim and hold trigger to orbit a selected player")]
+    public static void EnableOrbitGun() => RigRuntime.Enable<OrbitPlayerGun>("Orbit Player Gun");
+    [MenuDisable("Orbit Player Gun")]
+    public static void DisableOrbitGun() => RigRuntime.Disable("Orbit Player Gun");
+
     [MenuButton("Copy Movement Gun", ButtonType.Toggle, Category = "Rig", Order = 0, runOption = RunOption.Once, Description = "Right grip aims; hold trigger to copy a selected rig")]
     public static void EnableCopyMovementGun() => RigRuntime.Enable<CopyMovementGun>("Copy Movement Gun");
 

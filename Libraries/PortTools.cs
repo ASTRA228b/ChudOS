@@ -26,13 +26,14 @@ internal static class PortTools
     private static Material? lineMaterial;
     internal static bool Ready => GTPlayer.Instance != null && GorillaTagger.Instance != null && GorillaTagger.Instance.rigidbody != null && ControllerInputPoller.instance != null;
     internal static void Register(Action cleanup, Action? tick = null) => PortLifetime.Register(cleanup, tick);
+    internal static void RemoveTick(Action tick) => PortLifetime.RemoveTick(tick);
 
     internal static void ClaimPointer(string selected)
     {
         foreach (string name in PointerButtons)
             if (name != selected) ButtonManager.SetEnabled(name, false);
     }
-    private static readonly string[] PointerButtons = { "Teleport Gun", "Draw Gun", "Tag Gun" };
+    private static readonly string[] PointerButtons = { "Teleport Gun", "Draw Gun", "Tag Gun", "Platform Gun" };
 
     internal static void Teleport(Vector3 bodyPosition)
     {
@@ -74,6 +75,7 @@ internal sealed class PortLifetime : MonoBehaviour
     private static PortLifetime? instance;
     private readonly HashSet<Action> cleanup = new();
     private readonly HashSet<Action> ticks = new();
+    private Action[] activeTicks = Array.Empty<Action>();
 
     internal static void Register(Action action, Action? tick)
     {
@@ -84,12 +86,20 @@ internal sealed class PortLifetime : MonoBehaviour
             instance = main.GetComponent<PortLifetime>() ?? main.gameObject.AddComponent<PortLifetime>();
         }
         instance.cleanup.Add(action);
-        if (tick != null) instance.ticks.Add(tick);
+        if (tick != null && instance.ticks.Add(tick)) instance.activeTicks = instance.ticks.ToArray();
+        instance.enabled = instance.ticks.Count > 0;
+    }
+
+    internal static void RemoveTick(Action tick)
+    {
+        if (instance == null || !instance.ticks.Remove(tick)) return;
+        instance.activeTicks = instance.ticks.ToArray();
+        instance.enabled = instance.activeTicks.Length > 0;
     }
 
     private void LateUpdate()
     {
-        foreach (Action tick in ticks) tick();
+        foreach (Action tick in activeTicks) tick();
     }
 
     private void OnDestroy()
