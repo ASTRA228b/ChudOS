@@ -10,8 +10,8 @@ namespace ChudOS.Mods.Visuals.Particles;
 
 internal sealed class ForestLightning : ParticleEffectBase
 {
-    private const int PoolSize = 4;
-    private const float Interval = 0.25f;
+    private const int PoolSize = 8;
+    private const float Interval = 0.08f;
     private readonly GameObject[] bolts = new GameObject[PoolSize];
     private readonly LineRenderer[] lines = new LineRenderer[PoolSize];
     private readonly Light[] lights = new Light[PoolSize];

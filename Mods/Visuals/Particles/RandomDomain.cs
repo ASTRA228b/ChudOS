@@ -11,8 +11,8 @@ namespace ChudOS.Mods.Visuals.Particles;
 
 internal sealed class RandomDomain : ParticleEffectBase
 {
-    private const int PoolSize = 16;
-    private const float Interval = 0.15f;
+    private const int PoolSize = 48;
+    private const float Interval = 0.05f;
     private readonly GameObject[] lines = new GameObject[PoolSize], orbs = new GameObject[PoolSize];
     private readonly LineRenderer[] renderers = new LineRenderer[PoolSize];
     private readonly Renderer[] orbRenderers = new Renderer[PoolSize];
