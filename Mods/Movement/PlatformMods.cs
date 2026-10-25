@@ -15,8 +15,8 @@ public static class PlatformMods
     private static readonly string[] Styles = { "Platforms", "Invisible Platforms", "Sticky Platforms", "Plank Platforms", "Custom Platforms" };
     private static readonly GameObject?[] hands = new GameObject?[2];
     private static readonly Queue<GameObject> placed = new();
-    private static Material? material;
-    private static Vector3 customScale = new(0.5f, 0.05f, 0.5f);
+    private static PhysicsMaterial? stickyMaterial;
+    private static Vector3 customScale = new(0.25f, 0.3f, 0.25f);
     private static bool customVisible = true, flat, gunPressed;
     private static int colorIndex;
     private static float nextPlacement;
@@ -32,56 +32,65 @@ public static class PlatformMods
     {
         if (!PortTools.Ready) { ClearHands(); return; }
         PortTools.Register(Cleanup);
-        Vector3 correction = Vector3.zero;
-        int attached = 0;
+        bool changed = false;
         for (int i = 0; i < 2; i++)
         {
             bool held = i == 0 ? InputLib.LeftGrab : InputLib.RightGrab;
-            var hand = i == 0 ? GorillaTagger.Instance.leftHandTransform : GorillaTagger.Instance.rightHandTransform;
+            var hand = i == 0 ? GTPlayer.Instance.LeftHand.controllerTransform : GTPlayer.Instance.RightHand.controllerTransform;
             if (!held || hand == null) { Remove(hands[i]); hands[i] = null; continue; }
             if (hands[i] == null)
             {
-                Vector3 scale = mode == 3 ? new Vector3(0.25f, 0.06f, 1.2f) : mode == 4 ? customScale : new Vector3(0.25f, 0.3f, 0.25f);
+                Vector3 scale = mode == 3 ? new Vector3(0.25f, 0.3f, 1.2f) : mode == 4 ? customScale : new Vector3(0.25f, 0.3f, 0.25f);
                 Quaternion rotation = mode == 4 && flat ? Quaternion.identity : hand.rotation;
-                hands[i] = Create(hand.position, rotation, scale, mode != 1 && (mode != 4 || customVisible));
+                hands[i] = Create(hand.position, rotation, scale, mode != 1 && (mode != 4 || customVisible), i == 0 ? 1f : -1f);
+                if (mode == 2) ApplySticky(hands[i]!);
+                changed = true;
             }
-            if (mode == 2) { correction += hands[i]!.transform.position - hand.position; attached++; }
         }
-        if (attached > 0)
-        {
-            GTPlayer.Instance.transform.position += Vector3.ClampMagnitude(correction / attached, 0.2f);
-            GorillaTagger.Instance.rigidbody.linearVelocity = Vector3.zero;
-        }
+        if (changed) Physics.SyncTransforms();
     }
 
-    private static GameObject Create(Vector3 position, Quaternion rotation, Vector3 scale, bool visible)
+    private static void ApplySticky(GameObject platform)
     {
-        if (material == null)
-        {
-            var shader = Shader.Find("Unlit/Color") ?? Shader.Find("Sprites/Default");
-            if (shader == null) throw new InvalidOperationException("Platform shader unavailable.");
-            material = new Material(shader);
-        }
-        material.color = ColorValue();
-        var obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        obj.name = "ChudOS Platform";
-        obj.transform.SetPositionAndRotation(position, rotation);
-        obj.transform.localScale = scale;
-        var renderer = obj.GetComponent<Renderer>();
-        renderer.sharedMaterial = material;
+        if (stickyMaterial == null)
+            stickyMaterial = new PhysicsMaterial("ChudOS Sticky Platforms") { staticFriction = 1f, dynamicFriction = 1f, frictionCombine = PhysicsMaterialCombine.Maximum };
+        foreach (var collider in platform.GetComponentsInChildren<Collider>()) collider.sharedMaterial = stickyMaterial;
+        var surface = platform.AddComponent<GorillaSurfaceOverride>();
+        surface.overrideIndex = 0;
+        surface.slidePercentageOverride = 0f;
+    }
+
+    private static GameObject Create(Vector3 position, Quaternion rotation, Vector3 scale, bool visible, float side = -1f)
+    {
+        GameObject platform = side > 0f ? MovementMods.CreateLeftPlatform() : MovementMods.CreateRightPlatfrom();
+        platform.name = "ChudOS Platform";
+        platform.transform.localScale = scale;
+        var renderer = platform.transform.GetChild(0).GetComponent<Renderer>();
+        renderer.material.color = ColorValue();
         renderer.enabled = visible;
-        return obj;
+        platform.transform.SetPositionAndRotation(position, rotation);
+        return platform;
     }
 
     private static Color ColorValue() => colorIndex switch
     {
-        1 => GorillaTagger.Instance == null || GorillaTagger.Instance.offlineVRRig == null ? Color.white : GorillaTagger.Instance.offlineVRRig.playerColor,
+        0 => GorillaTagger.Instance == null || GorillaTagger.Instance.offlineVRRig == null ? Color.white : GorillaTagger.Instance.offlineVRRig.playerColor,
         2 => Color.cyan,
         3 => Color.white,
         _ => ChudOS.Core.Main.PrimaryColorValue
     };
 
-    private static void Remove(GameObject? obj) { if (obj != null) { obj.SetActive(false); Object.Destroy(obj); } }
+    private static void Remove(GameObject? obj)
+    {
+        if (obj == null) return;
+        obj.SetActive(false);
+        if (obj.transform.childCount > 0)
+        {
+            var renderer = obj.transform.GetChild(0).GetComponent<Renderer>();
+            if (renderer != null) Object.Destroy(renderer.sharedMaterial);
+        }
+        Object.Destroy(obj);
+    }
     public static void ClearHands() { for (int i = 0; i < hands.Length; i++) { Remove(hands[i]); hands[i] = null; } }
 
     [MenuButton("Invisible Platforms", ButtonType.Toggle, Category = "Movement", Order = 140, runOption = RunOption.FixedUpdate, Description = "Hold either grip to place an invisible solid platform")]
@@ -128,6 +137,8 @@ public static class PlatformMods
             Quaternion rotation = flat ? Quaternion.identity : Quaternion.FromToRotation(Vector3.up, normal);
             var obj = Create(point + normal * (customScale.y / 2f), rotation, customScale, customVisible);
             placed.Enqueue(obj);
+            Physics.SyncTransforms();
+            Object.Destroy(obj.transform.GetChild(0).GetComponent<Renderer>().sharedMaterial, 30f);
             Object.Destroy(obj, 30f);
         }
         gunPressed = trigger;
@@ -138,14 +149,19 @@ public static class PlatformMods
     public static void StopGun() { while (placed.Count > 0) Remove(placed.Dequeue()); gunPressed = false; nextPlacement = 0f; GunLib.Hide(); }
 
     private static int Index(string name) => ButtonManager.GetButton(name)?.OptionIndex ?? 0;
-    private static void Refresh() { ClearHands(); if (material != null) material.color = ColorValue(); }
-    [MenuButton("Platform Width", ButtonType.Option, Category = "Settings", Order = 160, Options = new[] { "0.5", "0.25", "0.75", "1", "1.5", "2" }, Notify = false)]
-    public static void SetWidth() { customScale.x = new[] { 0.5f, 0.25f, 0.75f, 1f, 1.5f, 2f }[Index("Platform Width")]; Refresh(); }
-    [MenuButton("Platform Height", ButtonType.Option, Category = "Settings", Order = 161, Options = new[] { "0.05", "0.025", "0.1", "0.25", "0.5" }, Notify = false)]
-    public static void SetHeight() { customScale.y = new[] { 0.05f, 0.025f, 0.1f, 0.25f, 0.5f }[Index("Platform Height")]; Refresh(); }
-    [MenuButton("Platform Length", ButtonType.Option, Category = "Settings", Order = 162, Options = new[] { "0.5", "0.25", "0.75", "1", "1.5", "2" }, Notify = false)]
-    public static void SetLength() { customScale.z = new[] { 0.5f, 0.25f, 0.75f, 1f, 1.5f, 2f }[Index("Platform Length")]; Refresh(); }
-    [MenuButton("Platform Color", ButtonType.Option, Category = "Settings", Order = 163, Options = new[] { "Theme", "Player", "Cyan", "White" }, Notify = false)]
+    private static void Refresh()
+    {
+        ClearHands();
+        foreach (var platform in placed)
+            if (platform != null) platform.transform.GetChild(0).GetComponent<Renderer>().material.color = ColorValue();
+    }
+    [MenuButton("Platform Width", ButtonType.Option, Category = "Settings", Order = 160, Options = new[] { "0.25", "0.5", "0.75", "1", "1.5", "2" }, Notify = false)]
+    public static void SetWidth() { customScale.x = new[] { 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f }[Index("Platform Width")]; Refresh(); }
+    [MenuButton("Platform Height", ButtonType.Option, Category = "Settings", Order = 161, Options = new[] { "0.3", "0.025", "0.1", "0.25", "0.5" }, Notify = false)]
+    public static void SetHeight() { customScale.y = new[] { 0.3f, 0.025f, 0.1f, 0.25f, 0.5f }[Index("Platform Height")]; Refresh(); }
+    [MenuButton("Platform Length", ButtonType.Option, Category = "Settings", Order = 162, Options = new[] { "0.25", "0.5", "0.75", "1", "1.5", "2" }, Notify = false)]
+    public static void SetLength() { customScale.z = new[] { 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f }[Index("Platform Length")]; Refresh(); }
+    [MenuButton("Platform Color", ButtonType.Option, Category = "Settings", Order = 163, Options = new[] { "Player", "Theme", "Cyan", "White" }, Notify = false)]
     public static void SetColor() { colorIndex = Index("Platform Color"); Refresh(); }
     [MenuButton("Platform Visibility", ButtonType.Option, Category = "Settings", Order = 164, Options = new[] { "Visible", "Invisible" }, Notify = false)]
     public static void SetVisibility() { customVisible = Index("Platform Visibility") == 0; Refresh(); }
@@ -153,5 +169,5 @@ public static class PlatformMods
     public static void SetRotation() { flat = Index("Platform Rotation") == 1; Refresh(); }
 
     internal static void Clear() { ClearHands(); StopGun(); }
-    private static void Cleanup() { Clear(); if (material != null) Object.Destroy(material); material = null; }
+    private static void Cleanup() { Clear(); if (stickyMaterial != null) Object.Destroy(stickyMaterial); stickyMaterial = null; }
 }

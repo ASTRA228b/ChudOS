@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Astra
 
 using ChudOS.Stuff;
+using GorillaLocomotion;
 using UnityEngine;
 
 namespace ChudOS.Core.Managers;
@@ -33,10 +34,13 @@ public static class MenuFeedback
         if (vibrations && rightHand.HasValue && GorillaTagger.Instance != null)
             GorillaTagger.Instance.StartVibration(rightHand.Value, GorillaTagger.Instance.tagHapticStrength / 2f, GorillaTagger.Instance.tagHapticDuration / 2f);
         int id = SoundIds[sound];
-        AudioClip[]? clips = VRRig.LocalRig != null ? VRRig.LocalRig.handTapSound : null;
-        if (id < 0 || clips == null || clips.Length == 0) return;
-        if (id >= clips.Length || clips[id] == null) id = 8;
-        if (id >= clips.Length || clips[id] == null) return;
+        var materials = GTPlayer.Instance != null ? GTPlayer.Instance.materialData : null;
+        if (id < 0 || materials == null || materials.Count == 0) return;
+        if (id >= materials.Count) id = materials.Count > 8 ? 8 : 0;
+        var surface = materials[id];
+        AudioClip? clip = surface.overrideAudio ? surface.audio : materials[0].audio;
+        if (clip == null) clip = materials[0].audio;
+        if (clip == null) return;
         if (source == null)
         {
             GameObject obj = new("ChudOS Click Feedback");
@@ -47,7 +51,7 @@ public static class MenuFeedback
             source.ignoreListenerPause = true;
             source.volume = 1f;
         }
-        source.PlayOneShot(clips[id], volume);
+        source.PlayOneShot(clip, volume);
     }
 
     public static void Shutdown()
