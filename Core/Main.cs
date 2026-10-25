@@ -72,6 +72,7 @@ public sealed partial class Main : MonoBehaviour
     private static int LastFps;
     private void Awake()
     {
+        if (Instance != null && Instance != this) { Destroy(this); return; }
         Instance = this;
         FileManager.Initialize(this);
         TranslationManager.Initialize(this);
@@ -87,6 +88,7 @@ public sealed partial class Main : MonoBehaviour
         ArrayListGUI.Initialize();
         gui = gameObject.AddComponent<GUIRuntime>();
         gui.enabled = false;
+        ButtonManager.OnNotification -= Notify;
         ButtonManager.OnNotification += Notify;
         ButtonManager.OnButtonsChanged += RequestRefresh;
         CategoryManager.OnPageChanged += RequestRefresh;
@@ -110,6 +112,12 @@ public sealed partial class Main : MonoBehaviour
     }
 
 
+    private void OnGUI()
+    {
+        if (!NotifyLib.HasToasts) return;
+        NotifyLib.InitToast();
+    }
+
     private void Update()
     {
         ButtonManager.Update();
@@ -117,7 +125,7 @@ public sealed partial class Main : MonoBehaviour
         GUIManager.Tick();
         CanvasNotifyLib.CanvasUpdate();
         NotifyLib.Tick();
-        bool showGUI = NotifyLib.HasToasts || GUIManager.HasVisibleWindows;
+        bool showGUI = GUIManager.HasVisibleWindows;
         if (gui != null && gui.enabled != showGUI) gui.enabled = showGUI;
 
         Keyboard? keyboard = Keyboard.current;
@@ -163,6 +171,7 @@ public sealed partial class Main : MonoBehaviour
     private void LateUpdate() => ButtonManager.LateUpdate();
     private void OnDestroy()
     {
+        if (Instance != this) return;
         ButtonManager.OnNotification -= Notify;
         ButtonManager.OnButtonsChanged -= RequestRefresh;
         CategoryManager.OnPageChanged -= RequestRefresh;

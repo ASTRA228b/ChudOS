@@ -45,7 +45,7 @@ public static class MenuSettings
 
 
     [MenuButton("Canvas Notifications", ButtonType.Toggle, Category = "Settings", Order = 6, DefaultEnabled = true, runOption = RunOption.Once, Notify = false)]
-    public static void Notifications() => CanvasNotifyLib.SetEnabled(true);
+    public static void Notifications() => CanvasNotifyLib.Enabled = true;
     [MenuDisable("Canvas Notifications")]
-    public static void NotificationsOff() => CanvasNotifyLib.SetEnabled(false);
+    public static void NotificationsOff() => CanvasNotifyLib.Enabled = false;
 }

@@ -36,7 +36,6 @@ public static class CanvasNotifyLib
     private static Camera? MainCam;
     private static Text? notificationText;
     public static bool Enabled = true;
-    public static void SetEnabled(bool value) { Enabled = value; Refresh(); }
 
     public static void InitCanvas() => Create();
     public static void Create()
@@ -72,7 +71,7 @@ public static class CanvasNotifyLib
     public static void CanvasUpdate()
     {
         if (!Enabled) return;
-        if (HUDObject == null && Messages.Count > 0) Create();
+        if (HUDObject == null) Create();
         if (Messages.Count > 0 && Time.unscaledTime - LastDecay > notificationDecayTime / 60f)
         {
             Messages.RemoveAt(0);
@@ -84,14 +83,13 @@ public static class CanvasNotifyLib
     {
         if (!Enabled || string.IsNullOrWhiteSpace(Message)) return;
         if (Message == PreviousNotification && Time.unscaledTime - LastDecay < 0.25f) return;
-        if (HUDObject == null) Create();
         PreviousNotification = Message;
         Messages.Add(Message);
         while (Messages.Count > Mathf.Max(1, NotifyThreshold)) Messages.RemoveAt(0);
         LastDecay = Time.unscaledTime;
         Refresh();
     }
-    private static void Refresh() { if (notificationText != null) notificationText.text = string.Join("\n", Messages); if (HUDObject != null) HUDObject.SetActive(Enabled && Messages.Count > 0); }
+    private static void Refresh() { if (notificationText != null) notificationText.text = string.Join("\n", Messages); }
     public static void Clear() { Messages.Clear(); PreviousNotification = ""; Refresh(); }
     public static void ClearOld(int amount) { Messages.RemoveRange(0, Mathf.Min(Mathf.Max(0, amount), Messages.Count)); Refresh(); }
     public static void Shutdown()
