@@ -2,9 +2,9 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.0** has **233 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.1** has **235 total menu buttons**, including mods, settings, and actions.
 
-**0.1.0 is a mini update. 0.1.1 will be a bigger update.**
+**0.1.1 is currently a local test build. The latest published release is 0.1.0.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -83,6 +83,15 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Movement: Long Arms, with separate Long Arm Length and Long Arm Height options in Settings. It scales the player transform horizontally and vertically, and restores the original scale when disabled.
 - Long Arms and Size Changer turn each other off to prevent conflicting scale changes.
 - Particle objects and materials are reused, with bounded lightning and Domain pools. Effects clear on disable, room changes, and shutdown. Draw and FireBall are not included in these additions.
+
+## New in 0.1.1
+
+- Soundboard control buttons fit translated labels within their existing dimensions.
+- Long song titles and artist names scroll inside clipped viewports, with pauses at the start and end. Short text remains centered.
+- Settings > Soundboard Text Scrolling turns the animation on or off. OFF fits the complete title and artist as stationary text. Soundboard Scroll Speed offers Normal, Slow, Fast, and Very Fast. Use Save Menu State to retain these settings.
+- Play and pause icons replace the center control's text symbols while retaining its playback action.
+- Metadata decoding respects UTF-8 and UTF-16 tags and repairs recoverable encoding mistakes without rewriting audio files or guessing missing characters.
+- Long desktop notifications wrap within their existing width and grow vertically; short notifications retain their size, colors, and timing.
 
 ## Full feature list
 
@@ -291,7 +300,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Time
 - No Rain
 
-## Settings — 64
+## Settings — 66
 
 - PC View
 - Array List
@@ -357,3 +366,5 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Speed Boost Multiplier
 - Long Arm Length
 - Long Arm Height
+- Soundboard Text Scrolling
+- Soundboard Scroll Speed

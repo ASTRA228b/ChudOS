@@ -83,7 +83,7 @@ public sealed partial class Main : MonoBehaviour
         CategoryManager.PageLimit = 3;
         CategoryManager.Initialize();
         SoundboardManager.Initialize(this);
-        SoundboardManager.Changed += RequestRefresh;
+        SoundboardManager.Changed += SoundboardChanged;
         GUIManager.Register("Soundboard", state => SoundboardGUI.Visible = state, () => SoundboardGUI.Visible, SoundboardGUI.CreateGUI, () => SoundboardGUI.Window);
         MacroManager.Reload();
         MultiMP3Manager.Initialize();
@@ -191,7 +191,7 @@ public sealed partial class Main : MonoBehaviour
         ArrayListGUI.Shutdown();
         ChudOS.Mods.Visuals.OverlayMod.Shutdown();
         ChudOS.Mods.Movement.PullMod.Stop();
-        SoundboardManager.Changed -= RequestRefresh;
+        SoundboardManager.Changed -= SoundboardChanged;
         MenuFeedback.Shutdown();
         RemoveMenu();
         SoundboardManager.Shutdown();
@@ -542,7 +542,9 @@ public sealed partial class Main : MonoBehaviour
         if (IsMenuOpen) MenuPreferences.RememberLocation();
         IsMenuOpen = false; NeedsRefresh = false; Pending = false;
         SoundboardControlOpen = false;
-        SongTitle = SongArtist = SongElapsed = SongRemaining = SongStatus = null;
+        SongTitle = SongArtist = null;
+        SongElapsed = SongRemaining = SongStatus = SongPlaybackFallback = null;
+        SongPlayIcon = SongPauseIcon = null;
         SongProgress = null;
         SearchObjects.Clear();
         MenuTextOriginal.Clear();

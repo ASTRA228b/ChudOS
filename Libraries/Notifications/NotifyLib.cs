@@ -25,6 +25,8 @@ public static class NotifyLib
     {
         public string toast = "";
         public long toastUntil;
+        internal readonly GUIContent Content = new();
+        internal float LayoutWidth = -1f, LayoutHeight;
     }
     private static readonly List<ToastData> Toasts = new();
     public static bool HasToasts => Toasts.Count > 0;
@@ -41,23 +43,31 @@ public static class NotifyLib
     {
         if (Toasts.Count == 0 || Event.current.type != EventType.Repaint) return;
         GUIStylesEX.Init();
-        const float width = 320f;
-        const float height = 54f;
+        float width = Mathf.Min(320f, Mathf.Max(44f, Screen.width - 44f));
         const float spacing = 8f;
         float x = Screen.width - width - 22f;
-        float bottomY = Screen.height - height - 22f;
+        float bottomY = Screen.height - 22f;
 
         for (int i = Toasts.Count - 1; i >= 0; i--)
         {
             ToastData toast = Toasts[i];
-            int stackIndex = Toasts.Count - 1 - i;
-            float y = bottomY - stackIndex * (height + spacing);
+            float textWidth = Mathf.Max(1f, width - 30f);
+            if (toast.LayoutWidth != textWidth || toast.Content.text != toast.toast)
+            {
+                toast.Content.text = toast.toast;
+                toast.LayoutWidth = textWidth;
+                toast.LayoutHeight = Mathf.Max(54f, Mathf.Ceil(GUIStylesEX.ToastLabel.CalcHeight(toast.Content, textWidth)) + 20f);
+            }
+            float height = Mathf.Min(toast.LayoutHeight, Mathf.Max(1f, Screen.height - 44f));
+            float y = bottomY - height;
+            if (y < 22f) break;
             Rect backgroundRect = new(x, y, width, height);
             Rect accentRect = new(x, y, 6f, height);
-            Rect textRect = new(x + 20f, y, width - 30f, height);
+            Rect textRect = new(x + 20f, y + 10f, textWidth, Mathf.Max(1f, height - 20f));
             GUI.Box(backgroundRect, GUIContent.none, GUIStylesEX.ToastBackground);
             GUI.Box(accentRect, GUIContent.none, GUIStylesEX.AccentBar);
-            GUI.Label(textRect, toast.toast, GUIStylesEX.ToastLabel);
+            GUI.Label(textRect, toast.Content, GUIStylesEX.ToastLabel);
+            bottomY = y - spacing;
         }
     }
 

@@ -45,7 +45,8 @@ public static class GUIStylesEX
         {
             alignment = TextAnchor.MiddleLeft,
             fontSize = 14,
-            wordWrap = false
+            wordWrap = true,
+            clipping = TextClipping.Clip
         };
         ToastLabel.normal.textColor = Color.white;
         initialized = true;

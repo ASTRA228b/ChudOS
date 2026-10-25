@@ -12,7 +12,7 @@ internal static class AudioMetadata
     internal static (string Title, string Artist) Read(string path, string fallback)
     {
         string title = fallback, artist = "";
-        if (!File.Exists(path) || !path.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)) return (title, artist);
+        if (!File.Exists(path) || !path.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)) return (MetadataText.Clean(title), artist);
         try
         {
             using FileStream stream = File.OpenRead(path);
@@ -52,15 +52,28 @@ internal static class AudioMetadata
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
         catch (ArgumentException) { }
-        return (title, artist);
+        return (MetadataText.Clean(title), MetadataText.Clean(artist));
     }
 
     private static int Sync(byte[] bytes, int offset) => ((bytes[offset] & 127) << 21) | ((bytes[offset + 1] & 127) << 14) | ((bytes[offset + 2] & 127) << 7) | (bytes[offset + 3] & 127);
     private static string Decode(byte[] data)
     {
         if (data.Length < 2) return "";
-        Encoding encoding = data[0] switch { 1 => data.Length > 2 && data[1] == 0xFE ? Encoding.BigEndianUnicode : Encoding.Unicode, 2 => Encoding.BigEndianUnicode, 3 => Encoding.UTF8, _ => Latin1 };
-        int offset = data[0] == 1 && data.Length > 2 && (data[1] == 0xFF && data[2] == 0xFE || data[1] == 0xFE && data[2] == 0xFF) ? 3 : 1;
-        return encoding.GetString(data, offset, data.Length - offset).Trim('\0', ' ', '\uFEFF').Split('\0')[0];
+        Encoding encoding;
+        int offset = 1;
+        switch (data[0])
+        {
+            case 0: encoding = Latin1; break;
+            case 1:
+                encoding = MetadataText.UTF16;
+                if (data.Length >= 3 && data[1] == 0xFF && data[2] == 0xFE) offset = 3;
+                else if (data.Length >= 3 && data[1] == 0xFE && data[2] == 0xFF) { encoding = MetadataText.UTF16BE; offset = 3; }
+                break;
+            case 2: encoding = MetadataText.UTF16BE; break;
+            case 3: encoding = MetadataText.UTF8; break;
+            default: return "";
+        }
+        try { return MetadataText.Clean(encoding.GetString(data, offset, data.Length - offset)); }
+        catch (DecoderFallbackException) { return ""; }
     }
 }
