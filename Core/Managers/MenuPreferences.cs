@@ -14,6 +14,8 @@ public static class MenuPreferences
     private static SavedPreferences saved = new();
     private static readonly HashSet<string> favorites = new(StringComparer.OrdinalIgnoreCase);
     private static bool remember, help;
+    private static string lastCategory = CategoryManager.Home;
+    private static int lastPage;
     private static string SavePath => Path.Combine(FileManager.RootFolder, "menu-preferences.json");
     public static IEnumerable<ButtonManager.ButtonData> Favorites => ButtonManager.Buttons.Where(b => favorites.Contains(b.Name));
 
@@ -27,6 +29,8 @@ public static class MenuPreferences
     public static void Initialize()
     {
         favorites.Clear();
+        lastCategory = CategoryManager.Home;
+        lastPage = 0;
         try
         {
             saved = File.Exists(SavePath) ? JsonConvert.DeserializeObject<SavedPreferences>(File.ReadAllText(SavePath)) ?? new() : new();
@@ -34,6 +38,8 @@ public static class MenuPreferences
                 if (name != null && ButtonManager.GetButton(name) != null) favorites.Add(name);
         }
         catch (Exception ex) { saved = new(); Debug.LogWarning($"[ChudOS] Menu preferences: {ex.Message}"); }
+        saved.Category = CategoryManager.Home;
+        saved.Page = 0;
     }
 
     public static bool IsFavorite(string name) => favorites.Contains(name);
@@ -60,15 +66,13 @@ public static class MenuPreferences
     public static void RememberLocation()
     {
         if (!remember || CategoryManager.IsSearching) return;
-        if (saved.Category == CategoryManager.CurrentCategory && saved.Page == CategoryManager.PageNumber) return;
-        saved.Category = CategoryManager.CurrentCategory;
-        saved.Page = CategoryManager.PageNumber;
-        Save();
+        lastCategory = CategoryManager.CurrentCategory;
+        lastPage = CategoryManager.PageNumber;
     }
 
     public static void Reopen()
     {
-        if (remember && saved.Category != CategoryManager.Home) CategoryManager.Open(saved.Category, saved.Page);
+        if (remember && lastCategory != CategoryManager.Home) CategoryManager.Open(lastCategory, lastPage);
         else CategoryManager.GoHome();
     }
 
@@ -79,7 +83,7 @@ public static class MenuPreferences
         NotifyLib.SendNotificationALL(TranslationManager.T(button.Name) + ": " + TranslationManager.T(description), 5000);
     }
 
-    [MenuButton("Remember Last Category", ButtonType.Toggle, Category = "Settings", Order = 150, runOption = RunOption.Once, Notify = false)]
+    [MenuButton("Remember Last Category", ButtonType.Toggle, Category = "Settings", Order = 150, runOption = RunOption.Once, Notify = false, Description = "Remember your category during this game session; a new session starts at Home")]
     public static void EnableRemember() => remember = true;
     [MenuDisable("Remember Last Category")]
     public static void DisableRemember() => remember = false;

@@ -59,6 +59,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 - Favorites: grip + click in VR or Shift + click on PC adds/removes a favorite without activating it. [F] marks favorites.
 - Optional Button Help and Remember Last Category; shared left/right Gun Hand setting.
+- The first menu opening after restarting the game always starts at Home, page 0. Remember Last Category applies only to later openings during the same game session.
 - Detected category for higher-risk tag and head mods, with warnings on opening or activation. This is a risk grouping, not a claim of confirmed server detection. Detected toggles are not automatically restored from saved state.
 - Astra NoLeaves V2 with cached/downloaded object names, bounded detection, cancellation and restoration.
 - Car, Reverse Velocity (X), Air Brake (both grips), and Ender Pearl (hold/release either grip).
