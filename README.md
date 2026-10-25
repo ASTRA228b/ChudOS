@@ -4,7 +4,7 @@
 
 ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.1** has **255 total menu buttons**, including mods, settings, and actions.
 
-**0.1.1 is currently a local test build. The latest published release is 0.1.0.**
+**0.1.1 is available now. Download the latest release below.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
