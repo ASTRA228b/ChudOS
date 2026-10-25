@@ -114,8 +114,9 @@ public sealed partial class Main : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!NotifyLib.HasToasts) return;
+        if (!NotifyLib.HasToasts && !ArrayListGUI.HasEntries) return;
         NotifyLib.InitToast();
+        ArrayListGUI.CreateArray();
     }
 
     private void Update()
@@ -221,7 +222,6 @@ public sealed partial class Main : MonoBehaviour
         TextColor = theme.Text;
         SecondaryTextColor = theme.SecondaryText;
         TextOnlyMenu = theme.TextOnly;
-        ArrayListGUI.RefreshTheme();
 
         if (BackgroundMat != null) BackgroundMat.color = BackgroundColor;
         if (MenuMat != null) MenuMat.color = MenuColor;
