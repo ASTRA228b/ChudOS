@@ -21,6 +21,11 @@ public static class TravelMods
     private static Vector3 velocity, launchPosition;
     private static object? pearlRoom;
     private static float driveSpeed = 6f, brakeStrength = 6f;
+    private static readonly Vector3[] pearlSamples = new Vector3[8];
+    private static readonly float[] pearlSampleTimes = new float[8];
+    private static int pearlSampleIndex, pearlSampleCount;
+    private static bool previousRightGrip, previousLeftGrip;
+    private static LayerMask pearlLayers;
 
     [MenuButton("Car", ButtonType.Toggle, Category = "Movement", Order = 130, runOption = RunOption.FixedUpdate, Description = "Use the left joystick to drive along the ground")]
     public static void Car()
@@ -68,28 +73,35 @@ public static class TravelMods
     [MenuButton("Air Brake Strength", ButtonType.Option, Category = "Settings", Order = 154, Options = new[] { "6", "3", "9", "12" }, Notify = false)]
     public static void SetBrake() => brakeStrength = new[] { 6f, 3f, 9f, 12f }[ButtonManager.GetButton("Air Brake Strength")?.OptionIndex ?? 0];
 
-    [MenuButton("Ender Pearl", ButtonType.Toggle, Category = "Movement", Order = 133, runOption = RunOption.FixedUpdate, Description = "Hold either grip, then release to throw; teleport when the pearl hits a surface")]
+    [MenuButton("Ender Pearl", ButtonType.Toggle, Category = "Movement", Order = 133, runOption = RunOption.FixedUpdate, Description = "Hold either grip, then release that hand to throw")]
     public static void EnderPearl()
     {
         if (!PortTools.Ready || !ReferenceEquals(pearlRoom, PhotonNetwork.CurrentRoom) && pearl != null) { StopPearl(); return; }
         PortTools.Register(Cleanup);
-        bool grip = InputLib.RightGrab || InputLib.LeftGrab;
-        if (grip)
+        bool right = InputLib.RightGrab, left = InputLib.LeftGrab;
+        bool rightPressed = right && !previousRightGrip, leftPressed = left && !previousLeftGrip;
+        previousRightGrip = right;
+        previousLeftGrip = left;
+        if (pearl == null && (rightPressed || leftPressed))
         {
-            if (!holding) { StopPearl(); rightPearl = InputLib.RightGrab; CreatePearl(); }
-            holding = true;
+            rightPearl = rightPressed;
+            pearlLayers = NoClipState.CollisionLayers;
+            pearlSampleIndex = pearlSampleCount = 0;
+            CreatePearl();
+            holding = pearl != null;
             flying = false;
-            var hand = rightPearl ? GorillaTagger.Instance.rightHandTransform : GorillaTagger.Instance.leftHandTransform;
-            if (hand == null || pearl == null) { StopPearl(); return; }
-            pearl.transform.position = hand.position;
-            return;
         }
         if (pearl == null) return;
         if (holding)
         {
+            var hand = rightPearl ? GTPlayer.Instance.RightHand.controllerTransform : GTPlayer.Instance.LeftHand.controllerTransform;
+            if (hand == null || pearl == null) { StopPearl(); return; }
+            pearl.transform.position = hand.position;
+            SamplePearlHand(hand.position);
+            if (rightPearl ? right : left) return;
             holding = false;
             flying = true;
-            velocity = Vector3.ClampMagnitude((rightPearl ? GTPlayer.Instance.RightHand : GTPlayer.Instance.LeftHand).velocityTracker.GetAverageVelocity(true, 0), 20f);
+            velocity = PearlThrowVelocity(hand);
             launchPosition = pearl.transform.position;
             expires = Time.unscaledTime + 10f;
         }
@@ -97,10 +109,10 @@ public static class TravelMods
         if (!Finite(velocity) || Time.unscaledTime >= expires || (pearl.transform.position - launchPosition).sqrMagnitude > 6400f) { StopPearl(); return; }
         velocity += Physics.gravity * Time.fixedDeltaTime;
         Vector3 step = velocity * Time.fixedDeltaTime;
-        if (step.sqrMagnitude > 0.000001f && Physics.SphereCast(pearl.transform.position, 0.04f, step.normalized, out RaycastHit hit, step.magnitude, GTPlayer.Instance.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
+        if (step.sqrMagnitude > 0.000001f && Physics.SphereCast(pearl.transform.position, 0.04f, step.normalized, out RaycastHit hit, step.magnitude, pearlLayers, QueryTriggerInteraction.Ignore))
         {
             Vector3 destination = hit.point + hit.normal * 0.4f;
-            if (Finite(destination) && !Physics.CheckSphere(destination, 0.15f, GTPlayer.Instance.locomotionEnabledLayers, QueryTriggerInteraction.Ignore)) PortTools.Teleport(destination);
+            if (Finite(destination) && !Physics.CheckSphere(destination, 0.15f, pearlLayers, QueryTriggerInteraction.Ignore)) PortTools.Teleport(destination);
             StopPearl();
             return;
         }
@@ -122,6 +134,39 @@ public static class TravelMods
         pearl.GetComponent<Renderer>().sharedMaterial = pearlMaterial;
     }
 
+    private static void SamplePearlHand(Vector3 position)
+    {
+        pearlSamples[pearlSampleIndex] = position;
+        pearlSampleTimes[pearlSampleIndex] = Time.unscaledTime;
+        pearlSampleIndex = (pearlSampleIndex + 1) % pearlSamples.Length;
+        pearlSampleCount = Mathf.Min(pearlSampleCount + 1, pearlSamples.Length);
+    }
+    private static Vector3 SampledPearlVelocity()
+    {
+        if (pearlSampleCount < 2) return Vector3.zero;
+        int newest = (pearlSampleIndex + pearlSamples.Length - 1) % pearlSamples.Length;
+        for (int offset = pearlSampleCount - 1; offset >= 1; offset--)
+        {
+            int older = (newest - offset + pearlSamples.Length) % pearlSamples.Length;
+            float duration = pearlSampleTimes[newest] - pearlSampleTimes[older];
+            if (duration <= 0.0001f || duration > 0.12f) continue;
+            return (pearlSamples[newest] - pearlSamples[older]) / duration;
+        }
+        return Vector3.zero;
+    }
+    private static Vector3 PearlThrowVelocity(Transform hand)
+    {
+        Vector3 result = SampledPearlVelocity();
+        var tracker = rightPearl ? GTPlayer.Instance.RightHand.velocityTracker : GTPlayer.Instance.LeftHand.velocityTracker;
+        if (tracker != null)
+        {
+            Vector3 tracked = tracker.GetAverageVelocity(true, 0.08f);
+            if (Finite(tracked) && (!Finite(result) || tracked.sqrMagnitude > result.sqrMagnitude)) result = tracked;
+        }
+        if (!Finite(result) || result.sqrMagnitude < 0.04f) result = hand.forward * 3f;
+        return Vector3.ClampMagnitude(result, 20f);
+    }
+
     [MenuDisable("Ender Pearl")]
     public static void StopPearl()
     {
@@ -131,6 +176,8 @@ public static class TravelMods
         pearlMaterial = null;
         pearlRoom = null;
         holding = flying = false;
+        previousRightGrip = previousLeftGrip = false;
+        pearlSampleIndex = pearlSampleCount = 0;
         velocity = Vector3.zero;
     }
 

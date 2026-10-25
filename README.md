@@ -2,7 +2,7 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.1** has **235 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.1** has **255 total menu buttons**, including mods, settings, and actions.
 
 **0.1.1 is currently a local test build. The latest published release is 0.1.0.**
 
@@ -92,6 +92,10 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Play and pause icons replace the center control's text symbols while retaining its playback action.
 - Metadata decoding respects UTF-8 and UTF-16 tags and repairs recoverable encoding mistakes without rewriting audio files or guessing missing characters.
 - Long desktop notifications wrap within their existing width and grow vertically; short notifications retain their size, colors, and timing.
+- Movement > Predictions applies configurable hand-motion prediction, with Default/Light/Medium/Strong presets, strength, movement threshold, smoothing and scale-aware reach in Settings. This is separate from Jump Predictions in Visuals. Rig pose mods and macros do not run against it.
+- Movement > PitGeo configures Forest pit upper/lower walls and top/bottom ground. Select surfaces, velocity/max multipliers, input and Hold Input/Always On in Settings. Defaults select no surfaces. Original surface values restore on release, deselection, disable and room changes.
+- Movement > NoClip uses right trigger by default, with right grip or Always On available in NoClip Input. PC: hold N. NoClip Fly uses X in VR or F on PC, with the existing fly speed. Player collision and gravity state restore when the modes end.
+- Ender Pearl releases from the hand holding it even when the opposite grip stays held. Throw velocity uses recent controller motion and a short tracker history, with a small forward fallback when stationary.
 
 ## Full feature list
 
@@ -102,7 +106,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Menu Source
 - PC Button Click
 
-## Movement — 47
+## Movement — 51
 
 - Speed Boost
 - Low Gravity
@@ -151,6 +155,10 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Platform Gun
 - Macros GUI
 - Long Arms
+- NoClip
+- NoClip Fly
+- Predictions
+- PitGeo
 
 ## Macros — 7
 
@@ -300,7 +308,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Time
 - No Rain
 
-## Settings — 66
+## Settings — 82
 
 - PC View
 - Array List
@@ -368,3 +376,19 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Long Arm Height
 - Soundboard Text Scrolling
 - Soundboard Scroll Speed
+- NoClip Input
+- Prediction Preset
+- Prediction Strength
+- Prediction Threshold
+- Prediction Smoothness
+- Prediction Reach
+- Reset Predictions
+- PitGeo Walls
+- PitGeo Ground
+- PitGeo Wall Multiplier
+- PitGeo Wall Max Multiplier
+- PitGeo Ground Multiplier
+- PitGeo Ground Max Multiplier
+- PitGeo Input
+- PitGeo Activation
+- Reset PitGeo Settings

@@ -12,13 +12,16 @@ namespace ChudOS.Mods.Safety;
 internal static class ModGuards
 {
     internal const string DetectedWarning = "WARNING: Mods in Detected may trigger detection or result in a ban. Safety settings do not make them safe to use.";
-    private static readonly string[] VelocityControllers = { "Car", "Fly (X)", "Trigger Fly", "Joystick Fly (LJ)", "BarkFly (JR)(JL)", "Velocity BarkFly (JR)(JL)", "Hand Fly (B)", "WASD Fly" };
+    private static readonly string[] VelocityControllers = { "Car", "Fly (X)", "Trigger Fly", "Joystick Fly (LJ)", "BarkFly (JR)(JL)", "Velocity BarkFly (JR)(JL)", "Hand Fly (B)", "WASD Fly", "NoClip Fly" };
     private static readonly Dictionary<string, float> errorNotices = new(StringComparer.Ordinal);
 
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
         if (button.Name == "Size Changer") ButtonManager.SetEnabled("Long Arms", false);
+        if (button.Name == "Predictions")
+            foreach (var other in ButtonManager.Buttons)
+                if (other.Category == "Rig" && other.Type == ButtonType.Toggle && other.Name != "Max Quest Score") ButtonManager.SetEnabled(other, false);
         if ((MacroManager.IsPlaying || MacroManager.Recording) && MacroManager.Conflicts(button)) MacroManager.Stop();
         if (button.Category == "Detected") WarnDetected();
         if (VelocityControllers.Contains(button.Name))
@@ -36,6 +39,11 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
+        ChudOS.Mods.Movement.NoClipMods.Clear();
+        ButtonManager.SetEnabled("Predictions", false);
+        ButtonManager.SetEnabled("PitGeo", false);
+        ChudOS.Mods.Movement.Predictions.Stop();
+        ChudOS.Mods.Movement.PitGeo.Stop();
         ChudOS.Core.Managers.Particles.ParticleManager.Shutdown();
         ButtonManager.SetEnabled("Long Arms", false);
         ChudOS.Mods.Movement.LongArmMods.Reset();
