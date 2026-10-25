@@ -54,10 +54,15 @@ public static class PlatformMods
     {
         if (stickyMaterial == null)
             stickyMaterial = new PhysicsMaterial("ChudOS Sticky Platforms") { staticFriction = 1f, dynamicFriction = 1f, frictionCombine = PhysicsMaterialCombine.Maximum };
-        foreach (var collider in platform.GetComponentsInChildren<Collider>()) collider.sharedMaterial = stickyMaterial;
-        var surface = platform.AddComponent<GorillaSurfaceOverride>();
-        surface.overrideIndex = 0;
-        surface.slidePercentageOverride = 0f;
+        foreach (var collider in platform.GetComponentsInChildren<Collider>())
+        {
+            collider.sharedMaterial = stickyMaterial;
+            var surface = collider.GetComponent<GorillaSurfaceOverride>();
+            if (surface == null) surface = collider.gameObject.AddComponent<GorillaSurfaceOverride>();
+            surface.overrideIndex = 0;
+            surface.slidePercentageOverride = 0f;
+        }
+        StickyPlatformColliders.Add(platform, stickyMaterial);
     }
 
     private static GameObject Create(Vector3 position, Quaternion rotation, Vector3 scale, bool visible, float side = -1f)

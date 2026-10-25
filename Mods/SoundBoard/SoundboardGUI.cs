@@ -26,7 +26,9 @@ public static class SoundboardGUI
     public static Rect Window = new(165f, 145f, 530f, 460f);
     private static Vector2 Scroll;
     private static int Tab;
-    private static readonly string[] Tabs = { "Sounds", "Settings" };
+    private static readonly string[] Tabs = { "Sounds", "Settings", "Downloads" };
+
+    public static void OpenDownloads() { Tab = 2; Visible = true; }
 
     public static void CreateGUI()
     {
@@ -38,11 +40,13 @@ public static class SoundboardGUI
     {
         Tabs[0] = TranslationManager.T("Sounds");
         Tabs[1] = TranslationManager.T("Settings");
+        Tabs[2] = TranslationManager.T("Downloads");
         Tab = MenuHelper.Toolbar(Tab, Tabs);
         switch (Tab)
         {
             case 0: Sounds(); break;
             case 1: Settings(); break;
+            case 2: MultiMP3GUI.CreateGUI(); break;
         }
 
         MenuHelper.Space();

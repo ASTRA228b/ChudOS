@@ -2,7 +2,9 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.8** has **214 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.9** has **224 total menu buttons**, including mods, settings, and actions.
+
+Version 0.0.9 is available in source for testing and has not been released. The download below is the latest published release.
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -65,6 +67,15 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Speed Boost presets from Astra's PullMod V2: Normal 6.5/1.1, Boost 8.5/1.5, Strong 10/1.8; custom jump speed/multiplier options. Mosa Speed Boost uses 999/2.2. Only one boost mode runs at a time.
 - Reset Temporary Mod State, movement-controller conflict handling and grouped repeated errors.
 
+## New in 0.0.9
+
+- Movement macros: record body movement and hand poses, save recordings, and select, rename, delete or preview them in the Macros GUI. Recordings are stored in `Gorilla Tag/ChudOS/Macros`.
+- Enable Macro Controls for VR: hold left trigger to record and release to stop. Hold right trigger within one metre of the selected recording's starting point to play; releasing stops playback. Desktop users can use Record, Play and Stop in the GUI. Controller input remains live during playback.
+- Recordings are limited to two minutes. Conflicting movement and rig mods must be disabled before recording or playback; changing rooms stops active macros.
+- MultiMP3: open Soundboard > Download YouTube Audio, paste a supported HTTPS YouTube link, select MP3 quality, and download into the existing Sounds folder. Download Clipboard Audio also works from the VR menu using the Windows clipboard.
+- Downloads support cancellation, validated responses and unique filenames. Successful downloads refresh the sound list without stopping the current song. The external processing service must be available.
+- Sticky Platforms keep the OG platform objects and player color, with additional local collision faces and per-collider surface settings. Adhesion still needs in-game VR testing.
+
 
 ## Full feature list
 
@@ -75,7 +86,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Menu Source
 - PC Button Click
 
-## Movement — 45
+## Movement — 46
 
 - Speed Boost
 - Low Gravity
@@ -122,6 +133,17 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Plank Platforms
 - Custom Platforms
 - Platform Gun
+- Macros GUI
+
+## Macros — 7
+
+- Macro Controls
+- Record Macro
+- Stop Macro
+- Play Selected Macro
+- Next Macro
+- Reload Macros
+- Open Macros Folder
 
 ## Player — 6
 
@@ -232,7 +254,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Quit Game
 - Disable Network Triggers
 
-## SoundBoard — 13
+## SoundBoard — 15
 
 - Play / Stop
 - Next Sound
@@ -244,6 +266,8 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Shuffle
 - Open Soundboard GUI
 - Reload Sounds
+- Download YouTube Audio
+- Download Clipboard Audio
 - Mute Other Players
 - Microphone Mute
 - Microphone Pitch

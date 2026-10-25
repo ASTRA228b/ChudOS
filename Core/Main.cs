@@ -85,6 +85,9 @@ public sealed partial class Main : MonoBehaviour
         SoundboardManager.Initialize(this);
         SoundboardManager.Changed += RequestRefresh;
         GUIManager.Register("Soundboard", state => SoundboardGUI.Visible = state, () => SoundboardGUI.Visible, SoundboardGUI.CreateGUI, () => SoundboardGUI.Window);
+        MacroManager.Reload();
+        MultiMP3Manager.Initialize();
+        GUIManager.Register("Macros", ChudOS.Mods.Movement.MacroMods.SetVisible, () => ChudOS.Mods.Movement.MacroMods.Visible, ChudOS.Mods.Movement.MacroMods.CreateGUI, () => ChudOS.Mods.Movement.MacroMods.Window);
         ArrayListGUI.Initialize();
         gui = gameObject.AddComponent<GUIRuntime>();
         gui.enabled = false;
@@ -173,6 +176,9 @@ public sealed partial class Main : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance != this) return;
+        MacroManager.Shutdown();
+        GUIManager.Unregister("Macros");
+        MultiMP3Manager.Shutdown();
         ButtonManager.OnNotification -= Notify;
         ButtonManager.OnButtonsChanged -= RequestRefresh;
         CategoryManager.OnPageChanged -= RequestRefresh;

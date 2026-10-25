@@ -75,6 +75,12 @@ public static class SoundboardManager
         SoundManager.ClearCache();
         RefreshList();
     }
+    public static void RefreshDownloaded(string path)
+    {
+        RefreshList();
+        int index = Sounds.FindIndex(sound => string.Equals(sound.Path, path, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0) Select(index);
+    }
     private static void RefreshList()
     {
         string? selected = Selected?.Path;

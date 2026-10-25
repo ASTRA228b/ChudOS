@@ -18,6 +18,7 @@ internal static class ModGuards
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
+        if ((MacroManager.IsPlaying || MacroManager.Recording) && MacroManager.Conflicts(button)) MacroManager.Stop();
         if (button.Category == "Detected") WarnDetected();
         if (VelocityControllers.Contains(button.Name))
             foreach (string name in VelocityControllers)
@@ -34,6 +35,8 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
+        ButtonManager.SetEnabled("Macro Controls", false);
+        MacroManager.Shutdown();
         ChudOS.Mods.Movement.TravelMods.StopPearl();
         ChudOS.Mods.Movement.TravelMods.StopCar();
         ChudOS.Mods.Movement.TravelMods.StopReverse();
