@@ -2,7 +2,9 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.0.9** has **224 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.0** has **233 total menu buttons**, including mods, settings, and actions.
+
+**0.1.0 is a mini update. 0.1.1 will be a bigger update.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
@@ -75,6 +77,13 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Sticky Platforms keep the OG platform objects and player color, with additional local collision faces and per-collider surface settings. Adhesion still needs in-game VR testing.
 
 
+## New in 0.1.0
+
+- Visuals: Fire Fists, Forest Lightning, Nebula Storm, Black Hole, White Hole, and Random Domain. These effects are local visuals; the holes do not apply forces.
+- Movement: Long Arms, with separate Long Arm Length and Long Arm Height options in Settings. It scales the player transform horizontally and vertically, and restores the original scale when disabled.
+- Long Arms and Size Changer turn each other off to prevent conflicting scale changes.
+- Particle objects and materials are reused, with bounded lightning and Domain pools. Effects clear on disable, room changes, and shutdown. Draw and FireBall are not included in these additions.
+
 ## Full feature list
 
 ## Main — 4
@@ -84,7 +93,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Menu Source
 - PC Button Click
 
-## Movement — 46
+## Movement — 47
 
 - Speed Boost
 - Low Gravity
@@ -132,6 +141,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Custom Platforms
 - Platform Gun
 - Macros GUI
+- Long Arms
 
 ## Macros — 7
 
@@ -184,7 +194,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Camera FOV
 - Silent Hand Taps
 
-## Visuals — 10
+## Visuals — 16
 
 - Hide Fog
 - Ambient Tint
@@ -196,6 +206,12 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Draw Gun
 - Hide Head Cosmetics
 - No Leaves
+- Fire Fists
+- Forest Lightning
+- Nebula Storm
+- Black Hole
+- White Hole
+- Random Domain
 
 ## Detected — 9
 
@@ -275,7 +291,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Time
 - No Rain
 
-## Settings — 62
+## Settings — 64
 
 - PC View
 - Array List
@@ -339,3 +355,5 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Speed Boost Preset
 - Speed Boost Jump Speed
 - Speed Boost Multiplier
+- Long Arm Length
+- Long Arm Height

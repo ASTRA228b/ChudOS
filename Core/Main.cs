@@ -176,6 +176,8 @@ public sealed partial class Main : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance != this) return;
+        ChudOS.Core.Managers.Particles.ParticleManager.Shutdown();
+        ChudOS.Mods.Movement.LongArmMods.Reset();
         MacroManager.Shutdown();
         GUIManager.Unregister("Macros");
         MultiMP3Manager.Shutdown();

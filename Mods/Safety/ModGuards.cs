@@ -18,6 +18,7 @@ internal static class ModGuards
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
+        if (button.Name == "Size Changer") ButtonManager.SetEnabled("Long Arms", false);
         if ((MacroManager.IsPlaying || MacroManager.Recording) && MacroManager.Conflicts(button)) MacroManager.Stop();
         if (button.Category == "Detected") WarnDetected();
         if (VelocityControllers.Contains(button.Name))
@@ -35,6 +36,9 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
+        ChudOS.Core.Managers.Particles.ParticleManager.Shutdown();
+        ButtonManager.SetEnabled("Long Arms", false);
+        ChudOS.Mods.Movement.LongArmMods.Reset();
         ButtonManager.SetEnabled("Macro Controls", false);
         MacroManager.Shutdown();
         ChudOS.Mods.Movement.TravelMods.StopPearl();
