@@ -41,7 +41,7 @@ public static class SoundboardManager
     public static readonly float[] Presets = { 0.25f, 0.50f, 0.75f, 1f };
     public static int SelectedIndex;
     public static int VolumeIndex = 2;
-    public static int MicVolumeIndex = 3;
+    public static int MicVolumeIndex = 2;
     public static bool AutoPlay;
     public static bool Shuffle;
     public static bool Repeat;

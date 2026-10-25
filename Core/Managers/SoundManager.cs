@@ -31,11 +31,12 @@ public static class SoundManager
     private static readonly Dictionary<AudioClip, float[]> Pcm = new();
     private static AudioSource? Source;
     private static Recorder? MicRecorder;
-    private static SoundPcmReader? MicReader;
+    private static SoundVoiceMixer? MicMixer;
+    private static LocalVoice? MicVoice;
     private static Recorder.InputSourceType OriginalSource;
     private static Func<IAudioDesc>? OriginalFactory;
     private static AudioClip? OriginalClip;
-    private static bool OriginalLoop, OriginalRecording;
+    private static bool OriginalLoop, OriginalRecording, OriginalTransmit, OriginalDetection;
     private static bool Paused, WasPlaying, ManualStop;
     private static int CacheGeneration;
     private static float NextMicRetry;
@@ -46,7 +47,8 @@ public static class SoundManager
     public static float CurrentTime => Source != null && Source.clip != null ? Source.time : 0f;
     public static float CurrentLength => CurrentClip != null ? CurrentClip.length : 0f;
     public static float Volume { get; private set; } = 0.75f;
-    public static float MicrophoneVolume { get; private set; } = 1f;
+    public static float MicrophoneVolume { get; private set; } = 0.75f;
+    public static float MicrophoneGain => MicrophoneVolume * 1.1f;
     public static PlaybackMode Mode { get; private set; }
     public static bool Repeat { get; private set; }
     public static event Action? ClipFinished;
@@ -64,7 +66,7 @@ public static class SoundManager
 
     private static void UpdateVolume()
     {
-        if (Source != null) Source.volume = Mode == PlaybackMode.Microphone && MicRecorder != null ? 0f : Volume;
+        if (Source != null) Source.volume = Mode == PlaybackMode.Microphone && MicRecorder != null && MicMixer?.Active == true ? 0f : Volume;
     }
 
     public static void SetVolume(float volume)
@@ -77,7 +79,7 @@ public static class SoundManager
     {
         if (float.IsNaN(volume) || float.IsInfinity(volume)) return;
         MicrophoneVolume = Mathf.Clamp01(volume);
-        if (MicReader != null) MicReader.Gain = MicrophoneVolume;
+        if (MicMixer != null) MicMixer.Gain = MicrophoneGain;
     }
 
     public static void SetPlaybackMode(PlaybackMode mode)
@@ -93,7 +95,7 @@ public static class SoundManager
     {
         Repeat = repeat;
         if (Source != null) Source.loop = repeat;
-        if (MicReader != null) MicReader.Loop = repeat;
+        if (MicMixer != null) MicMixer.Loop = repeat;
     }
 
     public static void Play(AudioClip clip, bool paused = false)
@@ -149,12 +151,17 @@ public static class SoundManager
         bool muted = ButtonManager.GetButton("Microphone Mute")?.Enabled == true;
         Recorder? recorder = GorillaTagger.Instance != null ? GorillaTagger.Instance.myRecorder : null;
         if (MicRecorder != null && muted) { StopMic(); UpdateVolume(); }
-        if (playing && !Paused && !muted && Mode != PlaybackMode.Local && (MicRecorder == null || MicRecorder != recorder) && Time.unscaledTime >= NextMicRetry)
+        if (playing && !Paused && !muted && Mode != PlaybackMode.Local && (MicRecorder == null || MicRecorder != recorder || recorder == null || !ReferenceEquals(MicVoice, recorder.Voice) || MicMixer?.Active != true) && Time.unscaledTime >= NextMicRetry)
         {
             NextMicRetry = Time.unscaledTime + 1f;
-            StopMic();
+            if (MicRecorder != recorder) StopMic();
             if (Source.clip != null) StartMic(Source.clip);
             UpdateVolume();
+        }
+        if (playing && MicRecorder != null && MicMixer?.Active == true && !muted)
+        {
+            MicRecorder.TransmitEnabled = true;
+            MicRecorder.VoiceDetection = false;
         }
         if (WasPlaying && !playing && !Paused && !ManualStop && Source.clip != null)
         {
@@ -179,23 +186,45 @@ public static class SoundManager
                 if (!clip.GetData(data, 0)) throw new InvalidOperationException("Unable to read sound samples.");
                 Pcm.Add(clip, data);
             }
-            MicRecorder = recorder;
-            OriginalSource = recorder.SourceType;
-            OriginalFactory = recorder.InputFactory;
-            OriginalClip = recorder.AudioClip;
-            OriginalLoop = recorder.LoopAudioClip;
-            OriginalRecording = recorder.IsRecording;
-            int start = Source.timeSamples;
-            int rate = clip.frequency, channels = clip.channels;
-            recorder.StopRecording();
-            recorder.SourceType = Recorder.InputSourceType.Factory;
-            recorder.InputFactory = () => MicReader = new SoundPcmReader(data, rate, channels, start, MicrophoneVolume, Repeat);
-            recorder.RestartRecording(true);
+            if (MicRecorder != recorder)
+            {
+                StopMic();
+                MicRecorder = recorder;
+                OriginalSource = recorder.SourceType;
+                OriginalFactory = recorder.InputFactory;
+                OriginalClip = recorder.AudioClip;
+                OriginalLoop = recorder.LoopAudioClip;
+                OriginalRecording = recorder.IsRecording;
+                OriginalTransmit = recorder.TransmitEnabled;
+                OriginalDetection = recorder.VoiceDetection;
+            }
+            recorder.TransmitEnabled = true;
+            recorder.VoiceDetection = false;
+            if (recorder.SourceType != Recorder.InputSourceType.Microphone)
+            {
+                recorder.SourceType = Recorder.InputSourceType.Microphone;
+                recorder.RestartRecording(true);
+            }
+            else if (!recorder.IsRecording) recorder.StartRecording();
+
+            LocalVoice voice = recorder.Voice;
+            if (voice == null || voice.Info.SamplingRate <= 0 || voice.Info.Channels <= 0) return false;
+            if (!ReferenceEquals(MicVoice, voice))
+            {
+                MicMixer?.Stop();
+                var mixer = new SoundVoiceMixer(voice.Info.SamplingRate, voice.Info.Channels);
+                if (voice is LocalVoiceAudio<float> floatVoice) floatVoice.AddPostProcessor((IProcessor<float>)mixer);
+                else if (voice is LocalVoiceAudio<short> shortVoice) shortVoice.AddPostProcessor((IProcessor<short>)mixer);
+                else return false;
+                MicVoice = voice;
+                MicMixer = mixer;
+            }
+            MicMixer!.Play(data, clip.frequency, clip.channels, Source.timeSamples, MicrophoneGain, Repeat);
             return true;
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"[{Constantss.GUID}] Microphone playback: {ex.Message}");
+            Debug.LogWarning($"[{Constantss.GUID}] Microphone mixing: {ex.Message}");
             StopMic();
             return false;
         }
@@ -203,23 +232,30 @@ public static class SoundManager
 
     private static void StopMic()
     {
+        MicMixer?.Stop();
         Recorder? recorder = MicRecorder;
         MicRecorder = null;
         if (recorder != null)
         {
             try
             {
-                recorder.StopRecording();
-                recorder.InputFactory = OriginalFactory;
-                recorder.SourceType = OriginalSource;
-                recorder.AudioClip = OriginalClip;
-                recorder.LoopAudioClip = OriginalLoop;
-                if (OriginalRecording && ButtonManager.GetButton("Microphone Mute")?.Enabled != true) recorder.StartRecording();
+                bool sourceChanged = recorder.SourceType != OriginalSource;
+                if (sourceChanged)
+                {
+                    recorder.StopRecording();
+                    recorder.InputFactory = OriginalFactory;
+                    recorder.SourceType = OriginalSource;
+                    recorder.AudioClip = OriginalClip;
+                    recorder.LoopAudioClip = OriginalLoop;
+                }
+                recorder.TransmitEnabled = OriginalTransmit;
+                recorder.VoiceDetection = OriginalDetection;
+                bool shouldRecord = OriginalRecording && ButtonManager.GetButton("Microphone Mute")?.Enabled != true;
+                if (shouldRecord && !recorder.IsRecording) recorder.StartRecording();
+                else if (!shouldRecord && recorder.IsRecording) recorder.StopRecording();
             }
             catch (Exception ex) { Debug.LogWarning($"[{Constantss.GUID}] Restore microphone: {ex.Message}"); }
         }
-        MicReader?.Dispose();
-        MicReader = null;
         OriginalFactory = null;
         OriginalClip = null;
     }
@@ -262,5 +298,8 @@ public static class SoundManager
         ClearCache();
         if (Source != null) UnityEngine.Object.Destroy(Source.gameObject);
         Source = null;
+        MicMixer?.Stop();
+        MicMixer = null;
+        MicVoice = null;
     }
 }
