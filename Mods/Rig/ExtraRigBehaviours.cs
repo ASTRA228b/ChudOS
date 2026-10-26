@@ -5,7 +5,6 @@ using ChudOS.Core.Managers;
 using ChudOS.Libraries;
 using GorillaLocomotion;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace ChudOS.Mods.Rig;
 
@@ -44,11 +43,11 @@ internal sealed class SpazzRig : RigBehaviour
     protected override void Update()
     {
         if (!InputLib.RightControllerAButton) { Restore(); return; }
-        rig.leftHand.trackingPositionOffset = left + Offset();
-        rig.rightHand.trackingPositionOffset = right + Offset();
-        rig.head.trackingPositionOffset = head + Offset();
+        rig.leftHand.trackingPositionOffset = left + Offset(0f);
+        rig.rightHand.trackingPositionOffset = right + Offset(2f);
+        rig.head.trackingPositionOffset = head + Offset(4f);
     }
-    private static Vector3 Offset() => new(Random.Range(-0.1f, 0.1f), Random.Range(-0.1f, 0.1f), Random.Range(-0.1f, 0.1f));
+    private static Vector3 Offset(float phase) => new Vector3(Mathf.Sin(Time.unscaledTime * 24f + phase), Mathf.Sin(Time.unscaledTime * 29f + phase), Mathf.Cos(Time.unscaledTime * 21f + phase)) * 0.08f;
     private void Restore()
     {
         if (rig == null) return;
@@ -77,10 +76,11 @@ internal sealed class SpazzHands : RigBehaviour
         posed = true;
         rig.transform.SetPositionAndRotation(tagger.bodyCollider.transform.position + Vector3.up * 0.15f, tagger.bodyCollider.transform.rotation);
         rig.head.rigTarget.rotation = tagger.headCollider.transform.rotation;
-        rig.leftHand.rigTarget.rotation = Random.rotation;
-        rig.rightHand.rigTarget.rotation = Random.rotation;
-        rig.leftHand.rigTarget.position = GTPlayer.Instance.LeftHand.controllerTransform.position + rig.leftHand.rigTarget.forward * 3f;
-        rig.rightHand.rigTarget.position = GTPlayer.Instance.RightHand.controllerTransform.position + rig.rightHand.rigTarget.forward * 3f;
+        float phase = Time.unscaledTime * 18f;
+        rig.leftHand.rigTarget.rotation = tagger.leftHandTransform.rotation * Quaternion.Euler(Mathf.Sin(phase) * 45f, 0f, Mathf.Cos(phase) * 45f);
+        rig.rightHand.rigTarget.rotation = tagger.rightHandTransform.rotation * Quaternion.Euler(Mathf.Cos(phase) * 45f, 0f, Mathf.Sin(phase) * 45f);
+        rig.leftHand.rigTarget.position = GTPlayer.Instance.LeftHand.controllerTransform.position + rig.leftHand.rigTarget.forward * (0.08f * GTPlayer.Instance.scale);
+        rig.rightHand.rigTarget.position = GTPlayer.Instance.RightHand.controllerTransform.position + rig.rightHand.rigTarget.forward * (0.08f * GTPlayer.Instance.scale);
     }
     protected override void OnDisable()
     {

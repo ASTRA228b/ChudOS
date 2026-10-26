@@ -51,6 +51,7 @@ public sealed partial class Main : MonoBehaviour
     public static Color ButtonColorValue => ButtonColor;
     public static Color TextColorValue => TextColor;
     public static bool TextOnlyMenu { get; private set; }
+    private static bool OutlineButtons;
 
     private static readonly Vector3 VRMenuScale = new(0.129f, 0.221f, 0.297f);
     private static readonly Vector3 DesktopMenuScale = new(0.1f, 0.3f, 0.3825f);
@@ -172,10 +173,11 @@ public sealed partial class Main : MonoBehaviour
         for (int i = 0; i < 10; i++) if (keyboard[(Key)((int)Key.Digit0 + i)].wasPressedThisFrame) SearchManager.Key(i.ToString());
     }
     private void FixedUpdate() => ButtonManager.FixedUpdate();
-    private void LateUpdate() => ButtonManager.LateUpdate();
+    private void LateUpdate() { ButtonManager.LateUpdate(); UpdateMenuPosition(); }
     private void OnDestroy()
     {
         if (Instance != this) return;
+        ChudOS.Mods.Fun.ThrowableSpam.Reset();
         ChudOS.Mods.Movement.SpiderMan.Stop();
         ChudOS.Mods.Movement.CustomArms.Stop();
         ChudOS.Mods.Player.PlayerESPRuntime.ClearHighlights();
@@ -239,6 +241,7 @@ public sealed partial class Main : MonoBehaviour
         TextColor = theme.Text;
         SecondaryTextColor = theme.SecondaryText;
         TextOnlyMenu = theme.TextOnly;
+        OutlineButtons = theme.OutlineButtons;
 
         if (BackgroundMat != null) BackgroundMat.color = BackgroundColor;
         if (MenuMat != null) MenuMat.color = MenuColor;
@@ -266,6 +269,7 @@ public sealed partial class Main : MonoBehaviour
             Renderer renderer = button.GetComponent<Renderer>();
             button.IdleColor = renderer != null && renderer.sharedMaterial == HeaderMat ? HeaderColor : ButtonColor;
             button.RefreshAppearance();
+            RefreshButtonOutline(button.gameObject);
             if ((button.PreviousPage || button.NextPage) && button.Label != null)
             {
                 Renderer labelRenderer = button.Label.GetComponent<Renderer>();
@@ -313,7 +317,8 @@ public sealed partial class Main : MonoBehaviour
         MenuMain.transform.localPosition = OnPC ? new Vector3(-0.12f, -0.02f, 0.8f) : VRMenuPosition;
         MenuMain.transform.localRotation = OnPC ? Quaternion.Euler(0f, 90f, 0f) : Quaternion.identity;
         MenuMain.transform.localScale = OnPC ? DesktopMenuScale : VRMenuScale;
-        if (!OnPC) AlignToPalm();
+        positionDirty = true;
+        UpdateMenuPosition();
 
 
         MenuBackground = Cube("Tablet Backing", new Vector3(0.475f, 0f, 0f), new Vector3(0.16f, 2.28f, 1.05f), BackgroundMat);
@@ -344,6 +349,7 @@ public sealed partial class Main : MonoBehaviour
         if (!OnPC) Text("v" + Constantss.Version, -1.055f, 0.36f, 0.011f, true, SecondaryTextColor);
         if (!OnPC) CreateReferences();
         RefreshPage();
+        MenuFeedback.PlayOpen();
     }
     private static void AlignToPalm()
     {
@@ -408,6 +414,7 @@ public sealed partial class Main : MonoBehaviour
         trigger.Disconnect = disconnect;
         trigger.SearchToggle = search;
         trigger.KeyboardKey = key;
+        RefreshButtonOutline(obj);
         if (label.Length > 0)
         {
             float textZ = home ? z + 0.085f : z;
@@ -549,6 +556,7 @@ public sealed partial class Main : MonoBehaviour
     public static void RemoveMenu()
     {
         if (IsMenuOpen) MenuPreferences.RememberLocation();
+        positionHand = null; positionDirty = true; previousUp = Vector3.up;
         IsMenuOpen = false; NeedsRefresh = false; Pending = false;
         SoundboardControlOpen = false;
         SongTitle = SongArtist = null;

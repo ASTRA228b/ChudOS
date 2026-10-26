@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace ChudOS.Core.Managers;
 
-public static class MacroManager
+public static partial class MacroManager
 {
     public sealed class Frame
     {
@@ -18,15 +18,18 @@ public static class MacroManager
         public float[] Body = Array.Empty<float>(), Velocity = Array.Empty<float>();
         public float[] LeftPosition = Array.Empty<float>(), LeftRotation = Array.Empty<float>();
         public float[] RightPosition = Array.Empty<float>(), RightRotation = Array.Empty<float>();
-        public bool LeftGrip, RightGrip;
+        public bool LeftGrip, RightGrip, LeftTrigger, RightTrigger;
+        public float[] HeadPosition = Array.Empty<float>(), HeadRotation = Array.Empty<float>(), RigRotation = Array.Empty<float>();
     }
 
     public sealed class RecordingData
     {
         public int Version = 1;
+        public bool HasRigPose;
         public string Name = "";
         public List<Frame> Frames = new();
         [JsonIgnore] public string File = "";
+        [JsonIgnore] internal string ImportFormat = "";
     }
 
     public static readonly List<RecordingData> Recordings = new();
@@ -57,12 +60,14 @@ public static class MacroManager
         try
         {
             Directory.CreateDirectory(Folder);
-            foreach (string file in Directory.GetFiles(Folder, "*.json"))
+            foreach (string file in Directory.EnumerateFiles(Folder))
             {
                 try
                 {
+                    string extension = Path.GetExtension(file);
+                    if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".macro", StringComparison.OrdinalIgnoreCase)) continue;
                     if (new FileInfo(file).Length > MaximumFileSize) continue;
-                    var data = JsonConvert.DeserializeObject<RecordingData>(File.ReadAllText(file), JsonSettings);
+                    var data = ReadRecording(file);
                     if (!Valid(data)) continue;
                     data!.Name = CleanName(data.Name);
                     data.File = file;
@@ -118,6 +123,7 @@ public static class MacroManager
                 Report("Recording ready. Open Macros GUI to save it.");
             }
         }
+        RestoreMacroPose();
         playing = null;
         triggerPlayback = false;
         playbackIndex = 0;
@@ -135,6 +141,7 @@ public static class MacroManager
         }
         Stop();
         ClearPreview();
+        if (data!.HasRigPose && !BeginMacroPose()) return;
         playing = data;
         triggerPlayback = requireTrigger;
         started = Time.unscaledTime;
@@ -214,6 +221,7 @@ public static class MacroManager
                 else if (Time.unscaledTime >= nextSample) { Capture(); nextSample = Time.unscaledTime + Step; }
             }
             if (playing == null) return;
+            if (playing.HasRigPose && poseRig != VRRig.LocalRig) { Stop(); return; }
             if (triggerPlayback && !right) { Stop(); return; }
 
             float elapsed = Time.unscaledTime - started;
@@ -246,6 +254,7 @@ public static class MacroManager
         tagger.rigidbody.linearVelocity = Vector3.Lerp(Vector(a.Velocity), Vector(b.Velocity), t);
         tagger.leftHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.LeftPosition), Vector(b.LeftPosition), t), Quaternion.Slerp(Rotation(a.LeftRotation), Rotation(b.LeftRotation), t));
         tagger.rightHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.RightPosition), Vector(b.RightPosition), t), Quaternion.Slerp(Rotation(a.RightRotation), Rotation(b.RightRotation), t));
+        if (playing?.HasRigPose == true) ApplyMacroPose(a, b, t);
     }
 
     internal static bool Conflicts(ButtonManager.ButtonData button) => button.Type == ChudOS.Stuff.ButtonType.Toggle && (button.Category == "Rig" || button.Category == "Detected" || button.Category == "Movement" && !button.Name.Contains("Platforms") && button.Name != "Platform Gun");
@@ -265,6 +274,7 @@ public static class MacroManager
             if (frame == null || !Finite(frame.Time) || frame.Time <= previous || frame.Time > MaximumDuration) return false;
             if (!ValidValues(frame.Body, 3) || !ValidValues(frame.Velocity, 3) || !ValidValues(frame.LeftPosition, 3) || !ValidValues(frame.RightPosition, 3)) return false;
             if (!ValidRotation(frame.LeftRotation) || !ValidRotation(frame.RightRotation)) return false;
+            if (data.HasRigPose && (!ValidValues(frame.HeadPosition, 3) || !ValidRotation(frame.HeadRotation) || !ValidRotation(frame.RigRotation))) return false;
             previous = frame.Time;
         }
         return data.Frames[0].Time == 0f;
@@ -291,7 +301,7 @@ public static class MacroManager
         {
             if (!Valid(data)) throw new InvalidDataException("The recording contains invalid frames.");
             Directory.CreateDirectory(Folder);
-            File.WriteAllText(temporary, JsonConvert.SerializeObject(data, JsonSettings));
+            WriteRecording(data, temporary, Path.GetExtension(path).Equals(".macro", StringComparison.OrdinalIgnoreCase));
             if (File.Exists(path)) File.Replace(temporary, path, null);
             else File.Move(temporary, path);
             data.File = path;

@@ -19,6 +19,13 @@ internal static class ModGuards
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
+        if (button.Name.StartsWith("Head Spin ", StringComparison.Ordinal))
+        {
+            foreach (var other in ButtonManager.Buttons)
+                if (other.Name != button.Name && other.Name != "Max Quest Score" && (other.Category == "Rig" || other.Name == "HeadBang") && other.Type == ButtonType.Toggle) ButtonManager.SetEnabled(other, false);
+        }
+        else if (button.Category == "Rig" || button.Name == "HeadBang")
+            foreach (string name in new[] { "Head Spin Yaw", "Head Spin Pitch", "Head Spin Roll" }) ButtonManager.SetEnabled(name, false);
         if (ScaleControllers.Contains(button.Name))
             foreach (string name in ScaleControllers)
                 if (name != button.Name) ButtonManager.SetEnabled(name, false);
@@ -44,6 +51,7 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
+        ChudOS.Mods.Fun.ThrowableSpam.Reset();
         ButtonManager.SetEnabled("Spider Man", false);
         ChudOS.Mods.Movement.SpiderMan.Stop();
         ButtonManager.SetEnabled("Custom Arms", false);

@@ -33,6 +33,7 @@ public static class FunMods
     private static NetworkSystem? headNetwork;
     private static Vector3 headGoal;
     private static int lastHeadFrame = -1;
+    private static float spinSpeed = 60f;
 
     [MenuButton("UpsideDown Head", ButtonType.Press, Category = "Detected", Order = 0, Description = "Smoothly rotate your head upside down")]
     public static void UpsideDownHead() => SetHeadAxis(2, 180f);
@@ -92,6 +93,26 @@ public static class FunMods
         if (GorillaTagger.Instance != null) GorillaTagger.Instance.handTapVolume = 0.1f;
     }
 
+    [MenuButton("Head Spin Yaw", ButtonType.Toggle, Category = "Rig", Order = 40)]
+    public static void SpinYaw() => Spin(1);
+    [MenuButton("Head Spin Pitch", ButtonType.Toggle, Category = "Rig", Order = 41)]
+    public static void SpinPitch() => Spin(0);
+    [MenuButton("Head Spin Roll", ButtonType.Toggle, Category = "Rig", Order = 42)]
+    public static void SpinRoll() => Spin(2);
+    [MenuDisable("Head Spin Yaw")]
+    public static void StopYaw() => ResetHeadState();
+    [MenuDisable("Head Spin Pitch")]
+    public static void StopPitch() => ResetHeadState();
+    [MenuDisable("Head Spin Roll")]
+    public static void StopRoll() => ResetHeadState();
+    [MenuButton("Head Spin Speed", ButtonType.Option, Category = "Settings", Order = 246, Options = new[] { "60", "30", "90", "120" }, Notify = false)]
+    public static void SpinSpeed() => spinSpeed = new[] { 60f, 30f, 90f, 120f }[ButtonManager.GetButton("Head Spin Speed")!.OptionIndex];
+    private static void Spin(int axis)
+    {
+        if (!PrepareHead()) return;
+        headGoal[axis] = HeadPoseMath.Wrap(headGoal[axis] + spinSpeed * Mathf.Min(Time.unscaledDeltaTime, 0.05f));
+    }
+
     private static bool PrepareHead()
     {
         if (VRRig.LocalRig == null) return false;
@@ -111,6 +132,9 @@ public static class FunMods
 
     private static void SetHeadAxis(int axis, float angle)
     {
+        ButtonManager.SetEnabled("Head Spin Yaw", false);
+        ButtonManager.SetEnabled("Head Spin Pitch", false);
+        ButtonManager.SetEnabled("Head Spin Roll", false);
         if (!PrepareHead()) return;
         headGoal[axis] = HeadPoseMath.Wrap(angle);
     }
@@ -135,7 +159,16 @@ public static class FunMods
     private static void RestoreHeadOffsets()
     {
         PortTools.RemoveTick(MaintainHead);
+        ButtonManager.SetEnabled("Head Spin Yaw", false);
+        ButtonManager.SetEnabled("Head Spin Pitch", false);
+        ButtonManager.SetEnabled("Head Spin Roll", false);
         ButtonManager.SetEnabled("HeadBang", false);
+        ResetHeadState();
+    }
+
+    private static void ResetHeadState()
+    {
+        PortTools.RemoveTick(MaintainHead);
         StopHeadBang();
         if (offsetOwner != null) offsetOwner.head.trackingRotationOffset = originalOffset;
         offsetOwner = null;

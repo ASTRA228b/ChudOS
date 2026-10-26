@@ -2,11 +2,23 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.2** has **318 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.3** has **334 total menu buttons**, including mods, settings, and actions.
 
-**0.1.2 is available now. Download the latest release below.**
+**0.1.3 is a local test build. The latest published release remains 0.1.2.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
+
+## New in 0.1.3 (local testing)
+
+- **Menu alignment:** Auto faces the menu toward your head while following your hand. Align To Palm uses the original, unchanged one-time palm alignment; Fixed keeps a constant wrist-relative rotation. Settings includes distance, height, Recenter Menu, and Reset Menu Position. Desktop placement stays unchanged.
+- **Defaults:** Auto alignment, Menu Open Sound, and Join Random: Current Map start on. Disable Mods On Leave starts off; explicit saved choices still restore. The existing room cleanup and mod reset behavior is retained.
+- **Join Random:** captures a public join for the active map, waits for the network to finish leaving, and submits one native join request. Cancel Reconnect also cancels a pending random join. Unavailable maps and timeouts show a notification. Turning Current Map off explicitly selects Forest.
+- **Neon Outline theme:** dark green panels, bright green rounded button outlines, and green highlights. All existing themes remain available.
+- **Menu sounds:** separate Menu Open Sound toggle, Open Sound selector, and Open Volume. Opening works in VR and desktop mode and uses the existing cached local feedback source. Click Sound, Click Volume, and Click Vibrations remain separate.
+- **Fun:** Snowball Spam and Water Balloon Spam repeatedly throw available native throwables while holding right trigger, using normal hand velocity. Throwable Interval offers 0.25, 0.5, or 1 second. These require the corresponding throwable to be available; they leave equipment you are already holding alone.
+- **Rig:** Spazz Rig uses bounded, time-based offsets; Spazz Hands keeps its motion near the controllers instead of extending three metres. Head Spin Yaw, Head Spin Pitch, and Head Spin Roll have 30/60/90/120-degree speed choices and restore the original head pose when disabled.
+- **Macro imports:** put ChudOS `.json`, Poison `.json`, or hamburbur GZip `.macro` files in `Gorilla Tag/ChudOS/Macros`, then press Reload Macros. Imported recordings use their native timing; hamburbur recordings retain head, rig, and hand poses. Renaming preserves each imported format. Corrupt, oversized, or invalid recordings are skipped without hiding valid files. Macros still require you to be within one metre of the start, stop on room changes, and never replay menu button presses or enable themselves from imported settings.
+- Use **Save Menu State** to keep your theme, alignment, sounds, and other menu preferences.
 
 ## New in 0.1.2
 
@@ -153,6 +165,8 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 ## Full feature list
 
+334 unique buttons, including mods, settings, and actions.
+
 ## Main — 4
 
 - Join Discord
@@ -160,7 +174,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Menu Source
 - PC Button Click
 
-## Movement — 51
+## Movement — 61
 
 - Speed Boost
 - Low Gravity
@@ -213,27 +227,18 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - NoClip Fly
 - Predictions
 - PitGeo
+- Drone Fly
+- Left And Right
+- Forward And Backwards
+- Velocity Movement
+- Throw
+- Double Jump
+- Fly Towards Gun
+- Punch
+- Custom Arms
+- Spider Man
 
-## Macros — 7
-
-- Macro Controls
-- Record Macro
-- Stop Macro
-- Play Selected Macro
-- Next Macro
-- Reload Macros
-- Open Macros Folder
-
-## Player — 6
-
-- Body Tracers
-- Bone ESP
-- 2D Box ESP
-- 3D Box ESP
-- 4D Box ESP
-- Trails ESP
-
-## Rig — 21
+## Rig — 35
 
 - Copy Movement Gun
 - Dance
@@ -256,45 +261,73 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Hug Gun
 - Follow Player Gun
 - Orbit Player Gun
+- Rig Gun
+- Spazz Rig
+- Spazz Hands
+- Fixed LongArms
+- Grab Rig
+- Fake Lag
+- Helicopter
+- T-Pose
+- Freeze Rig Body
+- Freeze Rig Limbs
+- Jumpscare Gun
+- Head Spin Yaw
+- Head Spin Pitch
+- Head Spin Roll
 
-## Fun — 5
+## Fun — 18
 
 - Fix Head
 - Fix All
 - Free Camera
+- Unlock FPS
+- 30 FPS
 - Camera FOV
+- 60 FPS
 - Silent Hand Taps
+- 72 FPS
+- 90 FPS
+- 120 FPS
+- 144 FPS
+- 165 FPS
+- 240 FPS
+- 360 FPS
+- Reset FPS
+- Snowball Spam
+- Water Balloon Spam
 
-## Visuals — 16
+## Player — 8
 
-- Hide Fog
-- Ambient Tint
-- Visual Info
-- Name Tags
-- Overlay
-- Jump Predictions
-- Show Room Triggers
-- Draw Gun
-- Hide Head Cosmetics
-- No Leaves
-- Fire Fists
-- Forest Lightning
-- Nebula Storm
-- Black Hole
-- White Hole
-- Random Domain
+- Body Tracers
+- Bone ESP
+- 2D Box ESP
+- 3D Box ESP
+- 4D Box ESP
+- Trails ESP
+- Chams
+- Beacons
 
-## Detected — 9
+## Room — 18
 
-- UpsideDown Head
-- Broken Neck
-- Backwards Head
-- Sideways Head
-- HeadBang
-- Tag Gun
-- Tag Self
-- Tag Aura
-- Tag All
+- Leave
+- JoinRandom
+- JoinRandom Private
+- EU
+- US
+- USW
+- Quit Game
+- Disable Network Triggers
+- Report All
+- Key-Leave
+- Key-Leave Input
+- Disable Quit Box
+- Disable Map Triggers
+- Reconnect
+- Cancel Reconnect
+- Join Last Room
+- JoinRoom: ASTRA
+- JoinRoom: CHUDOS
 
 ## Safety — 29
 
@@ -328,18 +361,43 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Rapid Master Protection
 - Reset Temporary Mod State
 
-## Room — 8
+## Detected — 9
 
-- Leave
-- JoinRandom
-- JoinRandom Private
-- EU
-- US
-- USW
-- Quit Game
-- Disable Network Triggers
+- UpsideDown Head
+- Broken Neck
+- Backwards Head
+- Sideways Head
+- HeadBang
+- Tag Gun
+- Tag Self
+- Tag Aura
+- Tag All
 
-## SoundBoard — 15
+## Visuals — 16
+
+- Hide Fog
+- Ambient Tint
+- Visual Info
+- Name Tags
+- Overlay
+- Jump Predictions
+- Show Room Triggers
+- Draw Gun
+- Hide Head Cosmetics
+- Fire Fists
+- Forest Lightning
+- Nebula Storm
+- Black Hole
+- White Hole
+- Random Domain
+- No Leaves
+
+## Weather — 2
+
+- Time
+- No Rain
+
+## Soundboard — 15
 
 - Play / Stop
 - Next Sound
@@ -357,12 +415,17 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Microphone Mute
 - Microphone Pitch
 
-## Weather — 2
+## Macros — 7
 
-- Time
-- No Rain
+- Macro Controls
+- Record Macro
+- Stop Macro
+- Play Selected Macro
+- Next Macro
+- Reload Macros
+- Open Macros Folder
 
-## Settings — 82
+## Settings — 112
 
 - PC View
 - Array List
@@ -385,7 +448,10 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Click Volume
 - Click Vibrations
 - Menu Language
+- Menu Open Sound
 - Auto Translate Boards
+- Open Sound
+- Open Volume
 - Wall Walk Strength
 - Wall Walk Input
 - Pull Method
@@ -423,11 +489,12 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Platform Color
 - Platform Visibility
 - Platform Rotation
+- Custom Platform Input
 - Speed Boost Preset
-- Speed Boost Jump Speed
-- Speed Boost Multiplier
 - Long Arm Length
+- Speed Boost Jump Speed
 - Long Arm Height
+- Speed Boost Multiplier
 - Soundboard Text Scrolling
 - Soundboard Scroll Speed
 - NoClip Input
@@ -446,3 +513,29 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - PitGeo Input
 - PitGeo Activation
 - Reset PitGeo Settings
+- Drone Speed
+- Drone Response
+- Velocity Speed
+- Velocity Acceleration
+- Velocity Input
+- Velocity Direction
+- Velocity Release
+- Throw Power
+- Double Jump Power
+- Double Jump Input
+- Punch Power
+- Custom Arms Speed
+- Reset Custom Arms
+- Chams Color
+- Chams Opacity
+- Beacon Height
+- Beacon Width
+- Beacon Color
+- Menu Alignment
+- Menu Distance
+- Menu Height
+- Recenter Menu
+- Reset Menu Position
+- Join Random: Current Map
+- Head Spin Speed
+- Throwable Interval

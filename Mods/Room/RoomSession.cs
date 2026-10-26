@@ -3,6 +3,8 @@
 
 using System.Collections;
 using ChudOS.Libraries.Notifications;
+using ChudOS.Core.Managers;
+using ChudOS.Stuff;
 using GorillaNetworking;
 using Photon.Pun;
 using UnityEngine;
@@ -14,6 +16,7 @@ public sealed class RoomSession : MonoBehaviourPunCallbacks
     private static RoomSession? instance;
     private static string lastRoom = "";
     private Coroutine? queued;
+    private static bool currentMap = true;
 
     private void Awake()
     {
@@ -38,6 +41,34 @@ public sealed class RoomSession : MonoBehaviourPunCallbacks
     internal static void JoinLastRoom() => Queue(lastRoom);
     internal static void JoinRoom(string code) => Queue(code);
 
+    [MenuButton("Join Random: Current Map", ButtonType.Toggle, Category = "Settings", Order = 245, DefaultEnabled = true, runOption = RunOption.Once, Notify = false)]
+    public static void CurrentMapOn() => currentMap = true;
+    [MenuDisable("Join Random: Current Map")]
+    public static void CurrentMapOff() => currentMap = false;
+
+    internal static void JoinRandom()
+    {
+        var controller = PhotonNetworkController.Instance;
+        if (instance == null || controller == null) return;
+        GorillaNetworkJoinTrigger? trigger = null;
+        if (!currentMap) trigger = GorillaComputer.instance?.GetJoinTriggerForZone("forest");
+        else
+        {
+            var candidate = controller.currentJoinTrigger;
+            if (candidate != null && candidate.isActiveAndEnabled && !candidate.isSubsOnly && ZoneManagement.instance != null && ZoneManagement.instance.IsZoneActive(candidate.zone)) trigger = candidate;
+            if (trigger == null)
+                foreach (var item in UnityEngine.Object.FindObjectsByType<GorillaNetworkJoinTrigger>(FindObjectsSortMode.None))
+                    if (item != null && item.isActiveAndEnabled && ZoneManagement.instance != null && ZoneManagement.instance.IsZoneActive(item.zone) && !item.isSubsOnly) { trigger = item; break; }
+        }
+        if (trigger == null)
+        {
+            NotifyLib.SendNotificationALL("No public room join is available for this map.", 4000);
+            return;
+        }
+        Cancel();
+        instance.queued = instance.StartCoroutine(instance.Join("", trigger, currentMap));
+    }
+
     private static void Queue(string code, bool reconnect = false)
     {
         if (instance == null || string.IsNullOrWhiteSpace(code))
@@ -54,7 +85,7 @@ public sealed class RoomSession : MonoBehaviourPunCallbacks
         instance.queued = instance.StartCoroutine(instance.Join(code));
     }
 
-    private IEnumerator Join(string code)
+    private IEnumerator Join(string code, GorillaNetworkJoinTrigger? publicTrigger = null, bool requireActiveZone = false)
     {
         yield return null;
         var network = NetworkSystem.Instance;
@@ -87,7 +118,15 @@ public sealed class RoomSession : MonoBehaviourPunCallbacks
         float readyAt = Time.unscaledTime + 0.5f;
         while (Time.unscaledTime < readyAt) yield return null;
         queued = null;
-        PhotonNetworkController.Instance.AttemptToAutoJoinSpecificRoom(code, JoinType.Solo);
+        if (PhotonNetworkController.Instance == null) { NotifyLib.SendNotificationALL("The room network is no longer available.", 3500); yield break; }
+        if (requireActiveZone && (publicTrigger == null || ZoneManagement.instance == null || !ZoneManagement.instance.IsZoneActive(publicTrigger.zone)))
+        {
+            NotifyLib.SendNotificationALL("The selected map is no longer available.", 3500);
+            yield break;
+        }
+        if (code.Length > 0) PhotonNetworkController.Instance.AttemptToAutoJoinSpecificRoom(code, JoinType.Solo);
+        else if (publicTrigger != null) PhotonNetworkController.Instance.AttemptToJoinPublicRoom(publicTrigger, JoinType.Solo);
+        else NotifyLib.SendNotificationALL("The selected map is no longer available.", 3500);
     }
 
     internal static void Cancel()

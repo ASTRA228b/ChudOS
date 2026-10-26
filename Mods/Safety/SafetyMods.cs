@@ -154,7 +154,7 @@ public static class SafetyMods
     [MenuDisable("Mod Error Protection")]
     public static void DisableErrorProtection() => ModSafetyMonitor.ErrorProtection = false;
 
-    [MenuButton("Disable Mods On Leave", ButtonType.Toggle, Category = "Safety", Order = 27, DefaultEnabled = true, runOption = RunOption.Once, Description = "Disable gameplay and visual toggles when leaving or changing rooms")]
+    [MenuButton("Disable Mods On Leave", ButtonType.Toggle, Category = "Safety", Order = 27, DefaultEnabled = false, runOption = RunOption.Once, Description = "Disable gameplay and visual toggles when leaving or changing rooms")]
     public static void LeaveProtection() { ModSafetyMonitor.LeaveProtection = true; ModSafetyMonitor.Ensure(); }
     [MenuDisable("Disable Mods On Leave")]
     public static void DisableLeaveProtection() => ModSafetyMonitor.LeaveProtection = false;

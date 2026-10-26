@@ -23,20 +23,10 @@ namespace ChudOS.Mods.Room;
 
 public class Room : MonoBehaviourPunCallbacks // room helpers
 {
-    // Only forest for now.
-    private static readonly string Zoner = "Environment Objects/TriggerZones_Prefab/JoinRoomTriggers_Prefab/JoinPublicRoom - Forest, Tree Exit";
     private static string? pendingRegion;
     public static bool IsEnabled;
 
-    public static void JoinRandom()
-    {
-        if (PhotonNetwork.InRoom)
-        {
-            Leave();
-        }
-        GameObject Val = GameObject.Find(Zoner);
-        Val.GetComponent<GorillaTriggerBox>().OnBoxTriggered();
-    }
+    public static void JoinRandom() => RoomSession.JoinRandom();
 
     public static void Leave()
     {

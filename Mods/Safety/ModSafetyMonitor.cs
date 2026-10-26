@@ -10,7 +10,7 @@ namespace ChudOS.Mods.Safety;
 
 internal sealed class ModSafetyMonitor : MonoBehaviourPunCallbacks
 {
-    internal static bool ErrorProtection = true, LeaveProtection = true, MasterProtection = true;
+    internal static bool ErrorProtection = true, LeaveProtection = false, MasterProtection = true;
     private static ModSafetyMonitor? instance;
     private readonly HashSet<ButtonManager.ButtonData> failed = new();
     private readonly CallWindow masterChanges = new(4, 3f);

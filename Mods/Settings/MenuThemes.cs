@@ -34,7 +34,7 @@ public static class MenuThemes
         public Color SearchBorder = new Color32(69, 70, 75, 255);
         public Color Text = Color.white;
         public Color SecondaryText = new Color32(142, 145, 154, 255);
-        public bool TextOnly;
+        public bool TextOnly, OutlineButtons;
     }
 
     private static Color RGB(byte r, byte g, byte b) => new Color32(r, g, b, 255);
@@ -133,10 +133,16 @@ public static class MenuThemes
             Background = RGB(8, 12, 24), Face = RGB(13, 19, 34), Button = RGB(24, 32, 49),
             Accent = RGB(235, 190, 80), Border = RGB(235, 190, 80), Divider = RGB(235, 190, 80),
             Text = RGB(255, 248, 225), SecondaryText = RGB(180, 180, 165)
+        },
+        new()
+        {
+            Background = RGB(5, 12, 9), Face = RGB(7, 17, 12), Button = RGB(12, 29, 20), Header = RGB(10, 24, 17),
+            Accent = RGB(35, 230, 115), Border = RGB(55, 255, 145), Divider = RGB(55, 255, 145),
+            SearchBorder = RGB(55, 255, 145), Text = RGB(235, 255, 240), SecondaryText = RGB(150, 210, 175), OutlineButtons = true
         }
     };
 
-    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only", "Arctic", "Ember", "Sakura", "Mint", "Midnight Gold" }, Notify = false)]
+    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only", "Arctic", "Ember", "Sakura", "Mint", "Midnight Gold", "Neon Outline" }, Notify = false)]
     public static void Apply()
     {
         int index = ButtonManager.GetButton("Menu Theme")?.OptionIndex ?? 0;
