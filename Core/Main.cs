@@ -176,6 +176,9 @@ public sealed partial class Main : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance != this) return;
+        ChudOS.Mods.Movement.SpiderMan.Stop();
+        ChudOS.Mods.Movement.CustomArms.Stop();
+        ChudOS.Mods.Player.PlayerESPRuntime.ClearHighlights();
         ChudOS.Mods.Movement.ExtraMovementMods.Clear();
         ChudOS.Mods.Movement.PunchMods.Stop();
         ChudOS.Mods.Safety.NoFingerPose.Disable();

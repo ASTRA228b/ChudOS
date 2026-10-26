@@ -22,7 +22,7 @@ using Object = UnityEngine.Object;
 namespace ChudOS.Mods.Player;
 
 
-public static class PlayerESPRuntime
+public static partial class PlayerESPRuntime
 {
     private static readonly Dictionary<VRRig, LineRenderer> Tracers = new();
     private static readonly Dictionary<VRRig, BoneState> Skeletons = new();

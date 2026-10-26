@@ -2,13 +2,13 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. The **0.1.2 test build** has **302 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.2** has **318 total menu buttons**, including mods, settings, and actions.
 
-**0.1.2 is in local testing and has not been released. The latest published release is 0.1.1.**
+**0.1.2 is available now. Download the latest release below.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
-## 0.1.2 test build
+## New in 0.1.2
 
 - **Long Arms:** default length 1.1 with a 0.5–2.5 range and finer steps near the default. Existing saved lengths migrate to the new choices; height settings stay separate.
 - **Board text:** refresh outdated built-in text from older saves, preserve custom fields, and keep a backup at `ChudOS/boards.json.pre-012.bak` when migrating an existing file.
@@ -17,16 +17,41 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. The
 - **Movement:** Drone Fly, Left And Right, Forward And Backwards, Velocity Movement, Throw, Double Jump, Fly Towards Gun, and Punch. Custom Platforms now has its own activation input setting.
 - **Rig:** Rig Gun, Spazz Rig, Spazz Hands, Fixed LongArms, Grab Rig, and Fake Lag.
 - **Settings:** Drone Speed/Response; Velocity Speed/Acceleration/Input/Direction/Release; Throw Power; Double Jump Power/Input; Punch Power; Custom Platform Input; and five additional themes.
+- **Spider Man:** hold either trigger to attach a web to a surface, swing under gravity, and release to retain momentum. Each hand has its own web.
+- **Platform Gun:** hold the trigger to rapidly place platforms, with a 50 ms minimum interval and a maximum of 20 active gun platforms. The original platform construction and collisions are retained.
 - **Fun:** Unlock FPS; 30, 60, 72, 90, 120, 144, 165, 240, and 360 FPS presets; and Reset FPS.
+
+### Additional 0.1.2 features
+
+Movement:
+- Custom Arms — hold left trigger to increase length and right trigger to decrease it.
+- Adjustable range: 0.5–2.5, starting at 1.1; height uses the existing Long Arm Height setting.
+- Custom Arms Speed and Reset Custom Arms settings.
+
+Player:
+- Chams — solid-color player highlights visible through walls, with the original avatar materials preserved.
+- Beacons — vertical markers above other players' heads.
+- Player/theme colors, Chams opacity, and Beacon height/width settings.
+
+Rig:
+- Helicopter (Trolling)
+- T-Pose (Trolling)
+- Freeze Rig Body (Trolling)
+- Freeze Rig Limbs (Trolling)
+- Jumpscare Gun (Trolling)
+
+(Trolling) identifies playful avatar-pose features. It is not a controller keybind or a safety rating. The freeze mods affect your own rig. Helicopter and T-Pose use A; Jumpscare Gun uses the existing VR/PC gun controls.
 
 **Controls and behavior**
 
+- Spider Man: aim a controller at a surface and hold its trigger. Release to detach. It uses surface anchors and rope tension rather than the existing Grappling Hooks pull.
 - Drone Fly: left stick moves, right stick controls height and turning. Configure speed and response in Settings.
 - Left And Right: left/right trigger. Forward And Backwards: left trigger forward, right trigger backwards. Both follow your horizontal head direction.
 - Velocity Movement: selected input, direction, speed, acceleration, and release behavior from Settings. Hand direction uses the right controller.
 - Throw: a quick hand swing away from surfaces adds a burst in that direction; slow the hand before another burst. Body translation is excluded from the hand sample.
 - Double Jump: press A by default for one additional airborne jump. Landing rearms it; input and power are configurable.
 - Punch: other players' nearby hand movements knock you back. Punch Power changes the impulse applied to you.
+- Platform Gun: aim with grip and hold trigger to keep placing platforms; on PC, hold right mouse to aim and left mouse to place. Release either button to stop.
 - Fly Towards Gun and Rig Gun: use the existing gun controls. Rig Gun places your rig slightly above the surface; Fly Towards Gun moves your player toward the hit point.
 - Spazz Rig and Spazz Hands: hold A. Grab Rig: hold right grip. Fixed LongArms uses uniform 1.5 scale. Fake Lag updates the local rig pose every half second.
 - Key-Leave: enable the toggle, then press its selected input. Enabling it while holding the input does not immediately leave.
@@ -34,7 +59,7 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. The
 - Report All submits a native Cheating report for every other player in the room.
 - Unlock FPS disables Unity VSync and its application frame cap. The VR runtime can still control headset frame rate. Reset FPS restores the previous frame limit and VSync settings.
 
-These features are available in the source and local test DLL. In-game VR behavior still needs testing before publication.
+Download ChudOS.dll from the release page to use these features.
 
 ## Features
 

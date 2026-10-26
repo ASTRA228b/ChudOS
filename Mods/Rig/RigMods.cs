@@ -156,6 +156,31 @@ public static class RigMods
     [MenuDisable("Fake Lag")]
     public static void DisableFakeLag() => RigRuntime.Disable("Fake Lag");
 
+    [MenuButton("Helicopter", ButtonType.Toggle, Category = "Rig", Order = 27, runOption = RunOption.Once, Description = "Hold A to spin and raise your rig with its arms extended")]
+    public static void EnableHelicopter() => RigRuntime.Enable<Helicopter>("Helicopter");
+    [MenuDisable("Helicopter")]
+    public static void DisableHelicopter() => RigRuntime.Disable("Helicopter");
+
+    [MenuButton("T-Pose", ButtonType.Toggle, Category = "Rig", Order = 28, runOption = RunOption.Once, Description = "Hold A to extend your rig's arms sideways")]
+    public static void EnableTPose() => RigRuntime.Enable<TPose>("T-Pose");
+    [MenuDisable("T-Pose")]
+    public static void DisableTPose() => RigRuntime.Disable("T-Pose");
+
+    [MenuButton("Freeze Rig Body", ButtonType.Toggle, Category = "Rig", Order = 29, runOption = RunOption.Once, Description = "Anchor your rig's body while your hands and head rotation follow tracking")]
+    public static void EnableFreezeRigBody() => RigRuntime.Enable<FreezeRigBody>("Freeze Rig Body");
+    [MenuDisable("Freeze Rig Body")]
+    public static void DisableFreezeRigBody() => RigRuntime.Disable("Freeze Rig Body");
+
+    [MenuButton("Freeze Rig Limbs", ButtonType.Toggle, Category = "Rig", Order = 30, runOption = RunOption.Once, Description = "Keep your rig's head and hands stationary while its body follows you")]
+    public static void EnableFreezeRigLimbs() => RigRuntime.Enable<FreezeRigLimbs>("Freeze Rig Limbs");
+    [MenuDisable("Freeze Rig Limbs")]
+    public static void DisableFreezeRigLimbs() => RigRuntime.Disable("Freeze Rig Limbs");
+
+    [MenuButton("Jumpscare Gun", ButtonType.Toggle, Category = "Rig", Order = 31, runOption = RunOption.Once, Description = "Aim and hold trigger to pose your rig in front of the selected player's face")]
+    public static void EnableJumpscareGun() => RigRuntime.Enable<JumpscareGun>("Jumpscare Gun");
+    [MenuDisable("Jumpscare Gun")]
+    public static void DisableJumpscareGun() => RigRuntime.Disable("Jumpscare Gun");
+
     [MenuButton("PC Rig Mode", ButtonType.Option, Category = "Rig", Order = 15, Options = new[] { "Wings", "Skellon", "Lemming", "Head", "Rec Room" }, Description = "Choose the desktop avatar pose used by PC Rig")]
     public static void ChangePcRigMode()
     {

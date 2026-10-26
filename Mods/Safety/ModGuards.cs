@@ -12,17 +12,18 @@ namespace ChudOS.Mods.Safety;
 internal static class ModGuards
 {
     internal const string DetectedWarning = "WARNING: Mods in Detected may trigger detection or result in a ban. Safety settings do not make them safe to use.";
-    private static readonly string[] VelocityControllers = { "Car", "Fly (X)", "Trigger Fly", "Joystick Fly (LJ)", "BarkFly (JR)(JL)", "Velocity BarkFly (JR)(JL)", "Hand Fly (B)", "WASD Fly", "NoClip Fly", "Drone Fly", "Velocity Movement", "Fly Towards Gun" };
+    private static readonly string[] VelocityControllers = { "Car", "Fly (X)", "Trigger Fly", "Joystick Fly (LJ)", "BarkFly (JR)(JL)", "Velocity BarkFly (JR)(JL)", "Hand Fly (B)", "WASD Fly", "NoClip Fly", "Drone Fly", "Velocity Movement", "Fly Towards Gun", "Spider Man" };
+    private static readonly string[] ScaleControllers = { "Size Changer", "Long Arms", "Custom Arms", "Fixed LongArms" };
     private static readonly Dictionary<string, float> errorNotices = new(StringComparer.Ordinal);
 
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
-        if (button.Name == "Size Changer")
-        {
-            ButtonManager.SetEnabled("Long Arms", false);
-            ButtonManager.SetEnabled("Fixed LongArms", false);
-        }
+        if (ScaleControllers.Contains(button.Name))
+            foreach (string name in ScaleControllers)
+                if (name != button.Name) ButtonManager.SetEnabled(name, false);
+        if (button.Name == "Spider Man") ButtonManager.SetEnabled("Grappling Hooks", false);
+        if (button.Name == "Grappling Hooks") ButtonManager.SetEnabled("Spider Man", false);
         if (button.Name == "Predictions")
             foreach (var other in ButtonManager.Buttons)
                 if (other.Category == "Rig" && other.Type == ButtonType.Toggle && other.Name != "Max Quest Score") ButtonManager.SetEnabled(other, false);
@@ -43,6 +44,13 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
+        ButtonManager.SetEnabled("Spider Man", false);
+        ChudOS.Mods.Movement.SpiderMan.Stop();
+        ButtonManager.SetEnabled("Custom Arms", false);
+        ButtonManager.SetEnabled("Chams", false);
+        ButtonManager.SetEnabled("Beacons", false);
+        ChudOS.Mods.Movement.CustomArms.Stop();
+        ChudOS.Mods.Player.PlayerESPRuntime.ClearHighlights();
         foreach (string name in new[] { "Drone Fly", "Velocity Movement", "Throw", "Double Jump", "Fly Towards Gun", "Punch", "Fixed LongArms" }) ButtonManager.SetEnabled(name, false);
         ChudOS.Mods.Movement.ExtraMovementMods.Clear();
         ChudOS.Mods.Movement.PunchMods.Stop();

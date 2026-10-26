@@ -19,9 +19,11 @@ public static class LongArmMods
     private static float length = 1.1f, height = 1f;
 
     [MenuButton("Long Arms", ButtonType.Toggle, Category = "Movement", Order = 151, runOption = RunOption.LateUpdate, Description = "Use the configured horizontal player scale and height")]
-    public static void LongArms()
+    public static void LongArms() => ApplyLength(length);
+
+    internal static void ApplyLength(float value)
     {
-        if (!PortTools.Ready) return;
+        if (!PortTools.Ready) { Reset(); return; }
         Transform player = GTPlayer.Instance.transform;
         if (owner != player)
         {
@@ -29,7 +31,8 @@ public static class LongArmMods
             owner = player;
             original = player.localScale;
         }
-        player.localScale = Vector3.Scale(original, new Vector3(length, height, length));
+        value = Mathf.Clamp(value, 0.5f, 2.5f);
+        player.localScale = Vector3.Scale(original, new Vector3(value, height, value));
     }
     [MenuEnable("Long Arms")]
     public static void Enable()

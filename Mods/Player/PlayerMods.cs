@@ -66,6 +66,20 @@ public static class PlayerMods
     [MenuDisable("Trails ESP")]
     public static void StopTrailsESP() => PlayerESPRuntime.ClearTrailsESP();
 
+    [MenuButton("Chams", ButtonType.Toggle, Category = "Player", Order = 6, runOption = RunOption.LateUpdate, Description = "Show solid-color highlights through walls")]
+    public static void Chams() => PlayerESPRuntime.Chams();
+    [MenuEnable("Chams")]
+    public static void StartChams() => PortTools.Register(PlayerESPRuntime.ClearHighlights);
+    [MenuDisable("Chams")]
+    public static void StopChams() => PlayerESPRuntime.ClearChams();
+
+    [MenuButton("Beacons", ButtonType.Toggle, Category = "Player", Order = 7, runOption = RunOption.LateUpdate, Description = "Show a vertical beacon above each remote player's head")]
+    public static void Beacons() => PlayerESPRuntime.Beacons();
+    [MenuEnable("Beacons")]
+    public static void StartBeacons() => PortTools.Register(PlayerESPRuntime.ClearHighlights);
+    [MenuDisable("Beacons")]
+    public static void StopBeacons() => PlayerESPRuntime.ClearBeacons();
+
     [MenuButton("Tag Gun", ButtonType.Toggle, Category = "Detected", Order = 6, Description = "Select a player within normal hand reach; does not move your rig")]
     public static void TG()
     {

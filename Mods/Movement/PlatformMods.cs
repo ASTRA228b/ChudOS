@@ -17,7 +17,7 @@ public static class PlatformMods
     private static readonly Queue<GameObject> placed = new();
     private static PhysicsMaterial? stickyMaterial;
     private static Vector3 customScale = new(0.25f, 0.3f, 0.25f);
-    private static bool customVisible = true, flat, gunPressed;
+    private static bool customVisible = true, flat;
     private static int colorIndex, customInput;
     private static float nextPlacement;
 
@@ -126,16 +126,17 @@ public static class PlatformMods
     [MenuDisable("Custom Platforms")]
     public static void StopCustom() => ClearHands();
 
-    [MenuButton("Platform Gun", ButtonType.Toggle, Category = "Movement", Order = 144, runOption = RunOption.FixedUpdate, Description = "Aim with grip and press trigger to place a custom platform; PC: right mouse + left click")]
+    [MenuButton("Platform Gun", ButtonType.Toggle, Category = "Movement", Order = 144, runOption = RunOption.FixedUpdate, Description = "Aim with grip and hold trigger to rapidly place custom platforms; PC: hold right mouse + left click")]
     public static void PlatformGun()
     {
         if (!PortTools.Ready) { StopGun(); return; }
         PortTools.Register(Cleanup);
         bool trigger = GunLib.SelectPressed;
         bool hit = GunLib.UpdateGun(GunLib.AimHand, GunLib.AimPressed, trigger, out Vector3 point);
-        if (hit && !gunPressed && Time.unscaledTime >= nextPlacement)
+        if (!hit) { nextPlacement = 0f; return; }
+        if (Time.unscaledTime >= nextPlacement)
         {
-            nextPlacement = Time.unscaledTime + 0.25f;
+            nextPlacement = Time.unscaledTime + 0.05f;
             while (placed.Count > 0 && placed.Peek() == null) placed.Dequeue();
             while (placed.Count >= 20) Remove(placed.Dequeue());
             Vector3 normal = GunLib.LastHit.normal;
@@ -146,12 +147,11 @@ public static class PlatformMods
             Object.Destroy(obj.transform.GetChild(0).GetComponent<Renderer>().sharedMaterial, 30f);
             Object.Destroy(obj, 30f);
         }
-        gunPressed = trigger;
     }
     [MenuEnable("Platform Gun")]
     public static void StartGun() { StopGun(); PortTools.ClaimPointer("Platform Gun"); }
     [MenuDisable("Platform Gun")]
-    public static void StopGun() { while (placed.Count > 0) Remove(placed.Dequeue()); gunPressed = false; nextPlacement = 0f; GunLib.Hide(); }
+    public static void StopGun() { while (placed.Count > 0) Remove(placed.Dequeue()); nextPlacement = 0f; GunLib.Hide(); }
 
     private static int Index(string name) => ButtonManager.GetButton(name)?.OptionIndex ?? 0;
     private static void Refresh()
