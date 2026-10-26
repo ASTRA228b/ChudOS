@@ -18,7 +18,7 @@ public static class PlatformMods
     private static PhysicsMaterial? stickyMaterial;
     private static Vector3 customScale = new(0.25f, 0.3f, 0.25f);
     private static bool customVisible = true, flat, gunPressed;
-    private static int colorIndex;
+    private static int colorIndex, customInput;
     private static float nextPlacement;
 
     internal static void Activate(string name)
@@ -35,7 +35,7 @@ public static class PlatformMods
         bool changed = false;
         for (int i = 0; i < 2; i++)
         {
-            bool held = i == 0 ? InputLib.LeftGrab : InputLib.RightGrab;
+            bool held = mode == 4 ? CustomHeld(i) : i == 0 ? InputLib.LeftGrab : InputLib.RightGrab;
             var hand = i == 0 ? GTPlayer.Instance.LeftHand.controllerTransform : GTPlayer.Instance.RightHand.controllerTransform;
             if (!held || hand == null) { Remove(hands[i]); hands[i] = null; continue; }
             if (hands[i] == null)
@@ -172,6 +172,14 @@ public static class PlatformMods
     public static void SetVisibility() { customVisible = Index("Platform Visibility") == 0; Refresh(); }
     [MenuButton("Platform Rotation", ButtonType.Option, Category = "Settings", Order = 165, Options = new[] { "Hand / Surface", "Flat" }, Notify = false)]
     public static void SetRotation() { flat = Index("Platform Rotation") == 1; Refresh(); }
+
+    [MenuButton("Custom Platform Input", ButtonType.Option, Category = "Settings", Order = 166, Options = new[] { "Grip", "Trigger", "Joystick Click", "Primary Button" }, Notify = false)]
+    public static void SetCustomInput() { customInput = Index("Custom Platform Input"); ClearHands(); }
+    private static bool CustomHeld(int hand)
+    {
+        int input = customInput == 3 ? (hand == 0 ? 5 : 3) : customInput;
+        return hand == 0 ? MovementInput.Left(input) : MovementInput.Right(input);
+    }
 
     internal static void Clear() { ClearHands(); StopGun(); }
     private static void Cleanup() { Clear(); if (stickyMaterial != null) Object.Destroy(stickyMaterial); stickyMaterial = null; }

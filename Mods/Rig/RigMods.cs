@@ -126,6 +126,36 @@ public static class RigMods
     [MenuDisable("Spin Bot")]
     public static void DisableSpinBot() => RigRuntime.Disable("Spin Bot");
 
+    [MenuButton("Rig Gun", ButtonType.Toggle, Category = "Rig", Order = 21, runOption = RunOption.Once, Description = "Place your rig just above the gun hit point")]
+    public static void EnableRigGun() => RigRuntime.Enable<RigGun>("Rig Gun");
+    [MenuDisable("Rig Gun")]
+    public static void DisableRigGun() => RigRuntime.Disable("Rig Gun");
+
+    [MenuButton("Spazz Rig", ButtonType.Toggle, Category = "Rig", Order = 22, runOption = RunOption.Once, Description = "Hold A to shake your rig's tracking offsets")]
+    public static void EnableSpazzRig() => RigRuntime.Enable<SpazzRig>("Spazz Rig");
+    [MenuDisable("Spazz Rig")]
+    public static void DisableSpazzRig() => RigRuntime.Disable("Spazz Rig");
+
+    [MenuButton("Spazz Hands", ButtonType.Toggle, Category = "Rig", Order = 23, runOption = RunOption.Once, Description = "Hold A to randomize your rig's hand poses")]
+    public static void EnableSpazzHands() => RigRuntime.Enable<SpazzHands>("Spazz Hands");
+    [MenuDisable("Spazz Hands")]
+    public static void DisableSpazzHands() => RigRuntime.Disable("Spazz Hands");
+
+    [MenuButton("Fixed LongArms", ButtonType.Toggle, Category = "Rig", Order = 24, runOption = RunOption.Once, Description = "Use the original LongArm Slider method at a fixed 1.5 scale")]
+    public static void EnableFixedLongArms() => RigRuntime.Enable<FixedLongArms>("Fixed LongArms");
+    [MenuDisable("Fixed LongArms")]
+    public static void DisableFixedLongArms() => RigRuntime.Disable("Fixed LongArms");
+
+    [MenuButton("Grab Rig", ButtonType.Toggle, Category = "Rig", Order = 25, runOption = RunOption.Once, Description = "Hold right grip to move your own rig with your hand")]
+    public static void EnableGrabRig() => RigRuntime.Enable<GrabRig>("Grab Rig");
+    [MenuDisable("Grab Rig")]
+    public static void DisableGrabRig() => RigRuntime.Disable("Grab Rig");
+
+    [MenuButton("Fake Lag", ButtonType.Toggle, Category = "Rig", Order = 26, runOption = RunOption.Once, Description = "Update your local rig pose every half second")]
+    public static void EnableFakeLag() => RigRuntime.Enable<FakeLag>("Fake Lag");
+    [MenuDisable("Fake Lag")]
+    public static void DisableFakeLag() => RigRuntime.Disable("Fake Lag");
+
     [MenuButton("PC Rig Mode", ButtonType.Option, Category = "Rig", Order = 15, Options = new[] { "Wings", "Skellon", "Lemming", "Head", "Rec Room" }, Description = "Choose the desktop avatar pose used by PC Rig")]
     public static void ChangePcRigMode()
     {

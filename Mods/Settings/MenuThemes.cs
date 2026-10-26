@@ -103,10 +103,40 @@ public static class MenuThemes
             Text = RGB(20, 35, 50),
             SecondaryText = RGB(65, 85, 105)
         },
-        new() { TextOnly = true }
+        new() { TextOnly = true },
+        new()
+        {
+            Background = RGB(9, 18, 24), Face = RGB(13, 25, 32), Button = RGB(23, 40, 49), Header = RGB(18, 33, 42),
+            Accent = RGB(100, 220, 255), Border = RGB(100, 220, 255), Divider = RGB(100, 220, 255),
+            Text = RGB(235, 250, 255), SecondaryText = RGB(160, 195, 210)
+        },
+        new()
+        {
+            Background = RGB(20, 11, 8), Face = RGB(28, 17, 12), Button = RGB(49, 29, 19),
+            Accent = RGB(255, 145, 45), Border = RGB(255, 145, 45), Divider = RGB(255, 145, 45),
+            Text = RGB(255, 245, 230), SecondaryText = RGB(205, 170, 135)
+        },
+        new()
+        {
+            Background = RGB(22, 12, 21), Face = RGB(31, 18, 29), Button = RGB(50, 29, 46),
+            Accent = RGB(255, 145, 195), Border = RGB(255, 145, 195), Divider = RGB(255, 145, 195),
+            Text = RGB(255, 240, 248), SecondaryText = RGB(205, 165, 190)
+        },
+        new()
+        {
+            Background = RGB(8, 20, 17), Face = RGB(12, 29, 24), Button = RGB(21, 45, 37),
+            Accent = RGB(105, 240, 185), Border = RGB(105, 240, 185), Divider = RGB(105, 240, 185),
+            Text = RGB(235, 255, 245), SecondaryText = RGB(150, 200, 175)
+        },
+        new()
+        {
+            Background = RGB(8, 12, 24), Face = RGB(13, 19, 34), Button = RGB(24, 32, 49),
+            Accent = RGB(235, 190, 80), Border = RGB(235, 190, 80), Divider = RGB(235, 190, 80),
+            Text = RGB(255, 248, 225), SecondaryText = RGB(180, 180, 165)
+        }
     };
 
-    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only" }, Notify = false)]
+    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only", "Arctic", "Ember", "Sakura", "Mint", "Midnight Gold" }, Notify = false)]
     public static void Apply()
     {
         int index = ButtonManager.GetButton("Menu Theme")?.OptionIndex ?? 0;

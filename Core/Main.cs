@@ -176,6 +176,9 @@ public sealed partial class Main : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance != this) return;
+        ChudOS.Mods.Movement.ExtraMovementMods.Clear();
+        ChudOS.Mods.Movement.PunchMods.Stop();
+        ChudOS.Mods.Safety.NoFingerPose.Disable();
         ChudOS.Mods.Movement.NoClipMods.Clear();
         ChudOS.Mods.Movement.Predictions.Stop();
         ChudOS.Mods.Movement.PitGeo.Stop();

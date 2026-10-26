@@ -40,17 +40,11 @@ public class Room : MonoBehaviourPunCallbacks // room helpers
 
     public static void Leave()
     {
+        RoomSession.Cancel();
         PhotonNetwork.Disconnect();
     }
 
-    public static void JoinRoom(string Name)
-    {
-        if (PhotonNetwork.InRoom)
-        {
-            Leave();
-        }
-        PhotonNetworkController.Instance.AttemptToAutoJoinSpecificRoom(Name, JoinType.Solo);
-    }
+    public static void JoinRoom(string Name) => RoomSession.JoinRoom(Name);
 
     public static void ConnectToRegion(string region)
     {

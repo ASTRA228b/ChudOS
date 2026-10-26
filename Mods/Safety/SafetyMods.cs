@@ -58,10 +58,10 @@ public static class SafetyMods
     }
 
 
-    [MenuButton("No Finger Gestures", ButtonType.Toggle, Category = "Safety", Order = 6, runOption = RunOption.LateUpdate, Description = "Suppress local finger animation without changing controller input")]
-    public static void NoFinger() => SafetyRuntime.NoFinger();
+    [MenuButton("No Finger Gestures", ButtonType.Toggle, Category = "Safety", Order = 6, runOption = RunOption.Once, Description = "Keep your local fingers open while retaining normal menu inputs")]
+    public static void NoFinger() => NoFingerPose.Enable();
     [MenuDisable("No Finger Gestures")]
-    public static void RestoreFingers() => SafetyRuntime.RestoreFingers();
+    public static void RestoreFingers() => NoFingerPose.Disable();
 
     [MenuButton("Fake Valve Tracking", ButtonType.Toggle, Category = "Safety", Order = 7, runOption = RunOption.Update, Description = "Hold right joystick click to freeze the local rig head angle")]
     public static void FakeValveTracking() => SafetyRuntime.FakeValveTracking();

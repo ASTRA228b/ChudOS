@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 using ChudOS.Stuff;
-using Newtonsoft.Json;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -47,6 +47,7 @@ public sealed class Changetext : MonoBehaviour
     private static bool boardsEnabled = true, motdEnabled = true, cocEnabled = true, uppercase;
     private static int colorIndex;
     private float nextScan;
+    private Dictionary<string, string> builtIn = null!;
     private string[] displayText = Array.Empty<string>();
     private readonly BoardSlot[] slots =
     {
@@ -57,14 +58,6 @@ public sealed class Changetext : MonoBehaviour
     };
 
     private static string TextPath => Path.Combine(FileManager.RootFolder, "boards.json");
-
-    private sealed class BoardText
-    {
-        public string? MOTDHeadingTXT;
-        public string? MOTDbodyTXT;
-        public string? COCHeadingTXT;
-        public string? COCbodyTXT;
-    }
 
     private sealed class BoardSlot
     {
@@ -130,6 +123,13 @@ public sealed class Changetext : MonoBehaviour
     {
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
+        builtIn = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [nameof(MOTDHeadingTXT)] = MOTDHeadingTXT,
+            [nameof(MOTDbodyTXT)] = MOTDbodyTXT,
+            [nameof(COCHeadingTXT)] = COCHeadingTXT,
+            [nameof(COCbodyTXT)] = COCbodyTXT
+        };
         ReloadText();
         TranslationManager.Changed += RefreshText;
     }
@@ -172,24 +172,11 @@ public sealed class Changetext : MonoBehaviour
     {
         try
         {
-            if (File.Exists(TextPath))
-            {
-                BoardText? data = JsonConvert.DeserializeObject<BoardText>(File.ReadAllText(TextPath));
-                if (data == null) throw new InvalidDataException("Board text file is empty.");
-                MOTDHeadingTXT = data.MOTDHeadingTXT ?? MOTDHeadingTXT;
-                MOTDbodyTXT = data.MOTDbodyTXT ?? MOTDbodyTXT;
-                COCHeadingTXT = data.COCHeadingTXT ?? COCHeadingTXT;
-                COCbodyTXT = data.COCbodyTXT ?? COCbodyTXT;
-            }
-            else
-            {
-                Directory.CreateDirectory(FileManager.RootFolder);
-                File.WriteAllText(TextPath, JsonConvert.SerializeObject(new BoardText
-                {
-                    MOTDHeadingTXT = MOTDHeadingTXT, MOTDbodyTXT = MOTDbodyTXT,
-                    COCHeadingTXT = COCHeadingTXT, COCbodyTXT = COCbodyTXT
-                }, Formatting.Indented));
-            }
+            var text = BoardTextStore.Load(TextPath, builtIn);
+            MOTDHeadingTXT = text[nameof(MOTDHeadingTXT)];
+            MOTDbodyTXT = text[nameof(MOTDbodyTXT)];
+            COCHeadingTXT = text[nameof(COCHeadingTXT)];
+            COCbodyTXT = text[nameof(COCbodyTXT)];
         }
         catch (Exception ex) { Debug.LogError($"[{Constantss.GUID}] Board text: {ex.Message}"); }
         RefreshText();

@@ -21,7 +21,7 @@ namespace ChudOS.Mods.Room;
 
 public static class RoomMods
 {
-    private static readonly string[] Codes = { "1", "12", "1245", "1234", "LUCIO", "MODS", "MOD", "TTTPIG", "MODDING", "MENU", "GHGHFJSDJ", "HSDFHSD", "SDFSDDFS", "HHHHH", "GGG3IU9" };
+    private static readonly string[] Codes1 = { "1", "12", "1245", "1234", "LUCIO", "MODS", "MOD", "TTTPIG", "MODDING", "MENU", "GHGHFJSDJ", "HSDFHSD", "SDFSDDFS", "HHHHH", "GGG3IU9", "ASTRA", "CHUDOS", "CHUD", "ASTRA1", "CHUDOS1", "MODS1", "MODS2", "MODDING1", "MODDING2", "TEST", "TEST1", "SANDBOX", "PRACTICE", "CHILL", "MONKE" };
 
     [MenuButton("Leave", ButtonType.Press, Category = "Room", Order = 0)]
     public static void Leave() => Room.Leave();
@@ -32,9 +32,14 @@ public static class RoomMods
     [MenuButton("JoinRandom Private", ButtonType.Press, Category = "Room", Order = 2, Description = "Joins a random private code that may or may not have people in it.")]
     public static void JRP()
     {
-        string code = Codes[UnityEngine.Random.Range(0, Codes.Length)];
+        string code = Codes1[UnityEngine.Random.Range(0, Codes1.Length)];
         Room.JoinRoom(code);
     }
+
+    [MenuButton("JoinRoom: ASTRA", ButtonType.Press, Category = "Room", Order = 16)]
+    public static void JoinAstra() => Room.JoinRoom("ASTRA");
+    [MenuButton("JoinRoom: CHUDOS", ButtonType.Press, Category = "Room", Order = 17)]
+    public static void JoinChudOS() => Room.JoinRoom("CHUDOS");
 
     [MenuButton("EU", ButtonType.Press, Category = "Room", Order = 3)]
     public static void EU() => Room.ConnectToRegion("eu");

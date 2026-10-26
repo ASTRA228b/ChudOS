@@ -48,7 +48,7 @@ internal sealed class RigRuntime : MonoBehaviour
     private Snapshot? snapshot;
     private bool changing;
     private static readonly string[] ExternalPoses = { "Tag Gun", "Tag Self", "Tag All", "Fake Power Off", "Rewind", "Predictions" };
-    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun", "Platform Gun" };
+    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun", "Platform Gun", "Fly Towards Gun" };
 
     internal static bool Ready => PortTools.Ready && VRRig.LocalRig != null &&
         VRRig.LocalRig.head.rigTarget != null && VRRig.LocalRig.leftHand.rigTarget != null && VRRig.LocalRig.rightHand.rigTarget != null &&

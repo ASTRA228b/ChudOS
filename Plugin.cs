@@ -33,6 +33,7 @@ public sealed class Plugin : BaseUnityPlugin
         Runtime = new GameObject(Constantss.ObjectName);
         Runtime.AddComponent<Changetext>();
         Runtime.AddComponent<Main>();
+        Runtime.AddComponent<ChudOS.Mods.Room.RoomSession>();
         DontDestroyOnLoad(Runtime);
     }
 

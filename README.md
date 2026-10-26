@@ -2,11 +2,39 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.1** has **255 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. The **0.1.2 test build** has **302 total menu buttons**, including mods, settings, and actions.
 
-**0.1.1 is available now. Download the latest release below.**
+**0.1.2 is in local testing and has not been released. The latest published release is 0.1.1.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
+
+## 0.1.2 test build
+
+- **Long Arms:** default length 1.1 with a 0.5–2.5 range and finer steps near the default. Existing saved lengths migrate to the new choices; height settings stay separate.
+- **Board text:** refresh outdated built-in text from older saves, preserve custom fields, and keep a backup at `ChudOS/boards.json.pre-012.bak` when migrating an existing file.
+- **No Finger Gestures:** keep fingers open at the native finger mapper while preserving controller inputs for the menu and other mods.
+- **Room:** Report All, Key-Leave with its input selector directly underneath, Disable Quit Box, Disable Map Triggers, Reconnect, Cancel Reconnect, Join Last Room, JoinRoom: ASTRA, and JoinRoom: CHUDOS. Random private-room selection now has 30 code choices.
+- **Movement:** Drone Fly, Left And Right, Forward And Backwards, Velocity Movement, Throw, Double Jump, Fly Towards Gun, and Punch. Custom Platforms now has its own activation input setting.
+- **Rig:** Rig Gun, Spazz Rig, Spazz Hands, Fixed LongArms, Grab Rig, and Fake Lag.
+- **Settings:** Drone Speed/Response; Velocity Speed/Acceleration/Input/Direction/Release; Throw Power; Double Jump Power/Input; Punch Power; Custom Platform Input; and five additional themes.
+- **Fun:** Unlock FPS; 30, 60, 72, 90, 120, 144, 165, 240, and 360 FPS presets; and Reset FPS.
+
+**Controls and behavior**
+
+- Drone Fly: left stick moves, right stick controls height and turning. Configure speed and response in Settings.
+- Left And Right: left/right trigger. Forward And Backwards: left trigger forward, right trigger backwards. Both follow your horizontal head direction.
+- Velocity Movement: selected input, direction, speed, acceleration, and release behavior from Settings. Hand direction uses the right controller.
+- Throw: a quick hand swing away from surfaces adds a burst in that direction; slow the hand before another burst. Body translation is excluded from the hand sample.
+- Double Jump: press A by default for one additional airborne jump. Landing rearms it; input and power are configurable.
+- Punch: other players' nearby hand movements knock you back. Punch Power changes the impulse applied to you.
+- Fly Towards Gun and Rig Gun: use the existing gun controls. Rig Gun places your rig slightly above the surface; Fly Towards Gun moves your player toward the hit point.
+- Spazz Rig and Spazz Hands: hold A. Grab Rig: hold right grip. Fixed LongArms uses uniform 1.5 scale. Fake Lag updates the local rig pose every half second.
+- Key-Leave: enable the toggle, then press its selected input. Enabling it while holding the input does not immediately leave.
+- Reconnect and Join Last Room remember the last joined room during this game session. Cancel Reconnect stops a queued join before it is submitted; it cannot retract a request already sent to the game.
+- Report All submits a native Cheating report for every other player in the room.
+- Unlock FPS disables Unity VSync and its application frame cap. The VR runtime can still control headset frame rate. Reset FPS restores the previous frame limit and VSync settings.
+
+These features are available in the source and local test DLL. In-game VR behavior still needs testing before publication.
 
 ## Features
 
@@ -17,7 +45,7 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - Soundboard and microphone controls.
 - Custom MOTD and rules boards with settings to edit and reload text.
 - PC and VR menus, search, an active mod list, and saved menu settings.
-- Eight menu themes: OG, OG Blue, OG Red, Midnight, Forest, Sunset, Ice, and Text Only.
+- Thirteen menu themes: OG, OG Blue, OG Red, Midnight, Forest, Sunset, Ice, Text Only, Arctic, Ember, Sakura, Mint, and Midnight Gold.
 - A text-only menu with clickable buttons and a setting to reset the theme to OG.
 - Safety options for ChudOS RPC request limits, mod errors, room changes, and rapid master changes.
 - Player-targeting guns that include player trigger hitboxes and skip your local body.

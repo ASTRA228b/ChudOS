@@ -86,37 +86,6 @@ internal static class SafetyRuntime
     }
 
     private static readonly Dictionary<LurkerGhost, bool> Lurkers = new();
-    private static VRRig? fingerRig;
-    private static float[]? fingerPose;
-
-    public static void NoFinger()
-    {
-        VRRig rig = VRRig.LocalRig;
-        if (rig == null) return;
-        if (fingerRig != rig)
-        {
-            RestoreFingers();
-            fingerRig = rig;
-            fingerPose = new[] { rig.leftHand.calcT, rig.rightHand.calcT, rig.leftIndex.calcT, rig.leftMiddle.calcT, rig.leftThumb.calcT, rig.rightIndex.calcT, rig.rightMiddle.calcT, rig.rightThumb.calcT };
-            PortTools.Register(RestoreFingers);
-        }
-        rig.leftHand.calcT = rig.rightHand.calcT = 0f;
-        rig.leftIndex.calcT = rig.leftMiddle.calcT = rig.leftThumb.calcT = 0f;
-        rig.rightIndex.calcT = rig.rightMiddle.calcT = rig.rightThumb.calcT = 0f;
-    }
-
-    public static void RestoreFingers()
-    {
-        if (fingerRig != null && fingerPose != null)
-        {
-            fingerRig.leftHand.calcT = fingerPose[0]; fingerRig.rightHand.calcT = fingerPose[1];
-            fingerRig.leftIndex.calcT = fingerPose[2]; fingerRig.leftMiddle.calcT = fingerPose[3]; fingerRig.leftThumb.calcT = fingerPose[4];
-            fingerRig.rightIndex.calcT = fingerPose[5]; fingerRig.rightMiddle.calcT = fingerPose[6]; fingerRig.rightThumb.calcT = fingerPose[7];
-        }
-        fingerRig = null;
-        fingerPose = null;
-    }
-
     public static void AntiLurker()
     {
         if (Time.unscaledTime < NextLurkerScan) return;

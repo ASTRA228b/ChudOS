@@ -33,7 +33,7 @@ internal static class PortTools
         foreach (string name in PointerButtons)
             if (name != selected) ButtonManager.SetEnabled(name, false);
     }
-    private static readonly string[] PointerButtons = { "Teleport Gun", "Draw Gun", "Tag Gun", "Platform Gun" };
+    private static readonly string[] PointerButtons = { "Teleport Gun", "Draw Gun", "Tag Gun", "Platform Gun", "Fly Towards Gun", "Rig Gun" };
 
     internal static void Teleport(Vector3 bodyPosition)
     {

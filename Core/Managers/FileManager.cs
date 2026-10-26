@@ -58,6 +58,7 @@ public static class FileManager
 
     public sealed class SavedMenuState
     {
+        public int SchemaVersion;
         public List<SavedButton> Buttons { get; set; } = new();
     }
 
@@ -66,6 +67,7 @@ public static class FileManager
         public string Name { get; set; } = "";
         public bool Enabled { get; set; }
         public int OptionIndex { get; set; }
+        public string? Option;
     }
 
     public static void Initialize(MonoBehaviour R)
@@ -114,7 +116,7 @@ public static class FileManager
                 throw new InvalidOperationException("ButtonManager is not initialized.");
 
             Directory.CreateDirectory(RootFolder);
-            SavedMenuState state = new();
+            SavedMenuState state = new() { SchemaVersion = 1 };
 
             foreach (var button in ButtonManager.Buttons)
             {
@@ -124,7 +126,8 @@ public static class FileManager
                 {
                     Name = button.Name,
                     Enabled = button.Enabled,
-                    OptionIndex = button.OptionIndex
+                    OptionIndex = button.OptionIndex,
+                    Option = button.Type == ButtonType.Option ? button.Option : null
                 });
             }
 
@@ -182,6 +185,13 @@ public static class FileManager
                 if (count == 0) continue;
 
                 int index = Mathf.Clamp(saved.OptionIndex, 0, count - 1);
+                if (!string.IsNullOrEmpty(saved.Option))
+                {
+                    int matched = Array.IndexOf(button.Attribute.Options, saved.Option);
+                    if (matched >= 0) index = matched;
+                }
+                else if (state.SchemaVersion < 1 && button.Name == "Long Arm Length")
+                    index = ChudOS.Mods.Movement.LongArmMods.LegacyLengthIndex(saved.OptionIndex);
 
                 try
                 {
