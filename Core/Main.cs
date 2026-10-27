@@ -116,14 +116,21 @@ public sealed partial class Main : MonoBehaviour
     }
 
 
+    private void OnGUI()
+    {
+        if (!NotifyLib.HasToasts && !ArrayListGUI.HasEntries) return;
+        NotifyLib.InitToast();
+        ArrayListGUI.CreateArray();
+    }
+
     private void Update()
     {
         ButtonManager.Update();
         SoundboardManager.Tick();
         GUIManager.Tick();
-        if (CanvasNotifyLib.HasMessages) CanvasNotifyLib.CanvasUpdate();
+        CanvasNotifyLib.CanvasUpdate();
         NotifyLib.Tick();
-        bool showGUI = NotifyLib.HasToasts || ArrayListGUI.HasEntries || GUIManager.HasVisibleWindows;
+        bool showGUI = GUIManager.HasVisibleWindows;
         if (gui != null && gui.enabled != showGUI) gui.enabled = showGUI;
 
         Keyboard? keyboard = Keyboard.current;
