@@ -36,6 +36,7 @@ public static class CanvasNotifyLib
     private static Camera? MainCam;
     private static Text? notificationText;
     public static bool Enabled = true;
+    public static bool HasMessages => Messages.Count > 0;
 
     public static void InitCanvas() => Create();
     public static void Create()
@@ -89,7 +90,11 @@ public static class CanvasNotifyLib
         LastDecay = Time.unscaledTime;
         Refresh();
     }
-    private static void Refresh() { if (notificationText != null) notificationText.text = string.Join("\n", Messages); }
+    private static void Refresh()
+    {
+        if (notificationText != null) notificationText.text = string.Join("\n", Messages);
+        if (HUDObject != null && HUDObject.activeSelf != HasMessages) HUDObject.SetActive(HasMessages);
+    }
     public static void Clear() { Messages.Clear(); PreviousNotification = ""; Refresh(); }
     public static void ClearOld(int amount) { Messages.RemoveRange(0, Mathf.Min(Mathf.Max(0, amount), Messages.Count)); Refresh(); }
     public static void Shutdown()

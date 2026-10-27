@@ -2,13 +2,13 @@
 
 **Made by Astra**
 
-ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.3** has **334 total menu buttons**, including mods, settings, and actions.
+ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Version **0.1.3** has **340 total menu buttons**, including mods, settings, and actions.
 
-**0.1.3 is a local test build. The latest published release remains 0.1.2.**
+**0.1.3 is available now. Download the latest release below.**
 
 [Download the latest release](https://github.com/ASTRA228b/ChudOS/releases/latest)
 
-## New in 0.1.3 (local testing)
+## New in 0.1.3
 
 - **Menu alignment:** Auto faces the menu toward your head while following your hand. Align To Palm uses the original, unchanged one-time palm alignment; Fixed keeps a constant wrist-relative rotation. Settings includes distance, height, Recenter Menu, and Reset Menu Position. Desktop placement stays unchanged.
 - **Defaults:** Auto alignment, Menu Open Sound, and Join Random: Current Map start on. Disable Mods On Leave starts off; explicit saved choices still restore. The existing room cleanup and mod reset behavior is retained.
@@ -17,8 +17,11 @@ ChudOS is a mod menu for **Gorilla Tag on Windows PCVR**, made by **Astra**. Ver
 - **Menu sounds:** separate Menu Open Sound toggle, Open Sound selector, and Open Volume. Opening works in VR and desktop mode and uses the existing cached local feedback source. Click Sound, Click Volume, and Click Vibrations remain separate.
 - **Fun:** Snowball Spam and Water Balloon Spam repeatedly throw available native throwables while holding right trigger, using normal hand velocity. Throwable Interval offers 0.25, 0.5, or 1 second. These require the corresponding throwable to be available; they leave equipment you are already holding alone.
 - **Rig:** Spazz Rig uses bounded, time-based offsets; Spazz Hands keeps its motion near the controllers instead of extending three metres. Head Spin Yaw, Head Spin Pitch, and Head Spin Roll have 30/60/90/120-degree speed choices and restore the original head pose when disabled.
-- **Macro imports:** put ChudOS `.json`, Poison `.json`, or hamburbur GZip `.macro` files in `Gorilla Tag/ChudOS/Macros`, then press Reload Macros. Imported recordings use their native timing; hamburbur recordings retain head, rig, and hand poses. Renaming preserves each imported format. Corrupt, oversized, or invalid recordings are skipped without hiding valid files. Macros still require you to be within one metre of the start, stop on room changes, and never replay menu button presses or enable themselves from imported settings.
-- Use **Save Menu State** to keep your theme, alignment, sounds, and other menu preferences.
+- **Macro imports:** put ChudOS `.json`, Poison `.json`, or hamburbur GZip `.macro` files in `Gorilla Tag/ChudOS/Macros`, then press Reload Macros. Imported recordings use their native timing; hamburbur recordings retain head, rig, and hand poses. Renaming preserves each imported format. Corrupt, oversized, or invalid recordings are skipped without hiding valid files. Recorded-position macros use the selected start range (1m by default); Relative placement starts the translated route where you are. Playback stops on room changes and never replays menu button presses or enables itself from imported settings.
+- **Corrected macro playback:** matches imported timing with a short smooth lead-in, keeps the physical head/body offset, leaves tracked head position alone, and keeps the final rig position when playback ends. This addresses the old underground/offset and snap-back paths; placement still needs to match the recording's map and game geometry.
+- **Macro settings:** Legacy Macro Playback restores the earlier behavior when enabled; corrected mode is the default. Macro Playback Range offers 0.25/0.5/1/2/3m. Loop Macros repeats playback until stopped or the held play input is released. Playback Speed offers 0.5/0.75/1/1.25/1.5/2x. Macro Position chooses the recorded world route or a route translated to your current position. Macro Height Offset provides small vertical adjustments. The existing LT recording and RT playback controls are unchanged.
+- **Idle UI:** IMGUI sleeps when there are no GUI windows, array-list entries, or desktop notifications. Empty VR notification canvases hide and stop their decay polling. Notification design and array-list rendering stay the same. Actual frame time depends on enabled mods and the game.
+- Use **Save Menu State** to keep your theme, alignment, sounds, macro settings, and other menu preferences.
 
 ## New in 0.1.2
 
@@ -165,7 +168,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 ## Full feature list
 
-334 unique buttons, including mods, settings, and actions.
+340 unique buttons, including mods, settings, and actions.
 
 ## Main — 4
 
@@ -425,7 +428,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Reload Macros
 - Open Macros Folder
 
-## Settings — 112
+## Settings — 118
 
 - PC View
 - Array List
@@ -539,3 +542,9 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Join Random: Current Map
 - Head Spin Speed
 - Throwable Interval
+- Legacy Macro Playback
+- Macro Playback Range
+- Loop Macros
+- Macro Playback Speed
+- Macro Position
+- Macro Height Offset

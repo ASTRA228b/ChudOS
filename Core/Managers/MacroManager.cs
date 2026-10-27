@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Astra
 
 using ChudOS.Libraries;
+using ChudOS.Mods.Settings;
 using ChudOS.Libraries.Notifications;
 using Newtonsoft.Json;
 using Photon.Pun;
@@ -50,7 +51,10 @@ public static partial class MacroManager
     private static object? room;
     private static int selected, playbackIndex;
     private static float started, nextSample;
-    private static bool lastLeft, lastRight, triggerPlayback;
+    private static bool lastLeft, lastRight, triggerPlayback, legacyPlayback;
+    private static Frame? playbackStart;
+    private static Vector3 playbackOffset, bodyHeadOffset;
+    private static float leadIn;
 
     public static void Reload()
     {
@@ -127,21 +131,28 @@ public static partial class MacroManager
         playing = null;
         triggerPlayback = false;
         playbackIndex = 0;
+        playbackStart = null;
         UpdateRegistration();
     }
 
     public static void Play(bool requireTrigger = false)
     {
         var data = Selected;
-        if (!PortTools.Ready || !Valid(data) || !CheckConflicts()) return;
-        if (Vector3.Distance(GorillaTagger.Instance.bodyCollider.transform.position, Vector(data!.Frames[0].Body)) > 1f)
+        if (!PortTools.Ready || data == null || !Valid(data) || !CheckConflicts()) return;
+        Vector3 startPosition = !MacroSettings.Legacy && data!.HasRigPose && VRRig.LocalRig != null ? VRRig.LocalRig.transform.position : GorillaTagger.Instance.bodyCollider.transform.position;
+        if (MacroSettings.Position == 0 && Vector3.Distance(startPosition, Vector(data.Frames[0].Body)) > MacroSettings.Range)
         {
-            Report("Move within 1 metre of the macro starting point.");
+            Report($"Move within {MacroSettings.Range:0.##}m of the macro starting point.");
             return;
         }
         Stop();
         ClearPreview();
+        legacyPlayback = MacroSettings.Legacy;
         if (data!.HasRigPose && !BeginMacroPose()) return;
+        playbackOffset = (MacroSettings.Position == 1 ? startPosition - Vector(data.Frames[0].Body) : Vector3.zero) + Vector3.up * MacroSettings.Height;
+        bodyHeadOffset = GorillaTagger.Instance.headCollider != null ? GorillaTagger.Instance.bodyCollider.transform.position - GorillaTagger.Instance.headCollider.transform.position : Vector3.zero;
+        playbackStart = CapturePlaybackStart(data.HasRigPose);
+        leadIn = legacyPlayback ? 0f : data.Frames[1].Time - data.Frames[0].Time;
         playing = data;
         triggerPlayback = requireTrigger;
         started = Time.unscaledTime;
@@ -185,7 +196,9 @@ public static partial class MacroManager
         if (data == null || !PortTools.Ready) return;
         preview = PortTools.Line("ChudOS Macro Preview", 0.015f, data.Frames.Count);
         preview.startColor = preview.endColor = ChudOS.Core.Main.PrimaryColorValue;
-        for (int i = 0; i < data.Frames.Count; i++) preview.SetPosition(i, Vector(data.Frames[i].Body));
+        Vector3 current = !MacroSettings.Legacy && data.HasRigPose && VRRig.LocalRig != null ? VRRig.LocalRig.transform.position : GorillaTagger.Instance.bodyCollider.transform.position;
+        Vector3 offset = (MacroSettings.Position == 1 ? current - Vector(data.Frames[0].Body) : Vector3.zero) + Vector3.up * MacroSettings.Height;
+        for (int i = 0; i < data.Frames.Count; i++) preview.SetPosition(i, Vector(data.Frames[i].Body) + offset);
         PortTools.Register(Shutdown);
     }
 
@@ -210,7 +223,7 @@ public static partial class MacroManager
             {
                 if (left && !lastLeft) StartRecording();
                 if (!left && lastLeft && Recording) Stop();
-                if (right && !lastRight && !Recording) Play(true);
+                if (right && !lastRight && !Recording && !left) Play(true);
             }
             lastLeft = left;
             lastRight = right;
@@ -224,11 +237,27 @@ public static partial class MacroManager
             if (playing.HasRigPose && poseRig != VRRig.LocalRig) { Stop(); return; }
             if (triggerPlayback && !right) { Stop(); return; }
 
-            float elapsed = Time.unscaledTime - started;
+            float elapsed = (Time.unscaledTime - started) * MacroSettings.Speed;
             var frames = playing.Frames;
+            float duration = frames[^1].Time + leadIn;
+            if (elapsed >= duration)
+            {
+                Apply(frames[^1], frames[^1], 0f);
+                if (!MacroSettings.Loop) { Stop(); return; }
+                playbackStart = CapturePlaybackStart(playing.HasRigPose);
+                float remainder = elapsed % duration;
+                started = Time.unscaledTime - remainder / MacroSettings.Speed;
+                elapsed = remainder;
+                playbackIndex = 0;
+            }
+            if (leadIn > 0f && elapsed < leadIn)
+            {
+                Apply(playbackStart!, frames[0], elapsed / leadIn, true);
+                return;
+            }
+            elapsed -= leadIn;
             while (playbackIndex + 1 < frames.Count && frames[playbackIndex + 1].Time <= elapsed) playbackIndex++;
-            if (playbackIndex + 1 >= frames.Count) { Apply(frames[^1], frames[^1], 0f); Stop(); return; }
-            Frame a = frames[playbackIndex], b = frames[playbackIndex + 1];
+            Frame a = frames[playbackIndex], b = frames[Math.Min(playbackIndex + 1, frames.Count - 1)];
             Apply(a, b, Mathf.InverseLerp(a.Time, b.Time, elapsed));
         }
         catch (Exception ex) { Stop(); ClearPreview(); Report($"Macro stopped: {ex.Message}"); }
@@ -247,14 +276,18 @@ public static partial class MacroManager
         });
     }
 
-    private static void Apply(Frame a, Frame b, float t)
+    private static void Apply(Frame a, Frame b, float t, bool liveStart = false)
     {
         var tagger = GorillaTagger.Instance;
-        PortTools.Teleport(Vector3.Lerp(Vector(a.Body), Vector(b.Body), t));
+        Vector3 offsetA = liveStart ? Vector3.zero : playbackOffset;
+        Vector3 body = Vector3.Lerp(Vector(a.Body) + offsetA, Vector(b.Body) + playbackOffset, t);
+        if (playing?.HasRigPose == true && !legacyPlayback)
+            body = Vector3.Lerp(Vector(a.HeadPosition) + offsetA, Vector(b.HeadPosition) + playbackOffset, t) + bodyHeadOffset;
+        PortTools.Teleport(body);
         tagger.rigidbody.linearVelocity = Vector3.Lerp(Vector(a.Velocity), Vector(b.Velocity), t);
-        tagger.leftHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.LeftPosition), Vector(b.LeftPosition), t), Quaternion.Slerp(Rotation(a.LeftRotation), Rotation(b.LeftRotation), t));
-        tagger.rightHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.RightPosition), Vector(b.RightPosition), t), Quaternion.Slerp(Rotation(a.RightRotation), Rotation(b.RightRotation), t));
-        if (playing?.HasRigPose == true) ApplyMacroPose(a, b, t);
+        tagger.leftHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.LeftPosition) + offsetA, Vector(b.LeftPosition) + playbackOffset, t), Quaternion.Slerp(Rotation(a.LeftRotation), Rotation(b.LeftRotation), t));
+        tagger.rightHandTransform.SetPositionAndRotation(Vector3.Lerp(Vector(a.RightPosition) + offsetA, Vector(b.RightPosition) + playbackOffset, t), Quaternion.Slerp(Rotation(a.RightRotation), Rotation(b.RightRotation), t));
+        if (playing?.HasRigPose == true) ApplyMacroPose(a, b, t, offsetA);
     }
 
     internal static bool Conflicts(ButtonManager.ButtonData button) => button.Type == ChudOS.Stuff.ButtonType.Toggle && (button.Category == "Rig" || button.Category == "Detected" || button.Category == "Movement" && !button.Name.Contains("Platforms") && button.Name != "Platform Gun");
@@ -313,6 +346,27 @@ public static partial class MacroManager
             try { if (File.Exists(temporary)) File.Delete(temporary); }
             catch (Exception ex) { Debug.LogWarning($"[ChudOS] Macro cleanup: {ex.Message}"); }
         }
+    }
+
+    internal static void SettingsChanged()
+    {
+        Stop();
+        ClearPreview();
+        if (PortTools.Ready) { lastLeft = InputLib.LeftTrigger; lastRight = InputLib.RightTrigger; }
+    }
+
+    private static Frame CapturePlaybackStart(bool rigPose)
+    {
+        var tagger = GorillaTagger.Instance;
+        var rig = VRRig.LocalRig;
+        return new Frame
+        {
+            Body = Values(rigPose ? rig.transform.position : tagger.bodyCollider.transform.position), Velocity = Values(tagger.rigidbody.linearVelocity),
+            LeftPosition = Values(tagger.leftHandTransform.position), LeftRotation = Values(tagger.leftHandTransform.rotation),
+            RightPosition = Values(tagger.rightHandTransform.position), RightRotation = Values(tagger.rightHandTransform.rotation),
+            HeadPosition = rigPose ? Values(tagger.headCollider.transform.position) : Array.Empty<float>(),
+            HeadRotation = rigPose ? Values(rig.head.rigTarget.rotation) : Array.Empty<float>(), RigRotation = rigPose ? Values(rig.transform.rotation) : Array.Empty<float>()
+        };
     }
 
     private static void UpdateRegistration()

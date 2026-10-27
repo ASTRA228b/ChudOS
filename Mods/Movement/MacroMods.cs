@@ -20,7 +20,7 @@ public static class MacroMods
     public static void Open() => SetVisible(!Visible);
     public static void SetVisible(bool visible) { Visible = visible; deleteFile = null; if (!visible) MacroManager.ClearPreview(); }
 
-    [MenuButton("Macro Controls", ButtonType.Toggle, Category = "Macros", Order = 0, runOption = RunOption.Once, Description = "Hold LT to record; hold RT within one metre of the start to play")]
+    [MenuButton("Macro Controls", ButtonType.Toggle, Category = "Macros", Order = 0, runOption = RunOption.Once, Description = "Hold LT to record; hold RT near the start to play. Range, looping and legacy playback are in Settings")]
     public static void EnableControls() => MacroManager.SetControls(true);
     [MenuDisable("Macro Controls")]
     public static void DisableControls() => MacroManager.SetControls(false);
@@ -82,7 +82,7 @@ public static class MacroMods
         GUILayout.EndHorizontal();
         if (MenuHelper.Button("Reload Macros")) MacroManager.Reload();
         if (MenuHelper.Button("Open Macros Folder")) OpenFolder();
-        MenuHelper.Label("VR: enable Macro Controls. LT records; RT plays near the start.");
+        MenuHelper.Label("Enable Macro Controls. LT records; RT plays. Range, looping and legacy playback are in Settings.");
         if (MenuHelper.Button("Close")) SetVisible(false);
         GUI.DragWindow(new Rect(0f, 0f, Window.width, 25f));
     }

@@ -2,11 +2,17 @@
 // Copyright (C) 2026 Astra
 
 using ChudOS.Core.Managers;
+using ChudOS.Libraries.Notifications;
 using UnityEngine;
 
 namespace ChudOS.Core.AGUI;
 
 internal sealed class GUIRuntime : MonoBehaviour
 {
-    private void OnGUI() => GUIManager.CreateGUIs();
+    private void OnGUI()
+    {
+        NotifyLib.InitToast();
+        ArrayListGUI.CreateArray();
+        GUIManager.CreateGUIs();
+    }
 }
