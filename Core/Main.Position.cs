@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Astra
 
 using ChudOS.Mods.Settings;
+using GorillaLocomotion;
 using UnityEngine;
 
 namespace ChudOS.Core;
@@ -20,6 +21,13 @@ public sealed partial class Main
         var hand = GorillaTagger.Instance.leftHandTransform;
         if (hand == null) return;
         var menu = MenuMain.transform;
+        if (MenuPositionSettings.Mode == 2)
+        {
+            UpdateFixedMenuPosition(menu, hand);
+            positionHand = hand;
+            positionDirty = false;
+            return;
+        }
         bool reset = positionDirty || positionHand != hand || menu.parent != hand;
         if (MenuPositionSettings.Mode != 0 && !reset) return;
         if (menu.parent != hand) menu.SetParent(hand, false);
@@ -55,5 +63,16 @@ public sealed partial class Main
         positionHand = hand;
         positionDirty = false;
     }
+    private static void UpdateFixedMenuPosition(Transform menu, Transform hand)
+    {
+        Transform? parent = Instance != null ? Instance.transform : null;
+        if (menu.parent != parent) menu.SetParent(parent, false);
+        float scale = GTPlayer.Instance != null ? GTPlayer.Instance.scale : 1f;
+        if (float.IsNaN(scale) || float.IsInfinity(scale) || scale <= 0f) scale = 1f;
+        menu.localScale = new Vector3(0.1f, VRMenuScale.y, VRMenuScale.z) * scale;
+        Vector3 offset = new Vector3(MenuPositionSettings.Distance, MenuPositionSettings.Height, 0f) * scale;
+        menu.SetPositionAndRotation(hand.position + hand.rotation * offset, hand.rotation);
+    }
+
     private static bool Finite(Vector3 value) => !float.IsNaN(value.x) && !float.IsNaN(value.y) && !float.IsNaN(value.z) && !float.IsInfinity(value.x) && !float.IsInfinity(value.y) && !float.IsInfinity(value.z);
 }

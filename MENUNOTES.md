@@ -9,6 +9,7 @@ Historical update entries describe their respective versions; newer entries take
 ## New in 0.1.3
 
 - **Menu alignment:** Auto faces the menu toward your head while following your hand. Align To Palm uses the original, unchanged one-time palm alignment; Fixed keeps a constant wrist-relative rotation. Settings includes distance, height, Recenter Menu, and Reset Menu Position. Desktop placement stays unchanged.
+- **Fixed position update:** follows the controller world position and rotation directly, using uniform player scaling instead of inheriting a stretched hand transform. Default placement starts at the hand origin; distance and height offsets remain adjustable. Auto and Align To Palm are unchanged.
 - **Defaults:** Auto alignment, Menu Open Sound, and Join Random: Current Map start on. Disable Mods On Leave starts off; explicit saved choices still restore. The existing room cleanup and mod reset behavior is retained.
 - **Join Random:** captures a public join for the active map, waits for the network to finish leaving, and submits one native join request. Cancel Reconnect also cancels a pending random join. Unavailable maps and timeouts show a notification. Turning Current Map off explicitly selects Forest.
 - **Hide Fog:** removes both scene fog and zone ground fog, including the Forest Halloween effect. Disabling it restores the captured fog values and override modes without replacing unrelated zone settings.
