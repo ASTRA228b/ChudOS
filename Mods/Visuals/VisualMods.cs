@@ -29,18 +29,23 @@ public static class VisualMods
     private static Color OldAmbient;
     private static AmbientMode OldAmbientMode;
 
-    [MenuButton("Hide Fog", ButtonType.Toggle, Category = "Visuals", Order = 0, runOption = RunOption.Once, Description = "Disable scene fog while enabled")]
+    [MenuButton("Hide Fog", ButtonType.Toggle, Category = "Visuals", Order = 0, runOption = RunOption.Once, Description = "Disable scene fog and zone ground fog, including Forest Halloween fog")]
     public static void HideFog()
     {
         if (!SavedFog) { OldFog = RenderSettings.fog; SavedFog = true; }
-        RenderSettings.fog = false;
+        try { GroundFogController.Enable(); RenderSettings.fog = false; }
+        catch { RestoreFog(); throw; }
     }
 
     [MenuDisable("Hide Fog")]
     public static void RestoreFog()
     {
-        if (SavedFog) RenderSettings.fog = OldFog;
-        SavedFog = false;
+        try { GroundFogController.Stop(); }
+        finally
+        {
+            if (SavedFog) RenderSettings.fog = OldFog;
+            SavedFog = false;
+        }
     }
 
 
