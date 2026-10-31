@@ -50,6 +50,7 @@ public sealed partial class Main : MonoBehaviour
     public static Color PrimaryColorValue => PrimaryColor;
     public static Color ButtonColorValue => ButtonColor;
     public static Color TextColorValue => TextColor;
+    internal static Material? PressedButtonMaterial => PressedMat;
     public static bool TextOnlyMenu { get; private set; }
     private static bool OutlineButtons;
 
@@ -63,7 +64,7 @@ public sealed partial class Main : MonoBehaviour
     private static SphereCollider? RightButtonCollider;
     private static Camera? PCamera;
     private static bool OnPC, LastController, NeedsRefresh, Pending;
-    private static Material? BackgroundMat, MenuMat, ButtonMat, HeaderMat, BorderMat, DividerMat, SearchBorderMat;
+    private static Material? BackgroundMat, MenuMat, ButtonMat, HeaderMat, BorderMat, DividerMat, SearchBorderMat, PressedMat;
     private static TextMesh? SearchText;
     private static readonly List<GameObject> PageObjects = new();
     private static readonly Dictionary<TextMesh, string> MenuTextOriginal = new();
@@ -213,6 +214,7 @@ public sealed partial class Main : MonoBehaviour
         IconLoader.Cleanup();
         DestroyMaterial(BackgroundMat); DestroyMaterial(MenuMat); DestroyMaterial(ButtonMat); DestroyMaterial(HeaderMat);
         DestroyMaterial(BorderMat); DestroyMaterial(DividerMat); DestroyMaterial(SearchBorderMat);
+        DestroyMaterial(PressedMat);
         Instance = null;
     }
     private static void DestroyMaterial(Material? m) { if (m != null) Destroy(m); }
@@ -248,6 +250,7 @@ public sealed partial class Main : MonoBehaviour
         if (MenuMat != null) MenuMat.color = MenuColor;
         if (ButtonMat != null) ButtonMat.color = ButtonColor;
         if (HeaderMat != null) HeaderMat.color = HeaderColor;
+        if (PressedMat != null) PressedMat.color = PrimaryColor;
         if (BorderMat != null) BorderMat.color = BorderColor;
         if (DividerMat != null) DividerMat.color = DividerColor;
         if (SearchBorderMat != null) SearchBorderMat.color = SearchBorderColor;
@@ -268,7 +271,7 @@ public sealed partial class Main : MonoBehaviour
         foreach (MenuButtonCollider button in MenuMain.GetComponentsInChildren<MenuButtonCollider>(true))
         {
             Renderer renderer = button.GetComponent<Renderer>();
-            button.IdleColor = renderer != null && renderer.sharedMaterial == HeaderMat ? HeaderColor : ButtonColor;
+            button.IdleColor = button.IdleMaterial == HeaderMat ? HeaderColor : ButtonColor;
             if (button.KeyboardKey.Length > 0 && ChudOS.Mods.Settings.KeyboardSettings.Appearance == 1) button.IdleColor = PrimaryColor;
             if (button.KeyboardKey.Length > 0 && ChudOS.Mods.Settings.KeyboardSettings.Appearance == 2 && renderer != null) renderer.enabled = false;
             button.RefreshAppearance();
@@ -308,6 +311,7 @@ public sealed partial class Main : MonoBehaviour
         MenuMat = new Material(shader) { color = MenuColor };
         ButtonMat = new Material(shader) { color = ButtonColor };
         HeaderMat = new Material(shader) { color = HeaderColor };
+        PressedMat = new Material(shader) { color = PrimaryColor };
         BorderMat = new Material(shader) { color = BorderColor };
         DividerMat = new Material(shader) { color = DividerColor };
         SearchBorderMat = new Material(shader) { color = SearchBorderColor };
@@ -413,6 +417,7 @@ public sealed partial class Main : MonoBehaviour
         if (previous || next) label = previous ? "<" : ">";
         GameObject obj = Cube(label.Length == 0 ? "ChudOS Button" : label, new Vector3(0.63f, y, z), new Vector3(0.06f, height, width), material ?? ButtonMat, true);
         MenuButtonCollider trigger = obj.AddComponent<MenuButtonCollider>();
+        trigger.InitializeAppearance();
         trigger.IdleColor = material == HeaderMat ? HeaderColor : ButtonColor;
         trigger.RelatedButton = button;
         trigger.RelatedCategory = category;
@@ -434,6 +439,7 @@ public sealed partial class Main : MonoBehaviour
             track?.Add(mesh.gameObject);
         }
         track?.Add(obj);
+        trigger.RefreshAppearance();
         return obj;
     }
     public static string GetButtonLabel(ButtonManager.ButtonData button) => (MenuPreferences.IsFavorite(button.Name) ? "[F] " : "") + (button.Category == "Main" && button.Name.StartsWith("Placeholder ", StringComparison.Ordinal) ? "Placeholder" : button.DisplayName);

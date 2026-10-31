@@ -35,34 +35,39 @@ public sealed class MenuButtonCollider : MonoBehaviour
     public Action? OnPress;
     public float TextWidth = 0.84f;
     public Color IdleColor = Main.ButtonColorValue;
+    internal Material? IdleMaterial { get; private set; }
     private Renderer? Render;
-    private MaterialPropertyBlock? Properties;
     private float PressedUntil;
 
     private Coroutine? pressReset;
-    private Color lastColor;
-    private bool hasColor;
+    private bool subscribed;
 
     private void Awake()
     {
-        Render = GetComponent<Renderer>();
-        Properties = new MaterialPropertyBlock();
+        InitializeAppearance();
+    }
+    internal void InitializeAppearance()
+    {
+        if (Render == null) Render = GetComponent<Renderer>();
+        if (Render != null && IdleMaterial == null) IdleMaterial = Render.sharedMaterial;
+        if (subscribed) return;
         ButtonManager.OnButtonsChanged += RefreshAppearance;
+        subscribed = true;
     }
     private void Start() => RefreshAppearance();
-    private void OnDestroy() => ButtonManager.OnButtonsChanged -= RefreshAppearance;
+    private void OnDestroy() { if (subscribed) ButtonManager.OnButtonsChanged -= RefreshAppearance; }
 
     public void RefreshAppearance()
     {
-        if (Render == null || Properties == null) return;
+        InitializeAppearance();
+        if (Render == null) return;
         bool active = RelatedButton?.Type == ButtonType.Toggle && RelatedButton.Enabled;
-        Color color = active || Time.unscaledTime < PressedUntil ? Main.PrimaryColorValue : IdleColor;
-        if (!hasColor || color != lastColor)
+        bool highlighted = active || Time.unscaledTime < PressedUntil || IdleColor == Main.PrimaryColorValue;
+        Material? material = highlighted ? Main.PressedButtonMaterial : IdleMaterial;
+        if (material != null)
         {
-            hasColor = true;
-            lastColor = color;
-            Properties.SetColor("_Color", color);
-            Render.SetPropertyBlock(Properties);
+            if (Render.sharedMaterial != material) Render.sharedMaterial = material;
+            Render.SetPropertyBlock(null);
         }
         if (Label == null || RelatedButton == null) return;
         string value = Main.GetButtonLabel(RelatedButton);
