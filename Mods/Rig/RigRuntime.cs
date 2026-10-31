@@ -48,7 +48,7 @@ internal sealed class RigRuntime : MonoBehaviour
     private Snapshot? snapshot;
     private bool changing;
     private static readonly string[] ExternalPoses = { "Tag Gun", "Tag Self", "Tag All", "Fake Power Off", "Rewind", "Predictions" };
-    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun", "Platform Gun", "Fly Towards Gun" };
+    private static readonly string[] ExternalGuns = { "Tag Gun", "Teleport Gun", "Draw Gun", "Platform Gun", "Fly Towards Gun", "Portal Gun" };
 
     internal static bool Ready => PortTools.Ready && VRRig.LocalRig != null &&
         VRRig.LocalRig.head.rigTarget != null && VRRig.LocalRig.leftHand.rigTarget != null && VRRig.LocalRig.rightHand.rigTarget != null &&
@@ -146,11 +146,15 @@ internal sealed class RigRuntime : MonoBehaviour
             ButtonManager.SetEnabled(owner, false);
             return;
         }
-        if (!Ready) return;
+        if (!Ready) { GhostHands.Hide(); return; }
         try
         {
             BeginWhenReady();
-            if (late) active?.TickLateUpdate();
+            if (late)
+            {
+                active?.TickLateUpdate();
+                GhostHands.Tick(owner == "Ghost Monke" || owner == "Invis Monke", !IsRigEnabled);
+            }
             else active?.TickUpdate();
         }
         catch (Exception ex)
@@ -162,6 +166,7 @@ internal sealed class RigRuntime : MonoBehaviour
 
     private void Stop()
     {
+        GhostHands.Hide();
         RigBehaviour? previous = active;
         active = null;
         enabled = false;

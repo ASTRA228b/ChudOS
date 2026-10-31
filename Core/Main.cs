@@ -134,6 +134,7 @@ public sealed partial class Main : MonoBehaviour
         if (gui != null && gui.enabled != showGUI) gui.enabled = showGUI;
 
         Keyboard? keyboard = Keyboard.current;
+        BindSearchKeyboard(keyboard);
         bool vrInput = ControllerInputPoller.instance != null && ControllerInputPoller.instance.leftControllerSecondaryButton;
         if (vrInput && !LastController) SwitchMenu(false);
         LastController = vrInput;
@@ -145,6 +146,7 @@ public sealed partial class Main : MonoBehaviour
         if (!IsMenuOpen || MenuMain == null) return;
         if (OnPC && PCamera != null)
         {
+            RefreshDesktopKeyboardBounds();
 
             if (Mouse.current?.leftButton.wasPressedThisFrame == true && !GUIManager.ContainsPointer(new Vector2(Mouse.current.position.ReadValue().x, Screen.height - Mouse.current.position.ReadValue().y)))
             {
@@ -168,15 +170,14 @@ public sealed partial class Main : MonoBehaviour
         if (keyboard.escapeKey.wasPressedThisFrame) { SearchManager.Blur(); RequestRefresh(); return; }
         if (keyboard.enterKey.wasPressedThisFrame) { SearchManager.Key("Done"); return; }
         if (keyboard.backspaceKey.wasPressedThisFrame) { SearchManager.Key("Del"); return; }
-        if (keyboard.spaceKey.wasPressedThisFrame) { SearchManager.Key("Space"); return; }
-        for (int i = 0; i < 26; i++) if (keyboard[(Key)((int)Key.A + i)].wasPressedThisFrame) SearchManager.Key(((char)('A' + i)).ToString());
-        for (int i = 0; i < 10; i++) if (keyboard[(Key)((int)Key.Digit0 + i)].wasPressedThisFrame) SearchManager.Key(i.ToString());
     }
     private void FixedUpdate() => ButtonManager.FixedUpdate();
     private void LateUpdate() { ButtonManager.LateUpdate(); UpdateMenuPosition(); }
     private void OnDestroy()
     {
         if (Instance != this) return;
+        BindSearchKeyboard(null);
+        ChudOS.Mods.Rig.GhostHands.Clear();
         ChudOS.Mods.Fun.ThrowableSpam.Reset();
         ChudOS.Mods.Movement.SpiderMan.Stop();
         ChudOS.Mods.Movement.CustomArms.Stop();
@@ -268,8 +269,15 @@ public sealed partial class Main : MonoBehaviour
         {
             Renderer renderer = button.GetComponent<Renderer>();
             button.IdleColor = renderer != null && renderer.sharedMaterial == HeaderMat ? HeaderColor : ButtonColor;
+            if (button.KeyboardKey.Length > 0 && ChudOS.Mods.Settings.KeyboardSettings.Appearance == 1) button.IdleColor = PrimaryColor;
+            if (button.KeyboardKey.Length > 0 && ChudOS.Mods.Settings.KeyboardSettings.Appearance == 2 && renderer != null) renderer.enabled = false;
             button.RefreshAppearance();
             RefreshButtonOutline(button.gameObject);
+            if (button.KeyboardKey.Length > 0 && ChudOS.Mods.Settings.KeyboardSettings.Appearance == 2)
+            {
+                var outline = button.transform.Find("Neon Outline");
+                if (outline != null) outline.gameObject.SetActive(false);
+            }
             if ((button.PreviousPage || button.NextPage) && button.Label != null)
             {
                 Renderer labelRenderer = button.Label.GetComponent<Renderer>();
@@ -478,39 +486,21 @@ public sealed partial class Main : MonoBehaviour
         }
         if (SearchManager.Active && SearchManager.KeyboardVisible) CreateKeyboard();
         else ClearKeyboard();
+        RefreshKeyboardQuery();
         RefreshThemeObjects();
-    }
-    private static void CreateKeyboard()
-    {
-        if (KeyboardBuilt || MenuMain == null) return;
-        KeyboardBuilt = true;
-        // Sidecar keyboard (VR pointer and PC mouse use the same menu button colliders).
-        // Anchoring to MenuMain also makes it follow the hand, never the HMD camera.
-        CubeKeyboard("Keyboard Back", 0.55f, 0f, -1.215f, 1.06f, 1.11f, MenuMat);
-        string[] rows = { "QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM" };
-        for (int r = 0; r < rows.Length; r++)
-        {
-            string letters = rows[r];
-            float step = 0.098f;
-            float firstZ = -1.215f - (letters.Length - 1) * step / 2f;
-            for (int i = 0; i < letters.Length; i++)
-                KeyboardButton(letters[i].ToString(), 0.35f - r * 0.215f, firstZ + i * step, 0.086f);
-        }
-        KeyboardButton("Space", -0.34f, -1.495f, 0.22f);
-        KeyboardButton("Del", -0.34f, -1.287f, 0.16f);
-        KeyboardButton("Clear", -0.34f, -1.088f, 0.20f);
-        KeyboardButton("Done", -0.34f, -0.864f, 0.20f);
     }
     private static void CubeKeyboard(string name, float depth, float y, float z, float height, float width, Material? mat)
     {
         GameObject go = Cube(name, new Vector3(depth, y, z), new Vector3(0.065f, height, width), mat);
         KeyboardObjects.Add(go);
     }
-    private static void KeyboardButton(string key, float y, float z, float width)
+    private static void KeyboardButton(string key, float y, float z, float width, float height = 0.17f)
     {
-        GameObject button = MakeButton(key, y, z, width, 0.17f, key: key, track: KeyboardObjects);
+        GameObject button = MakeButton(key, y, z, width, height, key: key, track: KeyboardObjects);
         // The keyboard labels need smaller type than the main three-button layout.
         MenuButtonCollider collider = button.GetComponent<MenuButtonCollider>();
+        if (ChudOS.Mods.Settings.KeyboardSettings.Appearance == 1) collider.IdleColor = PrimaryColor;
+        if (ChudOS.Mods.Settings.KeyboardSettings.Appearance == 2 && button.TryGetComponent(out Renderer keyRenderer)) keyRenderer.enabled = false;
         TextMesh? label = collider != null ? collider.Label : null;
         if (label != null) FitButtonText(label, key, width - 0.02f);
     }
@@ -520,6 +510,8 @@ public sealed partial class Main : MonoBehaviour
         foreach (GameObject go in KeyboardObjects) if (go != null) { if (go.TryGetComponent(out TextMesh label)) MenuTextOriginal.Remove(label); Destroy(go); }
         KeyboardObjects.Clear();
         KeyboardBuilt = false;
+        KeyboardQueryText = null;
+        RefreshDesktopKeyboardBounds(true);
     }
     public static bool TryGetReferenceHand(Collider other, out bool rightHand)
     {

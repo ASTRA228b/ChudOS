@@ -42,19 +42,43 @@ internal static class NetworkSafety
         return !RPCProtection || Calls.TryTake(Time.unscaledTime);
     }
 
-    internal static bool TryTag(VRRig target)
+    internal static string? TagReadiness()
     {
-        if (!PhotonNetwork.InRoom || NetworkSystem.Instance == null || GorillaTagger.Instance == null) return false;
+        if (!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null || NetworkSystem.Instance == null || GorillaTagger.Instance == null) return "Join a room before using tag tools.";
         VRRig local = VRRig.LocalRig;
-        if (local == null || !local.enabled || target == null || !target.gameObject.activeInHierarchy || target.isLocal || target.isOfflineVRRig || target.Creator == null) return false;
-        if (GorillaGameManager.instance is not GorillaTagManager || !TagManager.IsTagged(local) || TagManager.IsTagged(target)) return false;
+        if (local == null || !local.enabled || local.Creator == null) return "Tag tools need your normal local rig.";
+        if (GorillaGameManager.instance is not GorillaTagManager manager) return "This game mode does not support tag tools.";
+        if (!manager.LocalIsTagged(local.Creator)) return "You must be tagged before tagging other players.";
+        return null;
+    }
+
+    internal static string? TagRejection(VRRig? target)
+    {
+        string? readiness = TagReadiness();
+        if (readiness != null) return readiness;
+        VRRig local = VRRig.LocalRig;
+        var manager = (GorillaTagManager)GorillaGameManager.instance;
+        if (target == null || target == local || !target.gameObject.activeInHierarchy || target.isLocal || target.isOfflineVRRig || target.Creator == null) return "Select another active player.";
+        if (!manager.LocalCanTag(local.Creator, target.Creator)) return "That player cannot currently be tagged.";
         Transform left = GorillaTagger.Instance.leftHandTransform, right = GorillaTagger.Instance.rightHandTransform;
-        if (left == null || right == null || !Finite(left.position) || !Finite(right.position) || !Finite(target.transform.position)) return false;
+        if (left == null || right == null || !Finite(left.position) || !Finite(right.position) || !Finite(target.transform.position)) return "Player tracking is not ready.";
         float reach = GorillaTagger.Instance.maxTagDistance;
-        if (!Finite(reach) || reach <= 0f) return false;
+        if (!Finite(reach) || reach <= 0f) return "Tag reach is not available.";
         reach = Mathf.Min(reach, 2f);
         float distance = Mathf.Min((left.position - target.transform.position).sqrMagnitude, (right.position - target.transform.position).sqrMagnitude);
-        if (distance > reach * reach) return false;
+        return distance <= reach * reach ? null : "The selected player is outside normal hand reach.";
+    }
+
+    internal static bool CanTagTarget(VRRig? target) => TagRejection(target) == null;
+    private static float nextTagNotice;
+    internal static bool TryTag(VRRig target, bool notify = false)
+    {
+        string? rejection = TagRejection(target);
+        if (rejection != null)
+        {
+            if (notify && Time.unscaledTime >= nextTagNotice) { nextTagNotice = Time.unscaledTime + 3f; SafetyMods.Toast(rejection); }
+            return false;
+        }
         if (!ReferenceEquals(room, PhotonNetwork.CurrentRoom)) Reset();
         float now = Time.unscaledTime;
         if (Targets.TryGetValue(target, out float next) && now < next) return false;

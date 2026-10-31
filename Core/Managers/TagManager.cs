@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2026 Astra
 //
 // This file is part of ChudOS.
@@ -42,8 +42,7 @@ public sealed class TagManager
 
     public static bool IsTagged(VRRig? rig)
     {
-        if (rig == null) return false;
-        return rig.setMatIndex == 1 || rig.setMatIndex == 2 || rig.setMatIndex == 11;
+        return rig != null && rig.Creator != null && GorillaGameManager.instance is GorillaTagManager manager && manager.LocalIsTagged(rig.Creator);
     }
 
     public void AddInfected(NetPlayer player)

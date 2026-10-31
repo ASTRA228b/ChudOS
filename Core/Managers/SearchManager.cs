@@ -53,7 +53,7 @@ public static class SearchManager
         if (value == "Del") { if (Query.Length > 0) Query = Query.Substring(0, Query.Length - 1); }
         else if (value == "Clear") Query = "";
         else if (value == "Space") { if (Query.Length < 32) Query += " "; }
-        else if (value.Length == 1 && Query.Length < 32 && char.IsLetterOrDigit(value[0])) Query += value.ToLowerInvariant();
+        else if (value.Length == 1 && Query.Length < 32 && !char.IsControl(value[0]) && !char.IsSurrogate(value[0])) Query += value.ToLowerInvariant();
         else return;
         Rebuild();
         CategoryManager.SearchChanged();

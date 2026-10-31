@@ -59,7 +59,7 @@ public static class NewMovementMods
         action();
     }
 
-    [MenuButton("Wall Walk", ButtonType.Toggle, Category = "Movement", Order = 100, runOption = RunOption.FixedUpdate, Description = "Hold the selected inputs for Astra's Wall Walk V2")]
+    [MenuButton("Wall Walk", ButtonType.Toggle, Category = "Movement", Order = 100, runOption = RunOption.FixedUpdate, Description = "Original forward-force wall walk; hold the selected inputs")]
     public static void WallWalk() => WallWalkV2.Tick();
     [MenuButton("Grappling Hooks", ButtonType.Toggle, Category = "Movement", Order = 101, runOption = RunOption.FixedUpdate, Description = "Hold either grip to pull toward a hand anchor")]
     public static void GrapplingHooks()

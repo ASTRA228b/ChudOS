@@ -61,6 +61,10 @@ internal static class ParticleManager
         if (effects.TryGetValue(name, out var effect)) effect.Stop();
         UpdateRegistration();
     }
+    internal static void ApplySettings()
+    {
+        foreach (var effect in effects.Values) if (effect.Alive) effect.ApplySettings();
+    }
     private static void Tick()
     {
         float delta = Mathf.Min(Time.deltaTime, 0.25f);

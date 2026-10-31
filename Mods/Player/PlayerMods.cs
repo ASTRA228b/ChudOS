@@ -87,7 +87,7 @@ public static class PlayerMods
         if (!PortTools.Ready || GorillaTagger.Instance.rightHandTransform == null) { GunLib.Hide(); return; }
         bool grip = GunLib.AimPressed, trigger = GunLib.SelectPressed;
         if (GunLib.UpdateRigGun(GunLib.AimHand, grip, trigger, ref gunTarget) && gunTarget != null)
-            ChudOS.Mods.Safety.NetworkSafety.TryTag(gunTarget);
+            ChudOS.Mods.Safety.NetworkSafety.TryTag(gunTarget, true);
     }
 
     [MenuEnable("Tag Gun")]
@@ -140,12 +140,11 @@ public static class PlayerMods
         ButtonManager.SetEnabled("Tag All", false);
     }
 
-    [MenuButton("Tag All", ButtonType.Toggle, Category = "Detected", Order = 9, Description = "One pass over players within normal hand reach; does not teleport your rig")]
+    [MenuButton("Tag All", ButtonType.Toggle, Category = "Detected", Order = 9, Description = "Queue nearby eligible players while respecting request limits; does not teleport your rig")]
     public static void TagAll()
     {
         if (!ChudOS.Mods.Safety.NetworkSafety.AllowTagMod("Tag All")) return;
-        try { TagNearby(); }
-        finally { ButtonManager.SetEnabled("Tag All", false); }
+        TagAllQueue.Tick();
     }
 
     [MenuEnable("Tag All")]
@@ -154,7 +153,10 @@ public static class PlayerMods
         ButtonManager.SetEnabled("Tag Gun", false);
         ButtonManager.SetEnabled("Tag Self", false);
         ButtonManager.SetEnabled("Tag Aura", false);
+        TagAllQueue.Start();
     }
+    [MenuDisable("Tag All")]
+    public static void StopTagAll() => TagAllQueue.Clear();
 
     private static void TagNearby()
     {

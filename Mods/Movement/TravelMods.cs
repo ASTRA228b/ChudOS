@@ -61,7 +61,7 @@ public static class TravelMods
     [MenuDisable("Reverse Velocity")]
     public static void StopReverse() { reversed = false; reverseAfter = 0f; }
 
-    [MenuButton("Air Brake", ButtonType.Toggle, Category = "Movement", Order = 132, runOption = RunOption.FixedUpdate, Description = "Hold both grips to slow your momentum")]
+    [MenuButton("Air Brake", ButtonType.Toggle, Category = "Movement", Order = 132, Controls = "(RG)(LG)", runOption = RunOption.FixedUpdate, Description = "Hold both grips together to slow your momentum")]
     public static void AirBrake()
     {
         if (!PortTools.Ready || !InputLib.LeftGrab || !InputLib.RightGrab) return;

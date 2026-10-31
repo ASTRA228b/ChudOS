@@ -29,6 +29,7 @@ public sealed class MenuButtonAttribute : Attribute
     public string Category { get; set; } = "Main";
     public int Order { get; set; }
     public string Description { get; set; } = "";
+    public string Controls { get; set; } = "";
     public RunOption runOption { get; set; } = RunOption.Update;
     public bool DefaultEnabled { get; set; }
     public bool Notify { get; set; } = true;

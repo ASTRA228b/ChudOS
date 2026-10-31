@@ -37,7 +37,16 @@ public static class ButtonManager
         public ButtonType Type => Attribute.Type;
         public string Category => Attribute.Category;
         public string Option => Type == ButtonType.Option && Attribute.Options.Length > 0 ? Attribute.Options[OptionIndex] : "";
-        public string DisplayName => Type == ButtonType.Toggle ? $"{TranslationManager.T(Name)} [{TranslationManager.T(Enabled ? "ON" : "OFF")}]" : Type == ButtonType.Option ? $"{TranslationManager.T(Name)}: {TranslationManager.T(Option)}" : TranslationManager.T(Name);
+        public string DisplayName
+        {
+            get
+            {
+                string label = TranslationManager.T(Name);
+                if (!string.IsNullOrEmpty(Attribute.Controls)) label += " " + Attribute.Controls;
+                if (Type == ButtonType.Toggle) return $"{label} [{TranslationManager.T(Enabled ? "ON" : "OFF")}]";
+                return Type == ButtonType.Option ? $"{label}: {TranslationManager.T(Option)}" : label;
+            }
+        }
     }
 
     private static readonly List<ButtonData> All = new();

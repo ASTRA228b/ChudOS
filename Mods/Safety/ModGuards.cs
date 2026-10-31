@@ -19,6 +19,7 @@ internal static class ModGuards
     internal static void WarnDetected() => NotifyLib.SendNotificationALL(TranslationManager.T(DetectedWarning), 6500);
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
+        CreativeConflicts.OnEnable(button);
         if (button.Name.StartsWith("Head Spin ", StringComparison.Ordinal))
         {
             foreach (var other in ButtonManager.Buttons)
@@ -26,6 +27,8 @@ internal static class ModGuards
         }
         else if (button.Category == "Rig" || button.Name == "HeadBang")
             foreach (string name in new[] { "Head Spin Yaw", "Head Spin Pitch", "Head Spin Roll" }) ButtonManager.SetEnabled(name, false);
+        if (button.Name == "Wall Walk") ButtonManager.SetEnabled("Wall Walk V2", false);
+        if (button.Name == "Wall Walk V2") ButtonManager.SetEnabled("Wall Walk", false);
         if (ScaleControllers.Contains(button.Name))
             foreach (string name in ScaleControllers)
                 if (name != button.Name) ButtonManager.SetEnabled(name, false);

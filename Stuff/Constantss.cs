@@ -20,7 +20,7 @@ internal static class Constantss
 {
     public const string GUID = "ChudOS.Menu";
     public const string Name = "ChudOS";
-    public const string Version = "0.1.3";
+    public const string Version = "0.1.4";
     public const string ObjectName = "ChudOS Runtime";
     public const string INFORMATION = "ChudOS by Astra";
 }

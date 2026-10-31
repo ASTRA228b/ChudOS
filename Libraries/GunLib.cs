@@ -36,7 +36,7 @@ public static class GunLib
     private static bool leftHanded;
     public static Transform AimHand => GorillaTagger.Instance == null ? null! : leftHanded ? GorillaTagger.Instance.leftHandTransform : GorillaTagger.Instance.rightHandTransform;
     [MenuButton("Gun Hand", ButtonType.Option, Category = "Settings", Order = 152, Options = new[] { "Right", "Left" }, Notify = false)]
-    public static void SetHand() { leftHanded = (ChudOS.Core.Managers.ButtonManager.GetButton("Gun Hand")?.OptionIndex ?? 0) == 1; Hide(); }
+    public static void SetHand() { leftHanded = (ChudOS.Core.Managers.ButtonManager.GetButton("Gun Hand")?.OptionIndex ?? 0) == 1; Hide(); PortBindings.Refresh(); }
     public static bool AimPressed => XRSettings.isDeviceActive ? ControllerInputPoller.instance != null && (leftHanded ? InputLib.LeftGrab : InputLib.RightGrab) : Mouse.current?.rightButton.isPressed == true;
     public static bool SelectPressed => XRSettings.isDeviceActive ? ControllerInputPoller.instance != null && (leftHanded ? InputLib.LeftTrigger : InputLib.RightTrigger) : Mouse.current?.leftButton.isPressed == true;
 

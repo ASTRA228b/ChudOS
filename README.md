@@ -4,7 +4,9 @@
 
 ChudOS is a customizable mod menu for **Gorilla Tag on Windows PCVR**, with an in-game VR menu and mouse controls on desktop. It brings movement tools, player visuals, rig mods, a soundboard, and macros together in one menu.
 
-Version **0.1.3** includes **340 menu buttons** across mods, settings, and actions.
+Version **0.1.4** includes **409 menu buttons** across mods, settings, and actions.
+
+**0.1.4 is available from the latest release below.**
 
 [Download ChudOS](https://github.com/ASTRA228b/ChudOS/releases/latest) · [Full mod list and menu notes](MENUNOTES.md)
 

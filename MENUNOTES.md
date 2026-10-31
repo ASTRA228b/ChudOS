@@ -6,6 +6,27 @@ Update history, detailed controls, behavior notes, and the full categorized butt
 
 Historical update entries describe their respective versions; newer entries take precedence.
 
+## New in 0.1.4
+
+- **Movement ports, Part 1:** Portal Gun (grip/trigger aims and places; A switches portals; desktop RMB/LMB/Q), personal C4 (RG places, A detonates; desktop G/Space), Solid Water, Solid Players, PC Walking, Hoverboards Everywhere, Slippery Hands, and Disable Planet Zones. Adds nine associated settings. Portal Gun uses surface-fit and exit-clearance checks, preserves transformed velocity, and shares GunLib ownership. Hoverboard-area and slip hooks are scoped to the local player while enabled and removed on disable. Original water trigger layers stay intact; Solid Water uses a local support collider at supported water surfaces. PC Walking uses WASD, Space jump, Shift sprint, Ctrl slow movement, and RMB look; it does not implement physical crouching. These additions still require live game testing.
+- **Wall Walk:** keeps the original forward-force behavior, original strength/input settings, and saved button name.
+- **Wall Walk V2:** a separate Movement toggle that attaches toward the contacted surface normal while holding the selected inputs. Has its own strength and input settings. Compensation for gravity only runs during valid contact; releasing leaves the original gravity setting intact. The two Wall Walk toggles turn each other off.
+- **Reauthenticate:** Room button that retries native Mothership login once per request. Duplicate requests are blocked while pending, success/failure callbacks are detached afterward, and a long wait is reported without automatically retrying. No authentication payloads are shown.
+- **Keyboard:** English QWERTY, Portuguese with accents/Ç, Spanish with accents/Ñ, French AZERTY, German QWERTZ, and Italian layouts. Classic, Side Panel, Compact, or Wide style; Theme/Accent/Text Only keys; adjustable spacing, number row, placement, and size. Keyboard language is independent of menu language. Desktop text events accept accents and punctuation, and the combined menu/keyboard fits the camera view.
+- **Custom movement:** Momentum Bank (X stores speed, A releases toward the right hand), Surface Skate (RG), Air Paddle (LG+RG), Gravity Compass (X), and automatic Landing Brake, with individual settings.
+- **Traversal:** Advanced Checkpoints (X places, A returns, B deletes, RG moves a nearby point), Climby Hands (either grip), Auto Climb (both grips), and Bunny Hop (hold A). Movement controllers disable conflicting controllers rather than fighting over velocity.
+- **Practice:** Echo Race uses the selected saved macro as a local visual opponent (A starts/cancels). Gate Runner supports up to 32 local rings (X places, A starts/cancels, B clears). Beat Targets uses soundboard amplitude onsets for a local hand-target minigame. These tools do not send target or course objects to other players.
+- **Visuals:** personal Momentum Ribbon, Contact Sparks, Landing Pulse, and desktop-camera smoothing. Camera smoothing skips stereo cameras and restores the native camera pose after rendering. Effects use cached objects and size/intensity/quality/color settings.
+- **Rig:** Pose Sequencer (X captures, A plays/stops, B clears) stores up to 12 session poses and uses the existing rig ownership/restoration system.
+- **Soundboard:** Beat Halo adds a music-reactive ring around the music icon, with an Audio Orbs style. Analysis is shared between enabled audio features; playback and microphone mixing are unchanged.
+- **Profiles:** four named slots under ChudOS/Profiles, with save, preview, load, and reset controls. Mod restoration starts off; room actions and Detected mods are excluded. Invalid settings are rejected before applying a profile.
+- **Controller labels:** new input-driven buttons display A/B/X/Y, LT/RT, and LG/RG hints without changing their saved button names. Air Brake now displays LG+RG and still slows momentum while both grips are held.
+- **Ghost Hand Guides:** default-on Settings toggle. Two local player-colored controller markers appear while Ghost Monke or Invis Monke disables the rig. Markers have no active colliders, reuse their objects, and hide when normal tracking resumes.
+- **Tag tools:** use native infection/It state and eligibility checks. Tag All queues nearby eligible players with a timeout and skips invalid targets; it keeps the existing reach, room, per-target cooldown, and shared request limits. Tag Gun explains rejected selections with throttled notices. Submitted requests are not treated as confirmed server-side tags.
+- **Snowball Spam / Water Balloon Spam:** resolve native cosmetic/throwable IDs, request missing assets, validate material mappings, and allow the native growing-snowball release path. Hand velocity, ownership, existing held equipment, and configured intervals are respected. Availability still depends on the game's catalog and loading state.
+- **Preserved:** 0.1.1 notification behavior, Align To Palm, shared controller input helpers, EveryPatch.cs, and original platform construction.
+- Build validation uses isolated game stubs. Actual authentication responses, VR placement, wall contact and online projectile/tag behavior still need in-game testing.
+
 ## New in 0.1.3
 
 - **Menu alignment:** Auto faces the menu toward your head while following your hand. Align To Palm uses the original, unchanged one-time palm alignment; Fixed keeps a constant wrist-relative rotation. Settings includes distance, height, Recenter Menu, and Reset Menu Position. Desktop placement stays unchanged.
@@ -168,7 +189,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 ## Full feature list
 
-340 unique buttons, including mods, settings, and actions.
+409 unique buttons, including mods, settings, and actions.
 
 ## Main — 4
 
@@ -177,7 +198,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Menu Source
 - PC Button Click
 
-## Movement — 61
+## Movement — 79
 
 - Speed Boost
 - Low Gravity
@@ -217,7 +238,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Glider Tuning
 - Car
 - Reverse Velocity
-- Air Brake
+- Air Brake (RG)(LG)
 - Ender Pearl
 - Invisible Platforms
 - Sticky Platforms
@@ -240,8 +261,26 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Punch
 - Custom Arms
 - Spider Man
+- Wall Walk V2
+- Momentum Bank (X)(A)
+- Surface Skate (RG)
+- Air Paddle (RG)(LG)
+- Gravity Compass (X)
+- Landing Brake
+- Advanced Checkpoints (X)(A)(B)(RG)
+- Climby Hands (LG)/(RG)
+- Auto Climb (RG)(LG)
+- Bunny Hop (A)
+- Portal Gun (RG)(RT)(A)
+- C4 (RG)(A)
+- Hoverboards Everywhere
+- Disable Planet Zones
+- Slippery Hands
+- Solid Players
+- Solid Water
+- PC Walking (WASD)(Space)(Shift)(Ctrl)(RMB)
 
-## Rig — 35
+## Rig — 36
 
 - Copy Movement Gun
 - Dance
@@ -278,8 +317,9 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Head Spin Yaw
 - Head Spin Pitch
 - Head Spin Roll
+- Pose Sequencer (X)(A)(B)
 
-## Fun — 18
+## Fun — 21
 
 - Fix Head
 - Fix All
@@ -299,6 +339,9 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Reset FPS
 - Snowball Spam
 - Water Balloon Spam
+- Echo Race (A)
+- Gate Runner (X)(A)(B)
+- Beat Targets
 
 ## Player — 8
 
@@ -311,7 +354,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Chams
 - Beacons
 
-## Room — 18
+## Room — 19
 
 - Leave
 - JoinRandom
@@ -331,6 +374,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Join Last Room
 - JoinRoom: ASTRA
 - JoinRoom: CHUDOS
+- Reauthenticate
 
 ## Safety — 29
 
@@ -376,7 +420,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Tag Aura
 - Tag All
 
-## Visuals — 16
+## Visuals — 20
 
 - Hide Fog
 - Ambient Tint
@@ -394,13 +438,17 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - White Hole
 - Random Domain
 - No Leaves
+- Momentum Ribbon
+- Contact Sparks
+- Landing Pulse
+- Smooth Desktop Camera
 
 ## Weather — 2
 
 - Time
 - No Rain
 
-## Soundboard — 15
+## Soundboard — 16
 
 - Play / Stop
 - Next Sound
@@ -417,6 +465,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Mute Other Players
 - Microphone Mute
 - Microphone Pitch
+- Beat Halo
 
 ## Macros — 7
 
@@ -428,7 +477,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Reload Macros
 - Open Macros Folder
 
-## Settings — 118
+## Settings — 159
 
 - PC View
 - Array List
@@ -548,3 +597,44 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Macro Playback Speed
 - Macro Position
 - Macro Height Offset
+- Keyboard Style
+- Keyboard Placement
+- Keyboard Size
+- Ghost Hand Guides
+- Wall Walk V2 Strength
+- Wall Walk V2 Input
+- Keyboard Language
+- Keyboard Keys
+- Keyboard Spacing
+- Keyboard Numbers
+- Momentum Bank Capacity
+- Surface Skate Speed
+- Air Paddle Power
+- Compass Gravity
+- Landing Brake Distance
+- Auto Climb Power
+- Auto Climb Mode
+- Bunny Hop Power
+- Gate Runner Size
+- Pose Transition Time
+- Desktop Camera Smoothing
+- Beat Halo Style
+- Effect Size
+- Effect Intensity
+- Effect Quality
+- Effect Colors
+- Profile Slot
+- Load Profile Mods
+- Save Profile
+- Preview Profile
+- Load Profile
+- Reset Profile Settings
+- Portal Size
+- Portal Cooldown
+- C4 Power
+- C4 Radius
+- PC Walking Speed
+- PC Sprint Multiplier
+- PC Look Sensitivity
+- Solid Player Collision
+- Slippery Hands Strength
