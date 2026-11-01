@@ -84,6 +84,7 @@ public sealed class Changetext : MonoBehaviour
         public void Apply(string value)
         {
             if (Text == null) return;
+            ExpansionFonts.ApplyBoard(Text);
             if (!applied)
             {
                 originalText = Text.text;
@@ -107,6 +108,7 @@ public sealed class Changetext : MonoBehaviour
         public void Restore()
         {
             if (!applied) return;
+            if (Text != null) ExpansionFonts.RestoreBoard(Text);
             if (Text != null) { Text.text = originalText; Text.color = originalColor; }
             if (updater != null) updater.enabled = updaterWasEnabled;
             applied = false;

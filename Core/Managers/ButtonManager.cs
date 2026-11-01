@@ -156,10 +156,17 @@ public static class ButtonManager
         int next = button.OptionIndex + direction;
         next = button.Attribute.LoopOptions ? (next % count + count) % count : Mathf.Clamp(next, 0, count - 1);
         if (next == button.OptionIndex) return;
+        SetOption(button, next);
+    }
+    public static bool SetOption(ButtonData button, int next)
+    {
+        if (!All.Contains(button) || button.Type != ButtonType.Option || next < 0 || next >= button.Attribute.Options.Length) return false;
+        if (next == button.OptionIndex) return true;
         button.OptionIndex = next;
-        Execute(button.Run, button.Name);
+        bool success = Execute(button.Run, button.Name);
         Notify(button, button.Attribute.messagePress, $"{button.Name}: {button.Option}");
         OnButtonsChanged?.Invoke();
+        return success;
     }
     public static void Update() => RunPhase(RunOption.Update);
     public static void FixedUpdate() => RunPhase(RunOption.FixedUpdate);

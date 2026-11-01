@@ -53,6 +53,7 @@ internal sealed class SoundboardMarquee : MonoBehaviour
         marquee.viewportWidth = rect.sizeDelta.x;
         marquee.viewportHeight = rect.sizeDelta.y;
         marquee.enabled = false;
+        marquee.ApplyFont();
         return marquee;
     }
 
@@ -78,6 +79,14 @@ internal sealed class SoundboardMarquee : MonoBehaviour
         started = Time.unscaledTime;
         lastOffset = -1f;
         Measure();
+    }
+    internal void ApplyFont()
+    {
+        if (label == null) return;
+        label.font = ExpansionFonts.GetFont(ExpansionPreferences.MenuFont);
+        label.fontSize = Mathf.RoundToInt(48f * ExpansionPreferences.MenuTextSize);
+        measurePending = true;
+        enabled = true;
     }
     internal void SetSong(string key, string value)
     {

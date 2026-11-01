@@ -24,6 +24,7 @@ public static class MenuHelper
     public static Rect MakeWindow(int id, Rect window, GUI.WindowFunction createGUI, string title, params GUILayoutOption[] options)
     {
         GlobalStyles.INIT();
+        using var fonts = ExpansionFonts.BeginGUI();
         return GUILayout.Window(id, window, createGUI, TranslationManager.UI(title), GlobalStyles.WindowStyle, options);
     }
 

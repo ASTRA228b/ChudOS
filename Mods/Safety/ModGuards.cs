@@ -20,6 +20,7 @@ internal static class ModGuards
     internal static void OnEnable(ButtonManager.ButtonData button)
     {
         CreativeConflicts.OnEnable(button);
+        ExpansionConflicts.OnEnable(button);
         if (button.Name.StartsWith("Head Spin ", StringComparison.Ordinal))
         {
             foreach (var other in ButtonManager.Buttons)
@@ -54,7 +55,7 @@ internal static class ModGuards
 
     internal static void ClearTemporaryState()
     {
-        ChudOS.Mods.Fun.ThrowableSpam.Reset();
+        ChudOS.Mods.Spammers.ThrowableSpam.Reset();
         ButtonManager.SetEnabled("Spider Man", false);
         ChudOS.Mods.Movement.SpiderMan.Stop();
         ButtonManager.SetEnabled("Custom Arms", false);

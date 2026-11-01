@@ -4,27 +4,32 @@
 
 ChudOS is a customizable mod menu for **Gorilla Tag on Windows PCVR**, with an in-game VR menu and mouse controls on desktop. It brings movement tools, player visuals, rig mods, a soundboard, and macros together in one menu.
 
-Version **0.1.4** includes **409 menu buttons** across mods, settings, and actions.
+**V0.1.5 Beta** includes **585 menu buttons** across mods, settings, and actions.
 
-**0.1.4 is available from the latest release below.**
+**This is a beta: some features are buggy or may not work as intended. The full release is coming soon. Please report problems you find.**
 
-[Download ChudOS](https://github.com/ASTRA228b/ChudOS/releases/latest) · [Full mod list and menu notes](MENUNOTES.md)
+[Download V0.1.5 Beta](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5-beta.1) · [Full mod list and menu notes](MENUNOTES.md)
 
 ## What's in the menu
 
+- **Jarvis beta:** spoken local menu commands, GPT Jarvis, and ChudGPT Jarvis with 14 model choices.
 - **Movement:** platforms, flight, Wall Walk, Spider Man, Long Arms, Pull Mod, and more.
 - **Visuals:** name tags, player highlights, tracers, particle effects, and an information overlay.
 - **Rig:** poses, animations, and player-targeting guns.
+- **Practice and effects:** local physics toys, traversal tools, projectile previews, and a dedicated Spammers category.
+- **Optimize Game:** a reversible low-quality graphics toggle under Visuals.
 - **Soundboard:** local and microphone playback, a music control page, and audio downloads.
 - **Macros:** record and replay movement, manage saved routes, and import supported macro files.
-- **Customization:** themes, alignment, languages, click sounds, vibrations, and custom boards.
+- **Customization:** themes, gradients, fonts, alignment, languages, click sounds, vibrations, and custom boards.
+- **Holdables:** twelve premade models including a wooden cross and bisexual, rainbow gay pride, and trans flags, plus local cameras, toys, a flashlight, and a measuring tape. Custom visual bundles are optional.
+- **OP:** supported Guardian/team controls and locally owned Lucy tools, with clear mode and ownership requirements.
 
 Search for buttons, save favorites, and use the array list to see enabled mods. Settings lets you adjust the menu and individual mods without editing the source.
 
 ## Installation
 
 1. Set up BepInEx for the Windows PC version of Gorilla Tag.
-2. Download **ChudOS.dll** from the [latest release](https://github.com/ASTRA228b/ChudOS/releases/latest).
+2. Download **ChudOS.dll** from the [V0.1.5 Beta release](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5-beta.1).
 3. Put it in `Gorilla Tag/BepInEx/plugins`. Replace your previous ChudOS DLL and remove duplicate copies.
 4. Restart Gorilla Tag.
 

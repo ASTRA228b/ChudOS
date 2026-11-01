@@ -163,6 +163,12 @@ public static class NewVisualMods
     {
         if (!PortTools.Ready) return;
         bool draw = GunLib.UpdateGun(GunLib.AimHand, GunLib.AimPressed, GunLib.SelectPressed, out Vector3 point);
+        if (ChudOS.Mods.Settings.ExpansionPreferences.ReactorDrawing)
+        {
+            if (draw && GunLib.HasHit && !ChudOS.Mods.OP.ReactorHandprints.Stamp(point + GunLib.LastHit.normal * 0.01f, GunLib.LastHit.normal)) ChudOS.Mods.OP.ReactorHandprints.ExplainUnavailable();
+            stroke = null; strokePoints = 0;
+            return;
+        }
         if (!draw) { stroke = null; strokePoints = 0; return; }
         if (stroke == null || strokePoints >= 512)
         {

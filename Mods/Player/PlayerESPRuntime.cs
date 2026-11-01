@@ -140,6 +140,8 @@ public static partial class PlayerESPRuntime
         foreach (var pair in Tracers)
         {
             if (pair.Key == null || pair.Value == null) continue;
+            pair.Value.enabled = !ChudOS.Mods.Settings.ExpansionPreferences.CosmeticTracersOnly || PlayerInspectionDetails.HasCosmetics(pair.Key);
+            if (!pair.Value.enabled) continue;
             pair.Value.SetPosition(0, origin);
             pair.Value.SetPosition(1, pair.Key.transform.position);
             pair.Value.startColor = RigColor(pair.Key);

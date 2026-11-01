@@ -24,7 +24,7 @@ public static class CategoryManager
 {
     public const string Home = "Home";
     public const string Main = "Main";
-    private static readonly List<string> Categories = new() { "Main", "Enabled Mods", "Favorites", "Detected", "Movement", "Player", "Rig", "Visuals", "Weather", "Fun", "Room", "Soundboard", "Safety", "Settings" };
+    private static readonly List<string> Categories = new() { "Main", "Enabled Mods", "Favorites", "Detected", "Movement", "Player", "Rig", "Visuals", "Weather", "Fun", "Spammers", "OP", "Holdables", "Room", "Soundboard", "Safety", "Settings" };
     public static string CurrentCategory { get; private set; } = Home;
     public static int PageNumber { get; private set; }
     public static int PageLimit = 3;

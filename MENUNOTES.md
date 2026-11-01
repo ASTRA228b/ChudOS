@@ -6,13 +6,65 @@ Update history, detailed controls, behavior notes, and the full categorized butt
 
 Historical update entries describe their respective versions; newer entries take precedence.
 
+## New in V0.1.5 Beta
+
+This is a beta. Features are buggy or may be buggy; please report issues. The full release is coming soon.
+
+- **Jarvis:** enable Main > Jarvis, then open Jarvis GUI or use Ask Jarvis. F8 always starts voice capture. Jarvis starts disabled and can be saved through Save Menu State.
+- **Voice Assistant:** local commands work without an AI: enable/disable/toggle a mod, open a category, press an action, set an existing option value, increase/decrease an option, save settings, request a room, and control soundboard playback. Examples: "enable platforms", "set menu theme to OG Blue", "set drone speed to six", "set speed boost amount to ten", "open movement", and "join room ASTRA". Ambiguous names or nonexistent presets do not execute. Commands use the existing button callbacks and guards.
+- **GPT Jarvis:** uses the compatible GPT chat service and menu-command response format. The service chooses its backend model; ChudOS does not identify it as a verified direct OpenAI connection.
+- **ChudGPT Jarvis:** all 14 choices: Public, Music, Buggy, 700, 1300, 1500, 1600, Ultimate, Plus, Pro, Code, Mega, Plato, and Plato Mini. Sends only the user's message and conversation history, without a system prompt, Jarvis instructions, or menu snapshot. Public/Main retain separate per-model sessions; Plato uses bounded local message history. ChudGPT replies are conversation text and never execute menu commands; explicit local voice commands still work before contacting the model. If a request fails, Jarvis speaks and displays a suggestion to switch to GPT Jarvis. Providers never switch automatically.
+- **Spoken replies:** all three modes use a separate local audio source, leaving the soundboard and microphone mixer intact. Windows Default uses an installed Windows voice through a hidden synthesis process. Brian, Amy, Russell, Nicole, Matthew, Joanna, and Raveena use the web TTS service, with Windows synthesis as a fallback when the web request fails. Cached clips and cache files are bounded. Replies are spoken up to 550 characters; the GUI retains the longer reply.
+- **Voice controls:** Jarvis keeps listening for the selected wake word whenever enabled and ready, including when Push To Talk is selected. Enabling shows and speaks the active wake word even if ordinary Jarvis notifications are off; the GUI shows the active word and available choices. Choose Jarvis, Assistant, Friday, or System in Settings. Say the selected word, wait for the ready tone and **Listening â€” speak now**, then speak your command. Recognition pauses while a request is processed or a reply is spoken, then resumes automatically. Push To Talk additionally records while the selected input/F8 is held, within the configured listening limit. Ask Jarvis uses a timed listening window. Disabling Jarvis stops recognition.
+- **Wake-word handoff:** a short ready tone plays only after dictation reports Running; the earlier spoken acknowledgement no longer claims listening has already started. Say the wake word, wait for the tone/Listening indicator, then speak. A wake word followed by silence returns to standby without speaking a transcription error; real recognition errors and unfinished transcriptions remain visible. The ready tone follows Spoken Replies and Jarvis Volume.
+- **Recognition fixes/settings:** a fresh, disposable dictation session isolates callbacks from previous requests. Final results arriving after completion/stop are accepted during a bounded grace period. Partial transcripts are shown in the GUI but never execute commands. Low-confidence final text is retained for diagnosis instead of silently discarded. Balanced accepts Medium/High, High Confidence Only accepts High, and Allow Low Confidence also accepts Low (never Rejected). The default listening window is 12 seconds and silence timeout is 3 seconds; Settings and the Jarvis GUI expose alternatives. Windows Microphone Settings and Windows Speech Settings buttons open the relevant OS pages without changing permissions or device selection. Dictation uses Windows' default input device. The GUI shows Heard, speech status/error codes, and reply source, so recognition failures can be distinguished from AI replies. Raw speech text is not written to the console log.
+- **Jarvis settings:** provider, ChudGPT model, activation, input, wake word, voice, volume, spoken replies, text notifications, menu controls, optional notification dictation, clear conversation, and restart. Typed input remains available when Windows recognition is unavailable. Recognition uses the Windows speech language and requires microphone access and Windows speech support.
+- **GUI:** a themed window built with MakeWindow, provider/model selectors, typed requests, Listen, Stop, Clear Conversation, and the latest request/reply. No external AI request is sent in plain Voice Assistant mode.
+- Windows recognition, selected web voices, and AI providers have their own service availability. Windows may use online dictation; cloud voice selection sends reply text to its TTS provider. Speech plays locally and is not deliberately injected into game voice chat.
+- **Validation:** isolated command and provider-contract checks, a Windows-generated speech WAV, and live basic replies from the GPT service and all three ChudGPT API families. Full microphone recognition, VR input, and in-game coexistence still need testing. This beta is published for testing; in-game issues may remain.
+
+### Expansion pack
+
+- **Movement:** Airplane, Bird Fly, Bubble Locomotion, Zipline Launcher, Rideable Rockets, Nailgun Climbing, Auto Walk, Auto Branch, Air Swim, Controller Flick, Wall Kick, Ledge Hang, Parkour Vault, Wind Tunnel Builder, Moving Walkway, and Bungee Anchor. Air Swim requires loaded native water data. Auto Branch uses nearby loaded branch names; it is a proximity helper, not a map pathfinder. Zipline releases at its endpoint.
+- **Rig:** Weeping Angel, Minecraft Animations, Chicken Rig, Amputate Rig, Floating Rig, and Eye Contact. These use the existing rig ownership and pose restoration system. Avatar bone compatibility affects Amputate Rig.
+- **Player:** Cosmetic Inspector shows matching locally loaded cosmetic renderers; Player Audio Panel adjusts individual received voice sources and restores their volumes. Outline ESP samples up to four nearby player silhouettes. Voice Radar, Nearby Player Alert, and FOV Cone Viewer add local indicators.
+- **Visuals:** Minimap, World Mirror, Fullbright, Underwater Vision, Skybox Editor, Surface Inspector, Wind Barrier Viewer, Projectile Trajectory Preview, Photo Mode, Camera Dolly, NPC Tracker, and Resource Tracker. Tracker matches depend on objects loaded by the current map. World Mirror is a live camera screen. Trajectory Preview is a local ballistic estimate. Photos save under `ChudOS/Photos`.
+- **Optimize Game:** Visuals toggle lowering mipmapped textures to quarter resolution or lower, disabling shadows, anti-aliasing, anisotropic filtering, soft particles and realtime reflection updates, reducing pixel lights and LOD detail. It captures and restores the previous values; settings change only on enable/disable. Some game shaders, textures and rendering paths may ignore global quality settings. It does not change FPS caps or collision geometry.
+- **Weather:** Snow Control hides matching loaded looping snowfall particles and restores their prior emission state when disabled.
+- **Fun:** Physics Sandbox, Domino Builder, Marble Run, Force Lab, Rope Bridge Builder, RC Drone, Boomerang, Paper Planes, Yo-Yo, Juggling Practice, Mini Bowling, Ring Toss, Virtual Darts, Cup Stacking, Air Hockey, Pocket Basketball, Rhythm Drums, Metronome, Reaction Trainer, Memory Pads, Precision Landing Challenge, Balance Beam Challenge, Laser Maze, Throwable Target Range, and Theremin. These are local practice props/effects. Cup Stacking uses solid cylinder props. Sandbox supports grabbing, scale sliders and joining the last two props. Rope Bridge uses two gun-selected anchors.
+- **Spammers:** Snowball Spam and Water Balloon Spam move here from Fun without changing their saved names. Their release path now creates the native held throwable before checking ownership, respects occupied hands and the shared network budget, supports left/right hand and configurable inputs, and throttles missing asset requests. A loaded native catalog and throwable are still required; submission is not confirmation of server acceptance.
+- **Local emitters:** Projectile Gun, Projectile Pattern Emitter (Fountain/Rain/Orbit), Impact Painter, Bubble Wand, Confetti Cannon, and Firework Sequencer live in Spammers. All six are local previews/effects; they do not broadcast spawned objects to the room. Native projectile previews require a loaded throwable prefab.
+- **Room:** Favorite Rooms and Room History share a small notebook GUI; Join Clipboard Room validates a room code before requesting a native join, and Copy Room Code copies the current code. Up to 30 favorites/history entries save locally in `ChudOS/room-notebook.json`.
+- **Macros:** Macro Editor saves trimmed copies without overwriting the original recording. Macro Compare draws two normalized frame-sampled routes with optional start alignment. Route Deviation Coach measures distance from the selected route. Scrubbing displays a marker and does not teleport the player.
+- **Safety:** Mod Health Monitor shows readiness and recent ChudOS errors while enabled. It does not suppress errors, alter authentication or guarantee protection from bans.
+- **Shared settings:** Expansion Movement Power/Range, Expansion Object Limit, Sandbox Prop Mass, Toy Launch Power, Local Emitter Interval, Expansion Visual Range, and Practice Audio Volume. Geometry/mass settings apply when new props or scenes are created; disable/re-enable an active tool to rebuild it with a new limit.
+- **Controls:** new buttons include short input hints and descriptions. Common practice controls are A/Space to reset, B/R to change shape, RG/RMB to grab/release, and X/F for the tool's alternate action. RC Drone uses left stick/arrows, A/Space up and LG/Shift down. Gun tools retain GunLib aiming/selection. Close the menu to fire emitters.
+- **Performance:** feature components are created on enable and destroyed on disable; local prop/effect counts are bounded. Scene discovery is throttled, effect objects are reused, outline baking is staggered, and quality changes run only on setup/cleanup. New GUIs use MenuHelper.MakeWindow. No measured idle-time or FPS guarantee is made without profiling in the game.
+- **Expansion validation:** compiled callback/cleanup checks, numerical geometry/route tests, quality restoration tests, and native throwable creation/release regression tests passed. The full Release build succeeds with eight existing missing-reference warnings. These checks do not simulate the game, VR tracking, or remote server behavior. This is a beta prerelease, not a guarantee that every feature works in-game.
+
+### Gradients, fonts, OP and holdables
+
+- **Gradients:** Off preserves the selected original theme. Aurora, Sunset, Midnight, Ice, Cotton Candy and Custom use cached opaque textures, adjustable direction, separate enabled colors, and optional throttled UV animation. Existing pressed material references and highlighting are retained.
+- **Fonts:** Original, Segoe UI, Verdana and Consolas choices for menu, boards and GUIs, with menu/GUI size presets and font reset. Missing OS fonts fall back through available fonts. Menu labels use glyph advances to fit; soundboard title/artist marquees remeasure when fonts change. Original board fonts restore with the board manager. Options save through menu state/profiles; notifications are unchanged.
+- **OP:** Guardian Controls and Team Controls open registered GUIs. Guardian mode/valid zones are required; team assignment requires the active Monke Ball arena. Both require current room master authority, validate current players and use the existing request budget. Summon/Despawn, Grab, Move Gun, Freeze, Pet and Physics Lucy tools require a loaded, locally owned ghost. Continuous Lucy controllers are exclusive and restore captured state if still owned.
+- **Prop Control Gun:** local repositioning of supported dropped transferable objects owned by you; restores captured rigidbody flags on release. Sticky/physical holdable controllers do not compete with it.
+- **GR Trail / Draw Output:** current Ghost Reactor handprint API is local. This build sends no guessed BroadcastHandprint RPC. Both trail and optional Draw Gun output require the active Reactor zone and throttle printing.
+- **Premade holdables:** choose Toy Sword, Toy Hammer, Round Shield, Magic Wand, Banana, Flower, Toy Microphone, ChudOS Flag, Wooden Cross, Bisexual Flag, Gay Pride Flag (rainbow), or Trans Flag in Premade Holdable, then enable Equip Premade Holdable. No bundle, asset download or desktop GUI is required. These are twelve model choices, not twelve separate gameplay mods.
+- **Holdable Browser:** includes all twelve premade models and optional visual bundle imports, with previews, favorites and independent left/right model scale. Up to four bundles stay cached while open; asynchronous loads release assets even if the browser closes before completion. Script-bearing prefabs are rejected. See [Holdables](Docs/Holdables.md) for the manifest format.
+- **Other Holdables:** Sticky Holdables retains your grabbed native items until B/R releases them. Physical Holdables uses approximate local sphere proxies for compatible owned dropped items. Handheld Camera has a 10 Hz preview and saves PNGs to ChudOS/Photos. Squeeze Toy, Custom Flashlight, Measuring Tape, Dual Hand Orbs and Laser Eyes are local. Repeated orbs use a bounded pool. New tool inputs ignore active GUI areas and Jarvis text editing.
+- **Settings:** hand, original/theme/player/preset color, size, offsets, rotation, throw strength, haptics, placement reset, flashlight range/brightness and Lucy physics bounce. Hand-dependent hints update with the hand selector.
+- **Player/Soundboard/Safety:** Palm Player List and Palm Stats add hand-mounted panels. Cosmetic Inspector reads equipped cosmetic data plus room-local nickname, actor and color. Optional tracer filtering uses equipped cosmetics, not staff detection. Nearby alerts can filter for infected players. Microphone Echo restores its prior recorder state; Refresh Microphone restarts only a recording game recorder. It does not restart Windows dictation. Copy Pose Data copies local transform arrays to the clipboard.
+- **Movement/Rig:** Upside Down Body uses native gravity/rotation overrides; Mirrored Rig reflects tracked poses through RigRuntime. The existing Rig Tweaks modes were checked and rotate rather than reflect poses.
+- **Preserved:** NoClip, all platform constructors/variants, EveryPatch and shared input helpers remain unchanged. The reported NoClip/platform interaction is unconfirmed and remains plan-only.
+- **Validation:** Release build succeeds with no C# warnings/errors and eight existing unresolved-reference warnings. Isolated checks cover compiled registrations/lifecycles, settings and gradient restoration, holdable loading/cancellation and per-hand scale, and built-in model caching/collider/resource ownership. In-game VR placement, physics, fonts/gradients and online mode behavior still require testing. The beta remains local and unpublished.
+
 ## New in 0.1.4
 
 - **Movement ports, Part 1:** Portal Gun (grip/trigger aims and places; A switches portals; desktop RMB/LMB/Q), personal C4 (RG places, A detonates; desktop G/Space), Solid Water, Solid Players, PC Walking, Hoverboards Everywhere, Slippery Hands, and Disable Planet Zones. Adds nine associated settings. Portal Gun uses surface-fit and exit-clearance checks, preserves transformed velocity, and shares GunLib ownership. Hoverboard-area and slip hooks are scoped to the local player while enabled and removed on disable. Original water trigger layers stay intact; Solid Water uses a local support collider at supported water surfaces. PC Walking uses WASD, Space jump, Shift sprint, Ctrl slow movement, and RMB look; it does not implement physical crouching. These additions still require live game testing.
 - **Wall Walk:** keeps the original forward-force behavior, original strength/input settings, and saved button name.
 - **Wall Walk V2:** a separate Movement toggle that attaches toward the contacted surface normal while holding the selected inputs. Has its own strength and input settings. Compensation for gravity only runs during valid contact; releasing leaves the original gravity setting intact. The two Wall Walk toggles turn each other off.
 - **Reauthenticate:** Room button that retries native Mothership login once per request. Duplicate requests are blocked while pending, success/failure callbacks are detached afterward, and a long wait is reported without automatically retrying. No authentication payloads are shown.
-- **Keyboard:** English QWERTY, Portuguese with accents/Ç, Spanish with accents/Ñ, French AZERTY, German QWERTZ, and Italian layouts. Classic, Side Panel, Compact, or Wide style; Theme/Accent/Text Only keys; adjustable spacing, number row, placement, and size. Keyboard language is independent of menu language. Desktop text events accept accents and punctuation, and the combined menu/keyboard fits the camera view.
+- **Keyboard:** English QWERTY, Portuguese with accents/Ã‡, Spanish with accents/Ã‘, French AZERTY, German QWERTZ, and Italian layouts. Classic, Side Panel, Compact, or Wide style; Theme/Accent/Text Only keys; adjustable spacing, number row, placement, and size. Keyboard language is independent of menu language. Desktop text events accept accents and punctuation, and the combined menu/keyboard fits the camera view.
 - **Custom movement:** Momentum Bank (X stores speed, A releases toward the right hand), Surface Skate (RG), Air Paddle (LG+RG), Gravity Compass (X), and automatic Landing Brake, with individual settings.
 - **Traversal:** Advanced Checkpoints (X places, A returns, B deletes, RG moves a nearby point), Climby Hands (either grip), Auto Climb (both grips), and Bunny Hop (hold A). Movement controllers disable conflicting controllers rather than fighting over velocity.
 - **Practice:** Echo Race uses the selected saved macro as a local visual opponent (A starts/cancels). Gate Runner supports up to 32 local rings (X places, A starts/cancels, B clears). Beat Targets uses soundboard amplitude onsets for a local hand-target minigame. These tools do not send target or course objects to other players.
@@ -46,7 +98,7 @@ Historical update entries describe their respective versions; newer entries take
 
 ## New in 0.1.2
 
-- **Long Arms:** default length 1.1 with a 0.5–2.5 range and finer steps near the default. Existing saved lengths migrate to the new choices; height settings stay separate.
+- **Long Arms:** default length 1.1 with a 0.5â€“2.5 range and finer steps near the default. Existing saved lengths migrate to the new choices; height settings stay separate.
 - **Board text:** refresh outdated built-in text from older saves, preserve custom fields, and keep a backup at `ChudOS/boards.json.pre-012.bak` when migrating an existing file.
 - **No Finger Gestures:** keep fingers open at the native finger mapper while preserving controller inputs for the menu and other mods.
 - **Room:** Report All, Key-Leave with its input selector directly underneath, Disable Quit Box, Disable Map Triggers, Reconnect, Cancel Reconnect, Join Last Room, JoinRoom: ASTRA, and JoinRoom: CHUDOS. Random private-room selection now has 30 code choices.
@@ -60,13 +112,13 @@ Historical update entries describe their respective versions; newer entries take
 ### Additional 0.1.2 features
 
 Movement:
-- Custom Arms — hold left trigger to increase length and right trigger to decrease it.
-- Adjustable range: 0.5–2.5, starting at 1.1; height uses the existing Long Arm Height setting.
+- Custom Arms â€” hold left trigger to increase length and right trigger to decrease it.
+- Adjustable range: 0.5â€“2.5, starting at 1.1; height uses the existing Long Arm Height setting.
 - Custom Arms Speed and Reset Custom Arms settings.
 
 Player:
-- Chams — solid-color player highlights visible through walls, with the original avatar materials preserved.
-- Beacons — vertical markers above other players' heads.
+- Chams â€” solid-color player highlights visible through walls, with the original avatar materials preserved.
+- Beacons â€” vertical markers above other players' heads.
 - Player/theme colors, Chams opacity, and Beacon height/width settings.
 
 Rig:
@@ -135,8 +187,8 @@ Download ChudOS.dll from the release page to use these features.
 - **Free camera:** `WASD` to move, `Q/E` to move down/up, and hold the right mouse button to look around.
 - **Custom boards:** use **Open Board Text** and **Reload Board Text** in Settings.
 - **Saved settings:** use **Save Menu State** in Settings.
-- **Themes:** open **Settings → Menu Theme**. Use **Save Menu State** to keep your selection for next time.
-- **SB Control:** open **Main → SB Control**. Missing MP3 title/artist tags fall back to the filename and Unknown Artist.
+- **Themes:** open **Settings â†’ Menu Theme**. Use **Save Menu State** to keep your selection for next time.
+- **SB Control:** open **Main â†’ SB Control**. Missing MP3 title/artist tags fall back to the filename and Unknown Artist.
 - **Rig guns on PC:** hold the right mouse button to aim and the left mouse button to select. In VR, use right grip and trigger.
 - **PC Button Click:** enable it in Main, then left-click in-game buttons. Disable it to restore the previous cursor state.
 - **Language and click feedback:** change them in Settings, then use Save Menu State.
@@ -189,16 +241,24 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 ## Full feature list
 
-409 unique buttons, including mods, settings, and actions.
+585 unique buttons, including mods, settings, and actions.
 
-## Main — 4
+281 toggle mods outside Settings, plus 73 actions and 11 selectors. The Settings category has 220 entries. Actions and selectors are not all standalone gameplay mods.
+
+Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are grips, LJ/RJ are joystick clicks, and LMB/RMB are mouse buttons. A plus sign means hold together. Button descriptions explain the action.
+
+## Main — 8
 
 - Join Discord
 - SB Control
 - Menu Source
 - PC Button Click
+- Jarvis
+- Jarvis GUI
+- Ask Jarvis (F8)
+- Stop Jarvis Response
 
-## Movement — 79
+## Movement — 96
 
 - Speed Boost
 - Low Gravity
@@ -279,8 +339,44 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Solid Players
 - Solid Water
 - PC Walking (WASD)(Space)(Shift)(Ctrl)(RMB)
+- Airplane (Arms Out)
+- Bird Fly (Flap Arms)
+- Bubble Locomotion (LG)(RG)
+- Zipline Launcher (RG)(RT)
+- Rideable Rockets (LG)(RG)
+- Nailgun Climbing (RG)(RT)
+- Auto Walk
+- Auto Branch (RG)
+- Air Swim
+- Controller Flick (X)
+- Wall Kick (A)
+- Ledge Hang (RG)
+- Parkour Vault (A)
+- Wind Tunnel Builder (RG)(RT)
+- Moving Walkway (RG)(RT)
+- Bungee Anchor (RG)(RT)(B)
+- Upside Down Body
 
-## Rig — 36
+## Player — 16
+
+- Body Tracers
+- Bone ESP
+- 2D Box ESP
+- 3D Box ESP
+- 4D Box ESP
+- Trails ESP
+- Chams
+- Beacons
+- Cosmetic Inspector (RG)(RT)
+- Player Audio Panel
+- Outline ESP
+- Voice Radar
+- Nearby Player Alert
+- FOV Cone Viewer
+- Palm Player List
+- Palm Stats
+
+## Rig — 43
 
 - Copy Movement Gun
 - Dance
@@ -318,8 +414,57 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Head Spin Pitch
 - Head Spin Roll
 - Pose Sequencer (X)(A)(B)
+- Weeping Angel
+- Minecraft Animations
+- Chicken Rig
+- Amputate Rig
+- Floating Rig
+- Eye Contact
+- Mirrored Rig
 
-## Fun — 21
+## Visuals — 33
+
+- Hide Fog
+- Ambient Tint
+- Visual Info
+- Name Tags
+- Overlay
+- Jump Predictions
+- Show Room Triggers
+- Draw Gun
+- Hide Head Cosmetics
+- Fire Fists
+- Forest Lightning
+- Nebula Storm
+- Black Hole
+- White Hole
+- Random Domain
+- No Leaves
+- Momentum Ribbon
+- Contact Sparks
+- Landing Pulse
+- Smooth Desktop Camera
+- Minimap
+- World Mirror
+- Fullbright
+- Underwater Vision
+- Skybox Editor
+- Surface Inspector (RG)(RT)
+- Wind Barrier Viewer
+- Projectile Trajectory Preview
+- Photo Mode (A)
+- Camera Dolly (X)(A)
+- NPC Tracker
+- Resource Tracker
+- Optimize Game
+
+## Weather — 3
+
+- Time
+- No Rain
+- Snow Control
+
+## Fun — 45
 
 - Fix Head
 - Fix All
@@ -337,24 +482,76 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - 240 FPS
 - 360 FPS
 - Reset FPS
-- Snowball Spam
-- Water Balloon Spam
 - Echo Race (A)
 - Gate Runner (X)(A)(B)
 - Beat Targets
+- Physics Sandbox (RG)(RT)(A)(B)(X)
+- Domino Builder (RG)(RT)(A)(X)
+- Marble Run (RG)(RT)(A)
+- Force Lab (LG)(RG)(A)
+- Rope Bridge Builder (RG)(RT)(A)
+- RC Drone (Left Stick Axis)(A)(LG)
+- Boomerang (RG)(A)
+- Paper Planes (RG)(A)
+- Yo-Yo (RG)(A)
+- Juggling Practice (RG)(A)
+- Mini Bowling (RG)(A)
+- Ring Toss (RG)(A)
+- Virtual Darts (RG)(A)
+- Cup Stacking (RG)(A)
+- Air Hockey (Hands)(RG)(A)
+- Pocket Basketball (RG)(A)
+- Rhythm Drums (Hands)(A)
+- Metronome (GUI)
+- Reaction Trainer (Hands)(A)
+- Memory Pads (Hands)(A)
+- Precision Landing Challenge (Body)(A)
+- Balance Beam Challenge (Body)(A)
+- Laser Maze (Body)(A)
+- Throwable Target Range (Projectiles)(A)
+- Theremin (Hands)
+- Laser Eyes (RG)/(O)
 
-## Player — 8
+## Spammers — 9
 
-- Body Tracers
-- Bone ESP
-- 2D Box ESP
-- 3D Box ESP
-- 4D Box ESP
-- Trails ESP
-- Chams
-- Beacons
+- Snowball Spam (RT)/(LMB)
+- Water Balloon Spam (RT)/(LMB)
+- Throwable Status
+- Projectile Gun (RG)(RT)
+- Projectile Pattern Emitter (RT)/(LMB)
+- Impact Painter (RG)(RT)
+- Bubble Wand (RT)/(LMB)
+- Confetti Cannon (RT)/(LMB)
+- Firework Sequencer (RT)/(LMB)
 
-## Room — 19
+## OP — 11
+
+- Guardian Controls
+- Team Controls
+- Summon Lucy
+- Despawn Lucy
+- Grab Lucy (RG)/(RMB)
+- Move Lucy Gun (RG)(RT)
+- Freeze Lucy
+- Pet Lucy
+- Lucy Physics (RG)/(RMB)
+- Prop Control Gun (RG)(RT)
+- GR Trail
+
+## Holdables — 10
+
+- Holdable Browser
+- Sticky Holdables (B)/(R)
+- Physical Holdables
+- Equip Premade Holdable
+- Premade Holdable
+- Handheld Camera (RT)/(LMB)
+- Squeeze Toy (RG)/(RMB)
+- Custom Flashlight (A)/(Space)
+- Measuring Tape (RT)/(LMB)(X)
+- Dual Hand Orbs (LG)(RG)
+
+## Room — 23
 
 - Leave
 - JoinRandom
@@ -375,8 +572,46 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - JoinRoom: ASTRA
 - JoinRoom: CHUDOS
 - Reauthenticate
+- Favorite Rooms
+- Room History
+- Join Clipboard Room
+- Copy Room Code
 
-## Safety — 29
+## Soundboard — 18
+
+- Play / Stop
+- Next Sound
+- Volume
+- Sound Output
+- Mic Volume
+- Autoplay
+- Repeat
+- Shuffle
+- Open Soundboard GUI
+- Reload Sounds
+- Download YouTube Audio
+- Download Clipboard Audio
+- Mute Other Players
+- Microphone Mute
+- Microphone Pitch
+- Beat Halo
+- Microphone Echo
+- Refresh Microphone
+
+## Macros — 10
+
+- Macro Controls
+- Record Macro
+- Stop Macro
+- Play Selected Macro
+- Next Macro
+- Reload Macros
+- Open Macros Folder
+- Macro Editor
+- Macro Compare
+- Route Deviation Coach
+
+## Safety — 31
 
 - Disable Movement
 - Disable All Mods
@@ -407,6 +642,8 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Disable Mods On Leave
 - Rapid Master Protection
 - Reset Temporary Mod State
+- Mod Health Monitor
+- Copy Pose Data
 
 ## Detected — 9
 
@@ -420,64 +657,7 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Tag Aura
 - Tag All
 
-## Visuals — 20
-
-- Hide Fog
-- Ambient Tint
-- Visual Info
-- Name Tags
-- Overlay
-- Jump Predictions
-- Show Room Triggers
-- Draw Gun
-- Hide Head Cosmetics
-- Fire Fists
-- Forest Lightning
-- Nebula Storm
-- Black Hole
-- White Hole
-- Random Domain
-- No Leaves
-- Momentum Ribbon
-- Contact Sparks
-- Landing Pulse
-- Smooth Desktop Camera
-
-## Weather — 2
-
-- Time
-- No Rain
-
-## Soundboard — 16
-
-- Play / Stop
-- Next Sound
-- Volume
-- Sound Output
-- Mic Volume
-- Autoplay
-- Repeat
-- Shuffle
-- Open Soundboard GUI
-- Reload Sounds
-- Download YouTube Audio
-- Download Clipboard Audio
-- Mute Other Players
-- Microphone Mute
-- Microphone Pitch
-- Beat Halo
-
-## Macros — 7
-
-- Macro Controls
-- Record Macro
-- Stop Macro
-- Play Selected Macro
-- Next Macro
-- Reload Macros
-- Open Macros Folder
-
-## Settings — 159
+## Settings — 220
 
 - PC View
 - Array List
@@ -607,6 +787,27 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - Keyboard Keys
 - Keyboard Spacing
 - Keyboard Numbers
+- Jarvis Provider
+- ChudGPT Model
+- Jarvis Activation
+- Jarvis Input
+- Jarvis Wake Word
+- Jarvis Voice
+- Jarvis Volume
+- Jarvis Spoken Replies
+- Jarvis Notifications
+- Jarvis Menu Controls
+- Jarvis Dictate Notifications
+- Clear Jarvis Conversation
+- Restart Jarvis
+- Jarvis Listening Time
+- Jarvis Silence Time
+- Jarvis Recognition
+- Jarvis Speech Input
+- Windows Microphone Settings
+- Windows Speech Settings
+- Throwable Hand
+- Throwable Input
 - Momentum Bank Capacity
 - Surface Skate Speed
 - Air Paddle Power
@@ -638,3 +839,51 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 - PC Look Sensitivity
 - Solid Player Collision
 - Slippery Hands Strength
+- Expansion Movement Power
+- Expansion Movement Range
+- Expansion Object Limit
+- Sandbox Prop Mass
+- Toy Launch Power
+- Local Emitter Interval
+- Expansion Visual Range
+- Practice Audio Volume
+- Gradient Theme
+- Gradient Start Color
+- Gradient End Color
+- Gradient Enabled Start
+- Gradient Enabled End
+- Gradient Direction
+- Gradient Animation
+- Gradient Speed
+- Menu Font
+- Board Font
+- GUI Font
+- Menu Text Size
+- GUI Text Size
+- Reset Fonts
+- Holdable Hand
+- Holdable Size
+- Holdable Color
+- Holdable Offset X
+- Holdable Offset Y
+- Holdable Offset Z
+- Holdable Pitch
+- Holdable Yaw
+- Holdable Roll
+- Holdable Throw Strength
+- Holdable Vibrations
+- Reset Holdable Placement
+- Flashlight Range
+- Flashlight Brightness
+- Lucy Physics Bounce
+- Nearby Alert Targets
+- Tracer Filter
+- Draw Output
+
+### Local beta fixes: gradients and voice commands
+
+Gradient panels now use opaque texture rendering with depth writing, preserving labels, headers and navigation. Turning gradients off restores each material shader, texture, UV state and render queue.
+
+Jarvis Speech Input offers Automatic, Local Commands and Windows Dictation. Automatic uses offline keyword commands for Voice Assistant, keeping the wake word and ready tone. GPT and ChudGPT retain dictation for free-form questions; Local Commands is available for those providers too, with typed input for conversation. Live microphone and VR appearance verification are still required.
+
+Equipping a model in Holdable Browser removes its floating preview. Selecting another model displays a fresh preview.

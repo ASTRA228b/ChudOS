@@ -97,6 +97,8 @@ public sealed partial class Main : MonoBehaviour
         ButtonManager.OnNotification += Notify;
         ButtonManager.OnButtonsChanged += RequestRefresh;
         CategoryManager.OnPageChanged += RequestRefresh;
+        JarvisManager.Initialize(gameObject);
+        ChudOS.Mods.Room.RoomNotebook.Initialize(gameObject);
     }
 
 
@@ -126,9 +128,10 @@ public sealed partial class Main : MonoBehaviour
 
     private void Update()
     {
+        ExpansionAppearance.Tick();
         ButtonManager.Update();
         SoundboardManager.Tick();
-        GUIManager.Tick();
+        if (!JarvisGUI.Editing) GUIManager.Tick();
         CanvasNotifyLib.CanvasUpdate();
         NotifyLib.Tick();
         bool showGUI = GUIManager.HasVisibleWindows;
@@ -139,7 +142,7 @@ public sealed partial class Main : MonoBehaviour
         bool vrInput = ControllerInputPoller.instance != null && ControllerInputPoller.instance.leftControllerSecondaryButton;
         if (vrInput && !LastController) SwitchMenu(false);
         LastController = vrInput;
-        if (keyboard != null)
+        if (keyboard != null && !JarvisGUI.Editing)
         {
             if (SearchManager.KeyboardVisible && IsMenuOpen) HandleSearchTyping(keyboard);
             else if (keyboard.hKey.wasPressedThisFrame) SwitchMenu(true);
@@ -179,7 +182,7 @@ public sealed partial class Main : MonoBehaviour
         if (Instance != this) return;
         BindSearchKeyboard(null);
         ChudOS.Mods.Rig.GhostHands.Clear();
-        ChudOS.Mods.Fun.ThrowableSpam.Reset();
+        ChudOS.Mods.Spammers.ThrowableSpam.Reset();
         ChudOS.Mods.Movement.SpiderMan.Stop();
         ChudOS.Mods.Movement.CustomArms.Stop();
         ChudOS.Mods.Player.PlayerESPRuntime.ClearHighlights();
@@ -212,6 +215,7 @@ public sealed partial class Main : MonoBehaviour
         GunLib.Cleanup();
         GlobalStyles.Cleanup();
         IconLoader.Cleanup();
+        ExpansionAppearance.Cleanup();
         DestroyMaterial(BackgroundMat); DestroyMaterial(MenuMat); DestroyMaterial(ButtonMat); DestroyMaterial(HeaderMat);
         DestroyMaterial(BorderMat); DestroyMaterial(DividerMat); DestroyMaterial(SearchBorderMat);
         DestroyMaterial(PressedMat);
@@ -232,6 +236,7 @@ public sealed partial class Main : MonoBehaviour
     }
     public static void ApplyMenuTheme(ChudOS.Mods.Settings.MenuThemes.Theme theme)
     {
+        ExpansionAppearance.Restore();
         Color oldSecondary = SecondaryTextColor;
         BackgroundColor = theme.Background;
         MenuColor = theme.Face;
@@ -255,6 +260,7 @@ public sealed partial class Main : MonoBehaviour
         if (DividerMat != null) DividerMat.color = DividerColor;
         if (SearchBorderMat != null) SearchBorderMat.color = SearchBorderColor;
 
+        RefreshExpansionAppearance();
         if (MenuMain == null) return;
         foreach (TextMesh label in MenuMain.GetComponentsInChildren<TextMesh>(true))
             label.color = label.color == oldSecondary ? SecondaryTextColor : TextColor;
@@ -315,6 +321,7 @@ public sealed partial class Main : MonoBehaviour
         BorderMat = new Material(shader) { color = BorderColor };
         DividerMat = new Material(shader) { color = DividerColor };
         SearchBorderMat = new Material(shader) { color = SearchBorderColor };
+        RefreshExpansionAppearance();
     }
     public static void CreateMenu()
     {
@@ -410,6 +417,7 @@ public sealed partial class Main : MonoBehaviour
         text.anchor = anchor;
         text.alignment = anchor == TextAnchor.MiddleLeft ? TextAlignment.Left : TextAlignment.Center;
         text.color = color ?? TextColor;
+        ExpansionFonts.Bind(text, size);
         return text;
     }
     private static GameObject MakeButton(string label, float y, float z, float width, float height, ButtonManager.ButtonData? button = null, string category = "", bool home = false, bool previous = false, bool next = false, bool disconnect = false, bool search = false, string key = "", Material? material = null, List<GameObject>? track = null)
@@ -445,12 +453,7 @@ public sealed partial class Main : MonoBehaviour
     public static string GetButtonLabel(ButtonManager.ButtonData button) => (MenuPreferences.IsFavorite(button.Name) ? "[F] " : "") + (button.Category == "Main" && button.Name.StartsWith("Placeholder ", StringComparison.Ordinal) ? "Placeholder" : button.DisplayName);
     public static void FitButtonText(TextMesh mesh, string value, float availableWidth = 0.84f)
     {
-        if (mesh == null) return;
-        // TextMesh glyph advance at the built-in font's size is roughly 3 local units per characterSize.
-        // Shrink the whole label instead of allowing long option/toggle names to overflow the button.
-        float baseSize = mesh.name.StartsWith("Text Home", StringComparison.Ordinal) ? 0.012f : 0.021f;
-        float fit = availableWidth * 0.88f / Mathf.Max(3f, value.Length * 3f);
-        mesh.characterSize = Mathf.Min(baseSize, Mathf.Max(0.006f, fit));
+        if (mesh != null) ExpansionFonts.Fit(mesh, availableWidth);
     }
     public static void RefreshPage()
     {
