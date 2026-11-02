@@ -24,7 +24,7 @@ ChudOS is a customizable mod menu for **Gorilla Tag on Windows PCVR**, with an i
 - **Macros:** record and replay movement, manage saved routes, and import supported macro files.
 - **Customization:** built-in and JSON custom themes, gradients, pressed colors, fonts, alignment, languages, sounds, vibrations, and custom boards.
 - **Holdables:** twelve premade models, including Wooden Cross, Bisexual Flag, Gay Pride Flag, and Trans Flag. Cameras, toys, a flashlight, and a measuring tape are also included. Custom visual bundles are optional.
-- **Discord Rich Presence:** ChudOS activity details, the ChudGPT logo, elapsed time, and download/source buttons. It turns itself off with a notification if Discord is unavailable.
+- **Discord Rich Presence:** ChudOS activity details, the ChudGPT logo, elapsed time, and download/source buttons. It turns itself off with a notification if Discord is unavailable. It can cause FPS instability; turn it off if you notice stuttering or FPS drops.
 - **OP:** mode-dependent Guardian/team controls and locally owned Lucy tools, with ownership and availability requirements.
 
 Search for buttons, save favorites, and use the array list to see enabled mods. Settings lets you customize the menu and individual mods without editing source code.
@@ -32,11 +32,11 @@ Search for buttons, save favorites, and use the array list to see enabled mods. 
 ## Installation
 
 1. Set up BepInEx for the Windows PC version of Gorilla Tag.
-2. Download **ChudOS-v0.1.5.zip** from the [v0.1.5 release](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5).
-3. Remove previous ChudOS DLL copies from `BepInEx/plugins`, including subfolders. Extract the ZIP's **ChudOS** folder into `Gorilla Tag/BepInEx/plugins`.
-4. Keep the included Discord runtime DLLs beside `ChudOS.dll`, then restart Gorilla Tag.
+2. Download **ChudOS.dll** from the [v0.1.5 release](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5).
+3. Replace your previous ChudOS DLL in `Gorilla Tag/BepInEx/plugins`. Remove duplicate ChudOS copies from subfolders.
+4. Restart Gorilla Tag.
 
-The standalone DLL asset is also available, but it needs the runtime files included in the install ZIP. See [Discord setup and runtime files](Docs/DiscordPresence.md).
+The corrected build includes its Discord transport inside **ChudOS.dll**. See [Discord setup](Docs/DiscordPresence.md).
 
 ## Open the menu
 

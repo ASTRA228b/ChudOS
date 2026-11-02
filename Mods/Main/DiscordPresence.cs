@@ -48,7 +48,7 @@ internal sealed class DiscordPresence : MonoBehaviour
         try
         {
             artworkGuard = new Harmony("ChudOS.DiscordArtwork");
-            artworkGuard.CreateClassProcessor(typeof(DiscordArtworkGuard)).Patch();
+            artworkGuard.Patch(AccessTools.Method(typeof(DiscordRPC.Assets), "Merge"), prefix: new HarmonyMethod(typeof(DiscordArtworkGuard), nameof(DiscordArtworkGuard.Prefix)));
             timestamps = Timestamps.Now; readyDeadline = Time.unscaledTime + 10f; nextProcessCheck = Time.unscaledTime + 2f;
             client = new DiscordRpcClient(ApplicationId, autoEvents: false);
             client.OnReady += (_, _) => { ready = true; previousState = ""; nextPresence = 0f; };
@@ -134,13 +134,11 @@ internal sealed class DiscordPresence : MonoBehaviour
     private void OnDestroy() { Cleanup(); if (instance == this) instance = null; }
 }
 
-[HarmonyPatch(typeof(DiscordRPC.Assets), "Merge")]
 internal static class DiscordArtworkGuard
 {
     private static readonly System.Reflection.FieldInfo Large = AccessTools.Field(typeof(DiscordRPC.Assets), "_largeimagekey");
     private static readonly System.Reflection.FieldInfo Small = AccessTools.Field(typeof(DiscordRPC.Assets), "_smallimagekey");
 
-    [HarmonyPrefix]
     internal static void Prefix(DiscordRPC.Assets other)
     {
         if (Large.GetValue(other) == null) Large.SetValue(other, "");

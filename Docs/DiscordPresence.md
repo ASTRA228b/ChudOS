@@ -1,21 +1,20 @@
 # Discord Rich Presence
 
+**Discord Rich Presence can cause FPS instability. Turn it off if you notice stuttering or FPS drops.**
+
 Enable **Main > Discord Rich Presence** with the Discord desktop client running. If Discord is absent, closes, rejects the connection, or cannot finish connecting within ten seconds, ChudOS notifies you and turns the feature off. It does not launch Discord automatically.
 
 The application ID is `1564819192656437389`. Its public application name is currently **CHUD Studio**. The activity details identify **ChudOS / Gorilla Tag / v0.1.5**, and include elapsed time, a lobby summary, and Download/Source buttons. Private room codes and account IDs are not published.
 
 The large artwork uses `https://chudgpt-landing.vercel.app/chudgpt-logo.png`. This was verified to match the embedded PNG at implementation time. Discord must be able to fetch the image; activity visibility also depends on Discord settings. Renaming the application or uploading an alternative asset is separate from this build.
 
-## Runtime files
+## Single-DLL installation
 
-The build copies these files into the configured plugin output folder alongside ChudOS.dll:
+The corrected build merges its Discord transport into **ChudOS.dll**. Copy that DLL into the plugins folder and restart the game. The transport uses the game's existing Newtonsoft.Json assembly and the framework supplied by the game; separate DiscordRPC and Windows-package DLLs are not required by ChudOS.
 
-- DiscordRPC.dll
-- Microsoft.Win32.Registry.dll
-- System.Security.AccessControl.dll
-- System.Security.Principal.Windows.dll
+The earlier build referenced a separate DiscordRPC assembly during Harmony and Unity input-system startup scans. A missing companion DLL could therefore prevent the entire menu from loading. The merged build removes that assembly reference. The artwork guard is installed programmatically only when Discord Rich Presence starts, and removed when it stops.
 
-Keep these runtime files when testing or packaging this build. Newtonsoft.Json is supplied by the game. The transport license is in ThirdParty/DiscordRPC-LICENSE.txt. A scoped Harmony guard handles missing image fields in the pinned transport version; it is removed when presence is disabled.
+The transport license is in ThirdParty/DiscordRPC-LICENSE.txt. Source builds restore the pinned NuGet package and ILRepack build tool, then merge the transport automatically.
 
 ## Other additions in this batch
 

@@ -8,6 +8,10 @@ Historical update entries describe their respective versions; newer entries take
 
 ## New in V0.1.5 Final
 
+**Discord Rich Presence can cause FPS instability. Turn it off if you notice stuttering or FPS drops.**
+
+- **Startup hotfix:** Discord is bundled inside ChudOS.dll. This fixes the missing DiscordRPC dependency that could prevent ChudOS and Unity input from initializing. Fully restart the game after replacing the DLL.
+
 - **Custom JSON themes:** Settings > Custom Theme Editor supports JSON import/copy, RGB and hex controls, throttled live preview, Apply, reset, and saved files in ChudOS/Themes. Save Menu State preserves the active theme document. Invalid JSON leaves the current theme intact. Custom theme gradient controls now synchronize with the menu settings.
 - **Pressed colors and GUI appearance:** custom themes have an independent pressed color. Supported GUI styles follow the selected palette and font settings. All window callbacks use unrestricted GUI.DragWindow().
 - **Discord Rich Presence:** Main > Discord Rich Presence uses application 1564819192656437389, currently named CHUD Studio, with ChudOS activity details and the ChudGPT logo. Missing/closed Discord, connection failure, or startup timeout produces a notification and switches the feature off. Private room codes and account IDs are omitted. See Docs/DiscordPresence.md for runtime requirements.
@@ -15,7 +19,7 @@ Historical update entries describe their respective versions; newer entries take
 - **Main utilities:** Open Game Folder and Restart Game. A hidden restart helper waits for the existing game process to exit before asking Steam to relaunch it.
 - **Soundboard:** Sound Bindings uses F9 or a selected controller input to play/stop the selected sound. Controller polling failures leave F9 usable. Desktop media previous/play-pause/next actions control the Windows media session.
 - **Player:** Voice Level Bars show received speaker amplitude, refresh visuals at 30 Hz, and refresh player entries across room changes. Silent players have hidden indicators. The maximum is 32 indicators.
-- **Install package:** the release ZIP includes ChudOS.dll and the four required Discord runtime DLLs. Keep them together. Build and isolated checks passed; live VR placement, microphone behavior, Discord rendering, and actual restart execution still need in-game verification.
+- **Installation correction:** the Discord transport is merged into ChudOS.dll so a single-DLL install works. The optional artwork guard is excluded from global startup patch scans. Build and isolated checks passed; live VR placement, microphone behavior, Discord rendering, and actual restart execution still need in-game verification.
 
 ## New in V0.1.5 Beta
 
