@@ -84,6 +84,6 @@ public static class MacroMods
         if (MenuHelper.Button("Open Macros Folder")) OpenFolder();
         MenuHelper.Label("Enable Macro Controls. LT records; RT plays. Range, looping and legacy playback are in Settings.");
         if (MenuHelper.Button("Close")) SetVisible(false);
-        GUI.DragWindow(new Rect(0f, 0f, Window.width, 25f));
+        GUI.DragWindow();
     }
 }

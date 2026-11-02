@@ -123,6 +123,8 @@ internal static class ExpansionFonts
         if (styles != null) { styles.font = guiSkin.font; styles.fontSize = guiSkin.button.fontSize; }
         var window = ChudOS.Core.AGUI.GUIHelpers.GlobalStyles.WindowStyle;
         if (window != null) { window.font = guiSkin.font; window.fontSize = guiSkin.window.fontSize; }
+        var label = ChudOS.Core.AGUI.GUIHelpers.GlobalStyles.LabelStyle;
+        if (label != null) { label.font = guiSkin.font; label.fontSize = guiSkin.label.fontSize; }
         return new GUIScope(guiSkin);
     }
     internal static void Cleanup()

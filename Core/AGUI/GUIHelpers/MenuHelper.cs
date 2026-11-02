@@ -28,7 +28,7 @@ public static class MenuHelper
         return GUILayout.Window(id, window, createGUI, TranslationManager.UI(title), GlobalStyles.WindowStyle, options);
     }
 
-    public static void Label(string text) => GUILayout.Label(TranslationManager.UI(text));
+    public static void Label(string text) => GUILayout.Label(TranslationManager.UI(text), GlobalStyles.LabelStyle);
     public static bool Button(string text)
     {
         bool pressed = GUILayout.Button(TranslationManager.UI(text), GlobalStyles.Buttonss);

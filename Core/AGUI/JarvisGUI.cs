@@ -19,7 +19,7 @@ internal static class JarvisGUI
     private static GUIStyle? textStyle;
     internal static void CreateGUI()
     {
-        if (Visible) Window = MenuHelper.MakeWindow(847215, Window, Contents, "ChudOS Jarvis — 0.1.5 Beta");
+        if (Visible) Window = MenuHelper.MakeWindow(847215, Window, Contents, "ChudOS Jarvis — " + ChudOS.Stuff.Constantss.Version);
     }
     private static void Contents(int id)
     {

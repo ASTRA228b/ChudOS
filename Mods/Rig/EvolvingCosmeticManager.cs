@@ -258,7 +258,7 @@ public sealed class EvolvingCosmeticManager : MonoBehaviour
             MenuHelper.Label("Remote clients may reject stages that fail their age checks.");
         }
         GUILayout.EndScrollView();
-        GUI.DragWindow(new Rect(0f, 0f, window.width, 25f));
+        GUI.DragWindow();
     }
 
     private void OnDestroy()

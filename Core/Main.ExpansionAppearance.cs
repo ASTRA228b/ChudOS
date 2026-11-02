@@ -15,7 +15,7 @@ public sealed partial class Main
         if (MenuMat != null) MenuMat.color = MenuColor;
         if (ButtonMat != null) ButtonMat.color = ButtonColor;
         if (HeaderMat != null) HeaderMat.color = HeaderColor;
-        if (PressedMat != null) PressedMat.color = PrimaryColor;
+        if (PressedMat != null) PressedMat.color = PressedColor;
         if (BorderMat != null) BorderMat.color = BorderColor;
         if (DividerMat != null) DividerMat.color = DividerColor;
         ExpansionAppearance.Apply(new Material?[] { BackgroundMat, MenuMat, ButtonMat, HeaderMat, PressedMat, BorderMat, DividerMat });

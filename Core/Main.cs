@@ -42,6 +42,7 @@ public sealed partial class Main : MonoBehaviour
     private static Color ButtonColor = new Color32(30, 30, 33, 255);
     private static Color HeaderColor = new Color32(31, 31, 34, 255);
     private static Color PrimaryColor = new Color32(155, 18, 254, 255);
+    private static Color PressedColor = new Color32(155, 18, 254, 255);
     private static Color BorderColor = new Color32(164, 30, 255, 255);
     private static Color DividerColor = new Color32(155, 18, 254, 255);
     private static Color SearchBorderColor = new Color32(69, 70, 75, 255);
@@ -80,6 +81,7 @@ public sealed partial class Main : MonoBehaviour
         TranslationManager.Initialize(this);
         TranslationManager.Changed += RefreshLanguage;
         ButtonManager.Initialize();
+        CustomThemeManager.Initialize();
         MenuPreferences.Initialize();
         ChudOS.Mods.Settings.MenuThemes.Apply();
         CategoryManager.PageLimit = 3;
@@ -131,7 +133,7 @@ public sealed partial class Main : MonoBehaviour
         ExpansionAppearance.Tick();
         ButtonManager.Update();
         SoundboardManager.Tick();
-        if (!JarvisGUI.Editing) GUIManager.Tick();
+        if (!JarvisGUI.Editing && !CustomThemeGUI.Editing) GUIManager.Tick();
         CanvasNotifyLib.CanvasUpdate();
         NotifyLib.Tick();
         bool showGUI = GUIManager.HasVisibleWindows;
@@ -142,7 +144,7 @@ public sealed partial class Main : MonoBehaviour
         bool vrInput = ControllerInputPoller.instance != null && ControllerInputPoller.instance.leftControllerSecondaryButton;
         if (vrInput && !LastController) SwitchMenu(false);
         LastController = vrInput;
-        if (keyboard != null && !JarvisGUI.Editing)
+        if (keyboard != null && !JarvisGUI.Editing && !CustomThemeGUI.Editing)
         {
             if (SearchManager.KeyboardVisible && IsMenuOpen) HandleSearchTyping(keyboard);
             else if (keyboard.hKey.wasPressedThisFrame) SwitchMenu(true);
@@ -180,6 +182,10 @@ public sealed partial class Main : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance != this) return;
+        ChudOS.Mods.Main.DiscordPresence.Stop();
+        ChudOS.Mods.SoundBoard.SoundboardBindings.Disable();
+        ChudOS.Mods.Player.VoiceLevelBars.DisableBars();
+        CustomThemeManager.Cleanup();
         BindSearchKeyboard(null);
         ChudOS.Mods.Rig.GhostHands.Clear();
         ChudOS.Mods.Spammers.ThrowableSpam.Reset();
@@ -243,6 +249,8 @@ public sealed partial class Main : MonoBehaviour
         ButtonColor = theme.Button;
         HeaderColor = theme.Header;
         PrimaryColor = theme.Accent;
+        PressedColor = theme.Pressed ?? theme.Accent;
+        ChudOS.Core.AGUI.GUIHelpers.GlobalStyles.SetTheme(theme);
         BorderColor = theme.Border;
         DividerColor = theme.Divider;
         SearchBorderColor = theme.SearchBorder;
@@ -255,7 +263,7 @@ public sealed partial class Main : MonoBehaviour
         if (MenuMat != null) MenuMat.color = MenuColor;
         if (ButtonMat != null) ButtonMat.color = ButtonColor;
         if (HeaderMat != null) HeaderMat.color = HeaderColor;
-        if (PressedMat != null) PressedMat.color = PrimaryColor;
+        if (PressedMat != null) PressedMat.color = PressedColor;
         if (BorderMat != null) BorderMat.color = BorderColor;
         if (DividerMat != null) DividerMat.color = DividerColor;
         if (SearchBorderMat != null) SearchBorderMat.color = SearchBorderColor;
@@ -317,7 +325,7 @@ public sealed partial class Main : MonoBehaviour
         MenuMat = new Material(shader) { color = MenuColor };
         ButtonMat = new Material(shader) { color = ButtonColor };
         HeaderMat = new Material(shader) { color = HeaderColor };
-        PressedMat = new Material(shader) { color = PrimaryColor };
+        PressedMat = new Material(shader) { color = PressedColor };
         BorderMat = new Material(shader) { color = BorderColor };
         DividerMat = new Material(shader) { color = DividerColor };
         SearchBorderMat = new Material(shader) { color = SearchBorderColor };
@@ -365,7 +373,7 @@ public sealed partial class Main : MonoBehaviour
         IconLoader.Create("Home", MenuMain.transform, new Vector3(0.704f, -0.99f, -0.092f), new Vector2(0.065f, 0.065f));
         IconLoader.Create("Arrow_Right", MenuMain.transform, new Vector3(0.704f, -0.99f, 0.375f), new Vector2(0.085f, 0.075f));
 
-        if (!OnPC) Text("v" + Constantss.Version, -1.055f, 0.36f, 0.011f, true, SecondaryTextColor);
+        if (!OnPC) CreateRearBranding();
         if (!OnPC) CreateReferences();
         RefreshPage();
         MenuFeedback.PlayOpen();

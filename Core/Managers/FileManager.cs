@@ -59,6 +59,7 @@ public static class FileManager
     public sealed class SavedMenuState
     {
         public int SchemaVersion;
+        public string? CustomThemeJson { get; set; }
         public List<SavedButton> Buttons { get; set; } = new();
     }
 
@@ -116,7 +117,7 @@ public static class FileManager
                 throw new InvalidOperationException("ButtonManager is not initialized.");
 
             Directory.CreateDirectory(RootFolder);
-            SavedMenuState state = new() { SchemaVersion = 1 };
+            SavedMenuState state = new() { SchemaVersion = 1, CustomThemeJson = CustomThemeManager.Active ? CustomThemeManager.Export() : null };
 
             foreach (var button in ButtonManager.Buttons)
             {
@@ -171,6 +172,9 @@ public static class FileManager
                 return;
             }
 
+            if (!CustomThemeManager.Restore(state.CustomThemeJson, out string themeError))
+                Debug.LogWarning("[ChudOS] Saved custom theme could not be restored: " + themeError);
+
             int restoredOptions = 0;
             int restoredToggles = 0;
 
@@ -218,6 +222,10 @@ public static class FileManager
                 ButtonManager.SetEnabled(button, saved.Enabled);
                 restoredToggles++;
             }
+
+            if (CustomThemeManager.Active && !CustomThemeManager.Restore(state.CustomThemeJson, out string restoredThemeError))
+                Debug.LogWarning("[ChudOS] Saved custom theme could not be restored: " + restoredThemeError);
+            ChudOS.Mods.Settings.MenuThemes.Apply();
 
             if (restoredOptions == 0 && restoredToggles == 0)
             {

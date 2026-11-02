@@ -8,28 +8,28 @@ namespace ChudOS.Mods.Settings;
 public static partial class ExpansionPreferences
 {
     [MenuButton("Gradient Theme", ButtonType.Option, Category = "Settings", Order = 800, Options = new[] { "Off", "Aurora", "Sunset", "Midnight", "Ice", "Cotton Candy", "Custom" }, Notify = false)]
-    public static void SetGradient() => Changed();
+    public static void SetGradient() => GradientChanged("Gradient Theme");
 
     [MenuButton("Gradient Start Color", ButtonType.Option, Category = "Settings", Order = 801, Options = new[] { "Purple", "Blue", "Mint", "Cyan", "Pink", "Orange", "Red", "White" }, Notify = false)]
-    public static void SetGradientStart() => Changed();
+    public static void SetGradientStart() => GradientChanged("Gradient Start Color");
 
     [MenuButton("Gradient End Color", ButtonType.Option, Category = "Settings", Order = 802, Options = new[] { "Blue", "Mint", "Cyan", "Pink", "Orange", "Red", "White", "Purple" }, Notify = false)]
-    public static void SetGradientEnd() => Changed();
+    public static void SetGradientEnd() => GradientChanged("Gradient End Color");
 
     [MenuButton("Gradient Enabled Start", ButtonType.Option, Category = "Settings", Order = 803, Options = new[] { "Mint", "Cyan", "Pink", "Orange", "Red", "White", "Purple", "Blue" }, Notify = false)]
-    public static void SetEnabledStart() => Changed();
+    public static void SetEnabledStart() => GradientChanged("Gradient Enabled Start");
 
     [MenuButton("Gradient Enabled End", ButtonType.Option, Category = "Settings", Order = 804, Options = new[] { "Cyan", "Pink", "Orange", "Red", "White", "Purple", "Blue", "Mint" }, Notify = false)]
-    public static void SetEnabledEnd() => Changed();
+    public static void SetEnabledEnd() => GradientChanged("Gradient Enabled End");
 
     [MenuButton("Gradient Direction", ButtonType.Option, Category = "Settings", Order = 805, Options = new[] { "Vertical", "Horizontal", "Diagonal" }, Notify = false)]
-    public static void SetGradientDirection() => Changed();
+    public static void SetGradientDirection() => GradientChanged("Gradient Direction");
 
     [MenuButton("Gradient Animation", ButtonType.Option, Category = "Settings", Order = 806, Options = new[] { "Off", "On" }, Notify = false)]
-    public static void SetGradientAnimation() => Changed();
+    public static void SetGradientAnimation() => GradientChanged("Gradient Animation");
 
     [MenuButton("Gradient Speed", ButtonType.Option, Category = "Settings", Order = 807, Options = new[] { "Normal", "Slow", "Fast", "Very Fast" }, Notify = false)]
-    public static void SetGradientSpeed() => Changed();
+    public static void SetGradientSpeed() => GradientChanged("Gradient Speed");
 
     [MenuButton("Menu Font", ButtonType.Option, Category = "Settings", Order = 808, Options = new[] { "Original", "Segoe UI", "Verdana", "Consolas" }, Notify = false)]
     public static void SetMenuFont() => Changed();

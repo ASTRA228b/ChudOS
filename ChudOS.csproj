@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>ChudOS</AssemblyName>
     <RootNamespace>ChudOS</RootNamespace>
-    <Version>0.1.5-beta.1</Version>
+    <Version>0.1.5</Version>
     <GorillaTagDir Condition="'$(GorillaTagDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag</GorillaTagDir>
   </PropertyGroup>
   <ItemGroup>
@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
   </ItemGroup>
 
   <ItemGroup>
@@ -754,4 +755,11 @@
   </PropertyGroup>
 
 
+  <Target Name="CopyDiscordRuntime" AfterTargets="Build">
+    <ItemGroup>
+      <DiscordRuntime Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.Filename)' == 'DiscordRPC'" />
+      <DiscordRuntime Include="@(RuntimeTargetsCopyLocalItems)" Condition="'%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'win' And ('%(RuntimeTargetsCopyLocalItems.Filename)' == 'Microsoft.Win32.Registry' Or '%(RuntimeTargetsCopyLocalItems.Filename)' == 'System.Security.AccessControl' Or '%(RuntimeTargetsCopyLocalItems.Filename)' == 'System.Security.Principal.Windows')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DiscordRuntime)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

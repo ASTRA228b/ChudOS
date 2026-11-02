@@ -6,9 +6,20 @@ Update history, detailed controls, behavior notes, and the full categorized butt
 
 Historical update entries describe their respective versions; newer entries take precedence.
 
+## New in V0.1.5 Final
+
+- **Custom JSON themes:** Settings > Custom Theme Editor supports JSON import/copy, RGB and hex controls, throttled live preview, Apply, reset, and saved files in ChudOS/Themes. Save Menu State preserves the active theme document. Invalid JSON leaves the current theme intact. Custom theme gradient controls now synchronize with the menu settings.
+- **Pressed colors and GUI appearance:** custom themes have an independent pressed color. Supported GUI styles follow the selected palette and font settings. All window callbacks use unrestricted GUI.DragWindow().
+- **Discord Rich Presence:** Main > Discord Rich Presence uses application 1564819192656437389, currently named CHUD Studio, with ChudOS activity details and the ChudGPT logo. Missing/closed Discord, connection failure, or startup timeout produces a notification and switches the feature off. Private room codes and account IDs are omitted. See Docs/DiscordPresence.md for runtime requirements.
+- **Branding:** the rear menu label includes the embedded ChudGPT logo beside v0.1.5. The README also displays the same logo.
+- **Main utilities:** Open Game Folder and Restart Game. A hidden restart helper waits for the existing game process to exit before asking Steam to relaunch it.
+- **Soundboard:** Sound Bindings uses F9 or a selected controller input to play/stop the selected sound. Controller polling failures leave F9 usable. Desktop media previous/play-pause/next actions control the Windows media session.
+- **Player:** Voice Level Bars show received speaker amplitude, refresh visuals at 30 Hz, and refresh player entries across room changes. Silent players have hidden indicators. The maximum is 32 indicators.
+- **Install package:** the release ZIP includes ChudOS.dll and the four required Discord runtime DLLs. Keep them together. Build and isolated checks passed; live VR placement, microphone behavior, Discord rendering, and actual restart execution still need in-game verification.
+
 ## New in V0.1.5 Beta
 
-This is a beta. Features are buggy or may be buggy; please report issues. The full release is coming soon.
+Historical beta notes follow. The final release includes the additions listed above.
 
 - **Jarvis:** enable Main > Jarvis, then open Jarvis GUI or use Ask Jarvis. F8 always starts voice capture. Jarvis starts disabled and can be saved through Save Menu State.
 - **Voice Assistant:** local commands work without an AI: enable/disable/toggle a mod, open a category, press an action, set an existing option value, increase/decrease an option, save settings, request a room, and control soundboard playback. Examples: "enable platforms", "set menu theme to OG Blue", "set drone speed to six", "set speed boost amount to ten", "open movement", and "join room ASTRA". Ambiguous names or nonexistent presets do not execute. Commands use the existing button callbacks and guards.
@@ -56,7 +67,7 @@ This is a beta. Features are buggy or may be buggy; please report issues. The fu
 - **Player/Soundboard/Safety:** Palm Player List and Palm Stats add hand-mounted panels. Cosmetic Inspector reads equipped cosmetic data plus room-local nickname, actor and color. Optional tracer filtering uses equipped cosmetics, not staff detection. Nearby alerts can filter for infected players. Microphone Echo restores its prior recorder state; Refresh Microphone restarts only a recording game recorder. It does not restart Windows dictation. Copy Pose Data copies local transform arrays to the clipboard.
 - **Movement/Rig:** Upside Down Body uses native gravity/rotation overrides; Mirrored Rig reflects tracked poses through RigRuntime. The existing Rig Tweaks modes were checked and rotate rather than reflect poses.
 - **Preserved:** NoClip, all platform constructors/variants, EveryPatch and shared input helpers remain unchanged. The reported NoClip/platform interaction is unconfirmed and remains plan-only.
-- **Validation:** Release build succeeds with no C# warnings/errors and eight existing unresolved-reference warnings. Isolated checks cover compiled registrations/lifecycles, settings and gradient restoration, holdable loading/cancellation and per-hand scale, and built-in model caching/collider/resource ownership. In-game VR placement, physics, fonts/gradients and online mode behavior still require testing. The beta remains local and unpublished.
+- **Validation:** Release build succeeds with no C# warnings/errors and eight existing unresolved-reference warnings. Isolated checks cover compiled registrations/lifecycles, settings and gradient restoration, holdable loading/cancellation and per-hand scale, and built-in model caching/collider/resource ownership. In-game VR placement, physics, fonts/gradients and online mode behavior still require testing. These checks were performed during beta development; live behavior still needs testing.
 
 ## New in 0.1.4
 
@@ -241,13 +252,13 @@ Safety options reduce specific errors and limit ChudOS requests. They do not gua
 
 ## Full feature list
 
-585 unique buttons, including mods, settings, and actions.
+597 unique buttons, including mods, settings, and actions.
 
-281 toggle mods outside Settings, plus 73 actions and 11 selectors. The Settings category has 220 entries. Actions and selectors are not all standalone gameplay mods.
+284 toggle buttons outside Settings, plus 78 actions and 11 selectors. Settings has 224 entries. These counts are not all standalone gameplay mods.
 
-Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are grips, LJ/RJ are joystick clicks, and LMB/RMB are mouse buttons. A plus sign means hold together. Button descriptions explain the action.
+Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers; LG/RG are grips; LJ/RJ are joystick clicks; LMB/RMB are mouse buttons. A plus sign means hold together. F9 controls sound bindings and F8 starts Jarvis capture. Button descriptions provide additional controls.
 
-## Main — 8
+## Main — 11
 
 - Join Discord
 - SB Control
@@ -257,6 +268,9 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Jarvis GUI
 - Ask Jarvis (F8)
 - Stop Jarvis Response
+- Discord Rich Presence
+- Open Game Folder
+- Restart Game
 
 ## Movement — 96
 
@@ -357,25 +371,6 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Bungee Anchor (RG)(RT)(B)
 - Upside Down Body
 
-## Player — 16
-
-- Body Tracers
-- Bone ESP
-- 2D Box ESP
-- 3D Box ESP
-- 4D Box ESP
-- Trails ESP
-- Chams
-- Beacons
-- Cosmetic Inspector (RG)(RT)
-- Player Audio Panel
-- Outline ESP
-- Voice Radar
-- Nearby Player Alert
-- FOV Cone Viewer
-- Palm Player List
-- Palm Stats
-
 ## Rig — 43
 
 - Copy Movement Gun
@@ -421,6 +416,26 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Floating Rig
 - Eye Contact
 - Mirrored Rig
+
+## Player — 17
+
+- Body Tracers
+- Bone ESP
+- 2D Box ESP
+- 3D Box ESP
+- 4D Box ESP
+- Trails ESP
+- Chams
+- Beacons
+- Voice Level Bars
+- Cosmetic Inspector (RG)(RT)
+- Player Audio Panel
+- Outline ESP
+- Voice Radar
+- Nearby Player Alert
+- FOV Cone Viewer
+- Palm Player List
+- Palm Stats
 
 ## Visuals — 33
 
@@ -512,45 +527,6 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Theremin (Hands)
 - Laser Eyes (RG)/(O)
 
-## Spammers — 9
-
-- Snowball Spam (RT)/(LMB)
-- Water Balloon Spam (RT)/(LMB)
-- Throwable Status
-- Projectile Gun (RG)(RT)
-- Projectile Pattern Emitter (RT)/(LMB)
-- Impact Painter (RG)(RT)
-- Bubble Wand (RT)/(LMB)
-- Confetti Cannon (RT)/(LMB)
-- Firework Sequencer (RT)/(LMB)
-
-## OP — 11
-
-- Guardian Controls
-- Team Controls
-- Summon Lucy
-- Despawn Lucy
-- Grab Lucy (RG)/(RMB)
-- Move Lucy Gun (RG)(RT)
-- Freeze Lucy
-- Pet Lucy
-- Lucy Physics (RG)/(RMB)
-- Prop Control Gun (RG)(RT)
-- GR Trail
-
-## Holdables — 10
-
-- Holdable Browser
-- Sticky Holdables (B)/(R)
-- Physical Holdables
-- Equip Premade Holdable
-- Premade Holdable
-- Handheld Camera (RT)/(LMB)
-- Squeeze Toy (RG)/(RMB)
-- Custom Flashlight (A)/(Space)
-- Measuring Tape (RT)/(LMB)(X)
-- Dual Hand Orbs (LG)(RG)
-
 ## Room — 23
 
 - Leave
@@ -577,7 +553,7 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Join Clipboard Room
 - Copy Room Code
 
-## Soundboard — 18
+## Soundboard — 22
 
 - Play / Stop
 - Next Sound
@@ -591,6 +567,10 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Reload Sounds
 - Download YouTube Audio
 - Download Clipboard Audio
+- Desktop Media Play / Pause
+- Desktop Media Next
+- Desktop Media Previous
+- Sound Bindings (F9)
 - Mute Other Players
 - Microphone Mute
 - Microphone Pitch
@@ -610,6 +590,57 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Macro Editor
 - Macro Compare
 - Route Deviation Coach
+
+## Holdables — 10
+
+- Holdable Browser
+- Sticky Holdables (B)/(R)
+- Physical Holdables
+- Equip Premade Holdable
+- Premade Holdable
+- Handheld Camera (RT)/(LMB)
+- Squeeze Toy (RG)/(RMB)
+- Custom Flashlight (A)/(Space)
+- Measuring Tape (RT)/(LMB)(X)
+- Dual Hand Orbs (LG)(RG)
+
+## Spammers — 9
+
+- Snowball Spam (RT)/(LMB)
+- Water Balloon Spam (RT)/(LMB)
+- Throwable Status
+- Projectile Gun (RG)(RT)
+- Projectile Pattern Emitter (RT)/(LMB)
+- Impact Painter (RG)(RT)
+- Bubble Wand (RT)/(LMB)
+- Confetti Cannon (RT)/(LMB)
+- Firework Sequencer (RT)/(LMB)
+
+## OP — 11
+
+- Guardian Controls
+- Team Controls
+- Summon Lucy
+- Despawn Lucy
+- Grab Lucy (RG)/(RMB)
+- Move Lucy Gun (RG)(RT)
+- Freeze Lucy
+- Pet Lucy
+- Lucy Physics (RG)/(RMB)
+- Prop Control Gun (RG)(RT)
+- GR Trail
+
+## Detected — 9
+
+- UpsideDown Head
+- Broken Neck
+- Backwards Head
+- Sideways Head
+- HeadBang
+- Tag Gun
+- Tag Self
+- Tag Aura
+- Tag All
 
 ## Safety — 31
 
@@ -645,19 +676,7 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Mod Health Monitor
 - Copy Pose Data
 
-## Detected — 9
-
-- UpsideDown Head
-- Broken Neck
-- Backwards Head
-- Sideways Head
-- HeadBang
-- Tag Gun
-- Tag Self
-- Tag Aura
-- Tag All
-
-## Settings — 220
+## Settings — 224
 
 - PC View
 - Array List
@@ -803,11 +822,11 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Jarvis Listening Time
 - Jarvis Silence Time
 - Jarvis Recognition
-- Jarvis Speech Input
 - Windows Microphone Settings
 - Windows Speech Settings
 - Throwable Hand
 - Throwable Input
+- Jarvis Speech Input
 - Momentum Bank Capacity
 - Surface Skate Speed
 - Air Paddle Power
@@ -879,11 +898,8 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers, LG/RG are 
 - Nearby Alert Targets
 - Tracer Filter
 - Draw Output
+- Custom Theme Editor
+- Next Custom Theme
+- Reload Custom Themes
+- Soundboard Bind Input
 
-### Local beta fixes: gradients and voice commands
-
-Gradient panels now use opaque texture rendering with depth writing, preserving labels, headers and navigation. Turning gradients off restores each material shader, texture, UV state and render queue.
-
-Jarvis Speech Input offers Automatic, Local Commands and Windows Dictation. Automatic uses offline keyword commands for Voice Assistant, keeping the wake word and ready tone. GPT and ChudGPT retain dictation for free-form questions; Local Commands is available for those providers too, with typed input for conversation. Live microphone and VR appearance verification are still required.
-
-Equipping a model in Holdable Browser removes its floating preview. Selecting another model displays a fresh preview.

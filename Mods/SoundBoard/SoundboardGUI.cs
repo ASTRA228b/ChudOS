@@ -51,7 +51,7 @@ public static class SoundboardGUI
 
         MenuHelper.Space();
         if (MenuHelper.Button("Close")) Visible = false;
-        GUI.DragWindow(new Rect(0f, 0f, Window.width, 25f));
+        GUI.DragWindow();
     }
 
     public static void Sounds()

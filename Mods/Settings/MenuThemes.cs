@@ -34,6 +34,7 @@ public static class MenuThemes
         public Color SearchBorder = new Color32(69, 70, 75, 255);
         public Color Text = Color.white;
         public Color SecondaryText = new Color32(142, 145, 154, 255);
+        public Color? Pressed;
         public bool TextOnly, OutlineButtons;
     }
 
@@ -142,10 +143,13 @@ public static class MenuThemes
         }
     };
 
-    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only", "Arctic", "Ember", "Sakura", "Mint", "Midnight Gold", "Neon Outline" }, Notify = false)]
+    [MenuButton("Menu Theme", ButtonType.Option, Category = "Settings", Order = 30, Options = new[] { "OG", "OG Blue", "OG Red", "Midnight", "Forest", "Sunset", "Ice", "Text Only", "Arctic", "Ember", "Sakura", "Mint", "Midnight Gold", "Neon Outline", "Custom" }, Notify = false)]
     public static void Apply()
     {
-        int index = ButtonManager.GetButton("Menu Theme")?.OptionIndex ?? 0;
+        ExpansionPreferences.Revision++;
+        var button = ButtonManager.GetButton("Menu Theme");
+        if (button?.Option == "Custom") { CustomThemeManager.SynchronizeControls(); ChudOS.Core.Main.ApplyMenuTheme(CustomThemeManager.Compiled.Theme); return; }
+        int index = button?.OptionIndex ?? 0;
         ChudOS.Core.Main.ApplyMenuTheme(Themes[Mathf.Clamp(index, 0, Themes.Length - 1)]);
     }
 

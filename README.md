@@ -1,37 +1,42 @@
+<p align="center">
+  <img src="Assets/Icons/ChudGPT.png" width="120" alt="ChudGPT logo" />
+</p>
+
 # ChudOS
 
 **Gorilla Tag mod menu — made by Astra.**
 
-ChudOS is a customizable mod menu for **Gorilla Tag on Windows PCVR**, with an in-game VR menu and mouse controls on desktop. It brings movement tools, player visuals, rig mods, a soundboard, and macros together in one menu.
+ChudOS is a customizable mod menu for **Gorilla Tag on Windows PCVR**, with an in-game VR menu and mouse controls on desktop. Movement tools, player visuals, rig mods, music, macros, and local holdables are brought together in one menu.
 
-**V0.1.5 Beta** includes **585 menu buttons** across mods, settings, and actions.
+**V0.1.5 Final includes 597 menu buttons**, covering mods, settings, and actions. The total includes **284 toggles outside Settings, 78 actions, 11 selectors, and 224 Settings entries**.
 
-**This is a beta: some features are buggy or may not work as intended. The full release is coming soon. Please report problems you find.**
-
-[Download V0.1.5 Beta](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5-beta.1) · [Full mod list and menu notes](MENUNOTES.md)
+[Download V0.1.5](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5) · [Full button list and menu notes](MENUNOTES.md)
 
 ## What's in the menu
 
-- **Jarvis beta:** spoken local menu commands, GPT Jarvis, and ChudGPT Jarvis with 14 model choices.
+- **Jarvis:** spoken local menu commands, GPT Jarvis, and ChudGPT Jarvis with 14 model choices. Say the selected wake word, wait for the tone, then speak.
 - **Movement:** platforms, flight, Wall Walk, Spider Man, Long Arms, Pull Mod, and more.
-- **Visuals:** name tags, player highlights, tracers, particle effects, and an information overlay.
+- **Visuals and players:** name tags, highlights, tracers, particles, voice level bars, and an information overlay.
 - **Rig:** poses, animations, and player-targeting guns.
 - **Practice and effects:** local physics toys, traversal tools, projectile previews, and a dedicated Spammers category.
 - **Optimize Game:** a reversible low-quality graphics toggle under Visuals.
-- **Soundboard:** local and microphone playback, a music control page, and audio downloads.
+- **Soundboard:** local and microphone playback, music controls, audio downloads, F9/controller bindings, and desktop media controls.
 - **Macros:** record and replay movement, manage saved routes, and import supported macro files.
-- **Customization:** themes, gradients, fonts, alignment, languages, click sounds, vibrations, and custom boards.
-- **Holdables:** twelve premade models including a wooden cross and bisexual, rainbow gay pride, and trans flags, plus local cameras, toys, a flashlight, and a measuring tape. Custom visual bundles are optional.
-- **OP:** supported Guardian/team controls and locally owned Lucy tools, with clear mode and ownership requirements.
+- **Customization:** built-in and JSON custom themes, gradients, pressed colors, fonts, alignment, languages, sounds, vibrations, and custom boards.
+- **Holdables:** twelve premade models, including Wooden Cross, Bisexual Flag, Gay Pride Flag, and Trans Flag. Cameras, toys, a flashlight, and a measuring tape are also included. Custom visual bundles are optional.
+- **Discord Rich Presence:** ChudOS activity details, the ChudGPT logo, elapsed time, and download/source buttons. It turns itself off with a notification if Discord is unavailable.
+- **OP:** mode-dependent Guardian/team controls and locally owned Lucy tools, with ownership and availability requirements.
 
-Search for buttons, save favorites, and use the array list to see enabled mods. Settings lets you adjust the menu and individual mods without editing the source.
+Search for buttons, save favorites, and use the array list to see enabled mods. Settings lets you customize the menu and individual mods without editing source code.
 
 ## Installation
 
 1. Set up BepInEx for the Windows PC version of Gorilla Tag.
-2. Download **ChudOS.dll** from the [V0.1.5 Beta release](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5-beta.1).
-3. Put it in `Gorilla Tag/BepInEx/plugins`. Replace your previous ChudOS DLL and remove duplicate copies.
-4. Restart Gorilla Tag.
+2. Download **ChudOS-v0.1.5.zip** from the [v0.1.5 release](https://github.com/ASTRA228b/ChudOS/releases/tag/v0.1.5).
+3. Remove previous ChudOS DLL copies from `BepInEx/plugins`, including subfolders. Extract the ZIP's **ChudOS** folder into `Gorilla Tag/BepInEx/plugins`.
+4. Keep the included Discord runtime DLLs beside `ChudOS.dll`, then restart Gorilla Tag.
+
+The standalone DLL asset is also available, but it needs the runtime files included in the install ZIP. See [Discord setup and runtime files](Docs/DiscordPresence.md).
 
 ## Open the menu
 
@@ -40,12 +45,14 @@ Search for buttons, save favorites, and use the array list to see enabled mods. 
 
 ## Make it yours
 
-Open **Settings** to choose a theme, menu alignment, language, and sound preferences. Use **Save Menu State** to keep your choices for the next session.
+Open **Settings → Custom Theme Editor** to paste theme JSON or use the RGB controls. Use **Apply** to accept the theme, **Save Theme** to save a shareable file, and **Save Menu State** to keep the active theme and settings after restarting.
 
-Open **Main → SB Control** for music playback, or **Movement → Macros GUI** to manage recordings.
+Open **Main → SB Control** for music, **Movement → Macros GUI** for recordings, or **Main → Discord Rich Presence** to show your ChudOS activity. The rear menu label also includes the ChudGPT logo beside the version.
 
-For every button by category, individual mod controls, macro settings, and update history, see **[MENUNOTES.md](MENUNOTES.md)**.
+Voice recognition and external services depend on your setup and their availability. Map-specific and networked mods may require compatible game modes or loaded assets. Please report bugs with the button name and relevant log message.
+
+For every button by category, individual controls, macro settings, and update history, see **[MENUNOTES.md](MENUNOTES.md)**.
 
 ## License
 
-ChudOS is licensed under [GPL-3.0-only](LICENSE).
+ChudOS is licensed under [GPL-3.0-only](LICENSE). Included runtime license notices are in [ThirdParty](ThirdParty).

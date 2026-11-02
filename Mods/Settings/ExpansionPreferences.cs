@@ -22,10 +22,10 @@ public static partial class ExpansionPreferences
     internal static readonly Color[] Colors = { new Color32(155, 18, 254, 255), new Color32(45, 145, 255, 255), new Color32(45, 255, 170, 255), new Color32(25, 220, 255, 255), new Color32(255, 90, 175, 255), new Color32(255, 145, 45, 255), new Color32(255, 65, 80, 255), Color.white };
 
     internal static int Index(string name) => ButtonManager.GetButton(name)?.OptionIndex ?? 0;
-    internal static int Gradient => Index("Gradient Theme");
-    internal static int GradientDirection => Index("Gradient Direction");
-    internal static bool AnimatedGradient => Index("Gradient Animation") == 1;
-    internal static float GradientSpeed => AnimationSpeeds[Index("Gradient Speed")];
+    internal static int Gradient => CustomThemeManager.Active ? (CustomThemeManager.Compiled.Gradient ? 1 : 0) : Index("Gradient Theme");
+    internal static int GradientDirection => CustomThemeManager.Active ? CustomThemeManager.Compiled.Direction : Index("Gradient Direction");
+    internal static bool AnimatedGradient => CustomThemeManager.Active ? CustomThemeManager.Compiled.Animated : Index("Gradient Animation") == 1;
+    internal static float GradientSpeed => CustomThemeManager.Active ? CustomThemeManager.Compiled.Speed : AnimationSpeeds[Index("Gradient Speed")];
     internal static int MenuFont => Index("Menu Font");
     internal static int BoardFont => Index("Board Font");
     internal static int GUIFont => Index("GUI Font");
@@ -45,17 +45,28 @@ public static partial class ExpansionPreferences
     internal static bool InfectedAlerts => Index("Nearby Alert Targets") == 1;
     internal static bool CosmeticTracersOnly => Index("Tracer Filter") == 1;
     internal static bool ReactorDrawing => Index("Draw Output") == 1;
-    internal static Color PressedStart => Colors[(Index("Gradient Enabled Start") + 2) % Colors.Length];
-    internal static Color PressedEnd => Colors[(Index("Gradient Enabled End") + 3) % Colors.Length];
+    internal static Color PressedStart => CustomThemeManager.Active ? CustomThemeManager.Compiled.PressedStart : Colors[(Index("Gradient Enabled Start") + 2) % Colors.Length];
+    internal static Color PressedEnd => CustomThemeManager.Active ? CustomThemeManager.Compiled.PressedEnd : Colors[(Index("Gradient Enabled End") + 3) % Colors.Length];
 
     internal static void GradientColors(out Color first, out Color second)
     {
-        (first, second) = Gradient switch
+        if (CustomThemeManager.Active) { first = CustomThemeManager.Compiled.Start; second = CustomThemeManager.Compiled.End; return; }
+        PresetGradientColors(Index("Gradient Theme"), out first, out second);
+    }
+    internal static void PresetGradientColors(int index, out Color first, out Color second)
+    {
+        (first, second) = index switch
         {
             1 => (Colors[2], Colors[1]), 2 => (Colors[5], Colors[4]), 3 => (Colors[0], Colors[1]),
             4 => (Colors[3], Colors[7]), 5 => (Colors[4], Colors[3]),
             _ => (Colors[Index("Gradient Start Color")], Colors[(Index("Gradient End Color") + 1) % Colors.Length])
         };
+    }
+    private static void GradientChanged(string name)
+    {
+        if (CustomThemeManager.Synchronizing) return;
+        if (CustomThemeManager.Active) CustomThemeManager.ChangeGradient(name);
+        else Changed();
     }
     private static void Changed() { Revision++; ChudOS.Core.Main.RefreshExpansionAppearance(); }
     private static void HoldableChanged()

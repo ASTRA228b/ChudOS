@@ -16,7 +16,7 @@ public static class JarvisSettings
     internal static readonly string[] WakeWords = { "jarvis", "assistant", "friday", "system" };
     internal static readonly string[] Voices = { "Windows Default", "Brian", "Amy", "Russell", "Nicole", "Matthew", "Joanna", "Raveena" };
 
-    [MenuButton("Jarvis", ButtonType.Toggle, Category = "Main", Order = 20, runOption = RunOption.Once, Notify = false, Description = "0.1.5 beta: spoken local commands or AI. Uses Windows speech; F8 also starts listening.")]
+    [MenuButton("Jarvis", ButtonType.Toggle, Category = "Main", Order = 20, runOption = RunOption.Once, Notify = false, Description = "Spoken local commands or AI. Uses Windows speech; F8 also starts listening.")]
     public static void Enable() => JarvisManager.SetActive(true);
     [MenuDisable("Jarvis")]
     public static void Disable() => JarvisManager.SetActive(false);
