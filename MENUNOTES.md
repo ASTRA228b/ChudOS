@@ -902,4 +902,3 @@ Input hints: A/B/X/Y are controller face buttons; LT/RT are triggers; LG/RG are 
 - Next Custom Theme
 - Reload Custom Themes
 - Soundboard Bind Input
-
