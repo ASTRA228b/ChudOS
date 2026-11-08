@@ -107,6 +107,7 @@ public sealed partial class Main : MonoBehaviour
     private void Start()
     {
         CanvasNotifyLib.InitCanvas();
+        TelemetryManager.Initialize(gameObject);
         StartCoroutine(RestoreMenuState());
     }
 

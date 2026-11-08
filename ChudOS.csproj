@@ -2,7 +2,11 @@
   <PropertyGroup>
     <AssemblyName>ChudOS</AssemblyName>
     <RootNamespace>ChudOS</RootNamespace>
-    <Version>0.1.5</Version>
+    <Version>0.1.6</Version>
+    <InformationalVersion Condition="'$(PublicRelease)' != 'true'">$(Version)-beta.1</InformationalVersion>
+    <InformationalVersion Condition="'$(PublicRelease)' == 'true'">$(Version)</InformationalVersion>
+    <DefineConstants Condition="'$(PublicRelease)' == 'true'">$(DefineConstants);CHUDOS_PUBLIC_RELEASE</DefineConstants>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GorillaTagDir Condition="'$(GorillaTagDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Gorilla Tag</GorillaTagDir>
   </PropertyGroup>
   <ItemGroup>
